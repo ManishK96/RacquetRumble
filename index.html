@@ -1403,8 +1403,8 @@ Sneha P. (F)</pre>
       'niteshshet3@gmail.com'
     ];
 
-    // Optional Embedded Firebase Config (Accepts EMBEDDED_FIREBASE_CONFIG or standard firebaseConfig)
-    var EMBEDDED_FIREBASE_CONFIG = (typeof EMBEDDED_FIREBASE_CONFIG !== 'undefined') ? EMBEDDED_FIREBASE_CONFIG : { {
+    // Optional Embedded Firebase Config (Paste values below OR paste `const firebaseConfig = { ... };` anywhere in script)
+    const EMBEDDED_FIREBASE_CONFIG = {
       apiKey: "AIzaSyD3IkAifCkJQuzOSlNUjy-1aAzj5JZWFv0",
       authDomain: "badminton-101-57f82.firebaseapp.com",
       databaseURL: "https://badminton-101-57f82-default-rtdb.firebaseio.com/",
@@ -1414,7 +1414,6 @@ Sneha P. (F)</pre>
       appId: "1:60091223084:web:b38f1d5ec5bb7b90f91589",
       measurementId: "G-45P104NQQT"
     };
-    var firebaseConfig = (typeof firebaseConfig !== 'undefined') ? firebaseConfig : EMBEDDED_FIREBASE_CONFIG;
 
     const appState = {
       currentProfile: 'corporate', // 'corporate' | 'casual'
@@ -1871,6 +1870,33 @@ Sneha P. (F)</pre>
       return isAuthorizedEditor();
     }
 
+    function isAuthorizedEmail(email) {
+      if (!email || typeof email !== 'string') return false;
+      const clean = email.trim().toLowerCase();
+      if (clean === ADMIN_OWNER_EMAIL.toLowerCase()) return true;
+      return AUTHORIZED_EMAILS.some(e => e.trim().toLowerCase() === clean);
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function handleAdminFeatureClick(targetView) {
+      const view = targetView || 'fixtures';
+      if (isAuthorizedEditor()) {
+        switchCorpView(view);
+      } else {
+        switchCorpView(view);
+        openAuthModal();
+      }
+    }
+
     // --- Firebase Real-Time Synchronization Layer ---
     let firebaseApp = null;
     let firebaseDb = null;
@@ -2046,6 +2072,70 @@ Sneha P. (F)</pre>
       }
 
       updateAuthUI();
+    }
+
+    function updateCloudStatusBadge(connected, labelText) {
+      const dot = document.getElementById('cloud-status-dot');
+      const text = document.getElementById('cloud-status-text');
+      const btn = document.getElementById('btn-cloud-sync');
+      if (dot && text && btn) {
+        text.textContent = labelText || (connected ? 'Live Synced' : 'Local Mode');
+        if (connected) {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+          btn.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#132a1f] border border-[#2e5e45] text-emerald-300 hover:border-emerald-400 transition-colors';
+        } else if (labelText === 'Auth Ready') {
+          dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+          btn.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#241f14] border border-amber-500/40 text-amber-300 hover:border-amber-400 transition-colors';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-slate-500';
+          btn.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#1a211d] border border-[#26372d] text-[#8fa39a] hover:border-emerald-500/50 transition-colors';
+        }
+      }
+    }
+
+    function saveStateToLocalStorage() {
+      try {
+        localStorage.setItem(APP_STORAGE_KEY, JSON.stringify({
+          teams: appState.teams,
+          fixtures: appState.fixtures,
+          casual: appState.casual,
+          lastUpdated: Date.now()
+        }));
+      } catch (e) {}
+    }
+
+    function loadStateFromLocalStorage() {
+      try {
+        const raw = localStorage.getItem(APP_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.fixtures) && parsed.fixtures.length > 0) {
+            appState.fixtures = parsed.fixtures;
+          }
+          if (parsed && Array.isArray(parsed.teams) && parsed.teams.length > 0) {
+            appState.teams = parsed.teams;
+          }
+          if (parsed && parsed.casual) {
+            appState.casual = parsed.casual;
+          }
+        }
+      } catch (e) {}
+    }
+
+    function syncStateToCloud() {
+      saveStateToLocalStorage();
+      if (!isCloudConnected || !cloudDbRef || isRemoteUpdate) return;
+      if (!isAuthorizedEditor()) return;
+      try {
+        cloudDbRef.set({
+          teams: appState.teams,
+          fixtures: appState.fixtures,
+          casual: appState.casual,
+          lastUpdated: Date.now()
+        });
+      } catch (err) {
+        console.warn('Cloud sync write warning:', err);
+      }
     }
 
     async function loginWithGoogle() {
@@ -4077,6 +4167,7 @@ Sneha P. (F)</pre>
     // --- Initialization ---
     function init() {
       appState.fixtures = initCorporateFixtures();
+      loadStateFromLocalStorage();
       initFirebase();
       updateAuthUI();
 
