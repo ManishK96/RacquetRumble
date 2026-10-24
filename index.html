@@ -14,6 +14,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <!-- ☁️ PASTE YOUR FIREBASE CONFIG HERE (or anywhere in index.html / Cloud Sync modal) -->
+  <script id="user-firebase-config-script">
+    // You can paste `const firebaseConfig = { ... };` here, in EMBEDDED_FIREBASE_CONFIG, or in the UI modal.
+  </script>
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
@@ -1404,7 +1408,7 @@ Sneha P. (F)</pre>
     ];
 
     // Optional Embedded Firebase Config (Paste values below OR paste `const firebaseConfig = { ... };` anywhere in script)
-    const EMBEDDED_FIREBASE_CONFIG = {
+     var EMBEDDED_FIREBASE_CONFIG = (typeof EMBEDDED_FIREBASE_CONFIG !== 'undefined') ? EMBEDDED_FIREBASE_CONFIG : { {
       apiKey: "AIzaSyD3IkAifCkJQuzOSlNUjy-1aAzj5JZWFv0",
       authDomain: "badminton-101-57f82.firebaseapp.com",
       databaseURL: "https://badminton-101-57f82-default-rtdb.firebaseio.com/",
@@ -1905,68 +1909,181 @@ Sneha P. (F)</pre>
     let isCloudConnected = false;
     let isRemoteUpdate = false;
 
+    function isValidFirebaseApiKey(val) {
+      if (!val || typeof val !== 'string') return false;
+      const v = val.trim();
+      if (v.length < 12) return false;
+      if (v === 'AIza...' || v.includes('...') || v.toLowerCase().includes('your-')) return false;
+      return true;
+    }
+
+    function normalizeFirebaseConfig(rawCfg) {
+      if (!rawCfg || typeof rawCfg !== 'object' || !isValidFirebaseApiKey(rawCfg.apiKey)) return null;
+      const cfg = {
+        apiKey: String(rawCfg.apiKey || '').trim(),
+        authDomain: rawCfg.authDomain ? String(rawCfg.authDomain).trim() : '',
+        databaseURL: rawCfg.databaseURL ? String(rawCfg.databaseURL).trim() : '',
+        projectId: rawCfg.projectId ? String(rawCfg.projectId).trim() : '',
+        storageBucket: rawCfg.storageBucket ? String(rawCfg.storageBucket).trim() : '',
+        messagingSenderId: rawCfg.messagingSenderId ? String(rawCfg.messagingSenderId).trim() : '',
+        appId: rawCfg.appId ? String(rawCfg.appId).trim() : ''
+      };
+
+      // Infer projectId if omitted
+      if (!cfg.projectId) {
+        if (cfg.authDomain && cfg.authDomain.includes('.')) {
+          cfg.projectId = cfg.authDomain.split('.')[0];
+        } else if (cfg.databaseURL && cfg.databaseURL.includes('https://')) {
+          const host = cfg.databaseURL.replace('https://', '').split('.')[0];
+          cfg.projectId = host.replace(/-default-rtdb$/, '');
+        } else if (cfg.storageBucket && cfg.storageBucket.includes('.')) {
+          cfg.projectId = cfg.storageBucket.split('.')[0];
+        }
+      }
+
+      if (cfg.projectId) {
+        if (!cfg.authDomain) cfg.authDomain = `${cfg.projectId}.firebaseapp.com`;
+        if (!cfg.databaseURL) cfg.databaseURL = `https://${cfg.projectId}-default-rtdb.firebaseio.com`;
+      }
+      return cfg;
+    }
+
+    function parseFirebaseConfigSnippet(raw) {
+      if (!raw) return null;
+      if (typeof raw === 'object') {
+        return normalizeFirebaseConfig(raw);
+      }
+      if (typeof raw !== 'string') return null;
+      const trimmed = raw.trim();
+      if (!trimmed) return null;
+
+      // 1. Try direct JSON parse
+      try {
+        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+          const parsed = JSON.parse(trimmed);
+          const norm = normalizeFirebaseConfig(parsed);
+          if (norm) return norm;
+        }
+      } catch (e) {}
+
+      // 2. Scan for all occurrences of apiKey: "..." or apiKey = "..."
+      const keyRegex = /["']?apiKey["']?\s*[:=]\s*["'`]([^"'`\s,;}{]+)["'`]/g;
+      let match;
+      while ((match = keyRegex.exec(trimmed)) !== null) {
+        const candidateKey = match[1];
+        if (isValidFirebaseApiKey(candidateKey)) {
+          const winStart = Math.max(0, match.index - 250);
+          const winEnd = Math.min(trimmed.length, match.index + 1000);
+          const snippet = trimmed.substring(winStart, winEnd);
+
+          const extractField = (fieldName) => {
+            const r = new RegExp(`["']?${fieldName}["']?\\s*[:=]\\s*["'\`]([^"'\`\\r\\n,;}{]+)["'\`]`);
+            const m = snippet.match(r);
+            return m && m[1] ? m[1].trim() : '';
+          };
+
+          const norm = normalizeFirebaseConfig({
+            apiKey: candidateKey,
+            authDomain: extractField('authDomain'),
+            databaseURL: extractField('databaseURL'),
+            projectId: extractField('projectId'),
+            storageBucket: extractField('storageBucket'),
+            messagingSenderId: extractField('messagingSenderId'),
+            appId: extractField('appId')
+          });
+          if (norm) return norm;
+        }
+      }
+      return null;
+    }
+
     function detectFirebaseConfig() {
+      let found = null;
+
       // 1. Check if Firebase is already initialized anywhere on the page
       try {
         if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
           const opts = firebase.app().options;
-          if (opts && (opts.apiKey || opts.projectId)) return opts;
+          found = normalizeFirebaseConfig(opts);
+          if (found) return found;
         }
       } catch (e) {}
 
       // 2. Check EMBEDDED_FIREBASE_CONFIG
       try {
-        if (typeof EMBEDDED_FIREBASE_CONFIG !== 'undefined' && EMBEDDED_FIREBASE_CONFIG && EMBEDDED_FIREBASE_CONFIG.apiKey && EMBEDDED_FIREBASE_CONFIG.apiKey.trim() !== '') {
-          return EMBEDDED_FIREBASE_CONFIG;
-        }
-      } catch (e) {}
-
-      // 3. Check standard firebaseConfig variable (global / lexical / window)
-      try {
-        if (typeof firebaseConfig !== 'undefined' && firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey.trim() !== '') {
-          return firebaseConfig;
-        }
-      } catch (e) {}
-
-      try {
-        if (typeof window !== 'undefined') {
-          for (const k of ['firebaseConfig', 'FIREBASE_CONFIG', 'fbConfig', '_firebaseConfig', 'EMBEDDED_FIREBASE_CONFIG']) {
-            if (window[k] && window[k].apiKey && window[k].apiKey.trim() !== '') return window[k];
+        if (typeof EMBEDDED_FIREBASE_CONFIG !== 'undefined' && EMBEDDED_FIREBASE_CONFIG) {
+          found = normalizeFirebaseConfig(EMBEDDED_FIREBASE_CONFIG);
+          if (found) {
+            try { localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(found, null, 2)); } catch (e) {}
+            return found;
           }
         }
       } catch (e) {}
 
-      // 4. Fallback to localStorage
+      // 3. Check standard firebaseConfig variable (lexical or global)
       try {
-        const stored = localStorage.getItem(FIREBASE_CONFIG_KEY);
-        if (stored) {
-          try {
-            const p = JSON.parse(stored);
-            if (p && p.apiKey && p.apiKey.trim() !== '') return p;
-          } catch (je) {
-            const extract = (k) => {
-              const pos = stored.indexOf(k);
-              if (pos === -1) return undefined;
-              const after = stored.substring(pos + k.length);
-              const q1 = after.indexOf('"');
-              const q2 = after.indexOf("'");
-              let quote = '"';
-              let start = q1;
-              if (q1 === -1 || (q2 !== -1 && q2 < q1)) { quote = "'"; start = q2; }
-              if (start === -1) return undefined;
-              const end = after.indexOf(quote, start + 1);
-              return end !== -1 ? after.substring(start + 1, end) : undefined;
-            };
-            const apiKey = extract('apiKey');
-            if (apiKey) {
-              return {
-                apiKey,
-                projectId: extract('projectId'),
-                databaseURL: extract('databaseURL'),
-                authDomain: extract('authDomain'),
-                appId: extract('appId')
-              };
+        if (typeof firebaseConfig !== 'undefined' && firebaseConfig) {
+          found = normalizeFirebaseConfig(firebaseConfig);
+          if (found) {
+            try { localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(found, null, 2)); } catch (e) {}
+            return found;
+          }
+        }
+      } catch (e) {}
+
+      // 4. Check window globals
+      try {
+        if (typeof window !== 'undefined') {
+          for (const k of ['firebaseConfig', 'FIREBASE_CONFIG', 'fbConfig', '_firebaseConfig', 'EMBEDDED_FIREBASE_CONFIG']) {
+            if (window[k]) {
+              found = normalizeFirebaseConfig(window[k]);
+              if (found) {
+                try { localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(found, null, 2)); } catch (e) {}
+                return found;
+              }
             }
+          }
+        }
+      } catch (e) {}
+
+      // 5. Scan all <script> tags in the DOM (catches <script type="module"> from Firebase Console or separate <script> blocks)
+      try {
+        if (typeof document !== 'undefined' && document.querySelectorAll) {
+          const scripts = document.querySelectorAll('script');
+          for (let i = 0; i < scripts.length; i++) {
+            const txt = scripts[i].textContent || scripts[i].innerHTML || '';
+            if (txt && txt.includes('apiKey')) {
+              found = parseFirebaseConfigSnippet(txt);
+              if (found) {
+                try { localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(found, null, 2)); } catch (e) {}
+                return found;
+              }
+            }
+          }
+        }
+      } catch (e) {}
+
+      // 6. Check modal textarea if user already pasted text into it
+      try {
+        if (typeof document !== 'undefined') {
+          const inputEl = document.getElementById('firebase-config-input');
+          if (inputEl && inputEl.value && inputEl.value.trim() !== '') {
+            found = parseFirebaseConfigSnippet(inputEl.value);
+            if (found) {
+              try { localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(found, null, 2)); } catch (e) {}
+              return found;
+            }
+          }
+        }
+      } catch (e) {}
+
+      // 7. Fallback to localStorage (checks both Corporate League key and Casual Badminton 101 key)
+      try {
+        for (const storageKey of [FIREBASE_CONFIG_KEY, 'badminton_101_firebase_config_v1', 'firebaseConfig']) {
+          const stored = localStorage.getItem(storageKey);
+          if (stored) {
+            found = parseFirebaseConfigSnippet(stored);
+            if (found) return found;
           }
         }
       } catch (e) {}
@@ -1977,20 +2094,10 @@ Sneha P. (F)</pre>
     function initFirebase() {
       const config = detectFirebaseConfig();
 
-      if (!config || !config.apiKey) {
+      if (!config || !isValidFirebaseApiKey(config.apiKey)) {
         updateCloudStatusBadge(false, 'Local Mode');
         updateAuthUI();
         return;
-      }
-
-      // Auto-fill sensible defaults for authDomain and databaseURL if missing
-      if (config.projectId) {
-        if (!config.authDomain || config.authDomain.trim() === '') {
-          config.authDomain = `${config.projectId}.firebaseapp.com`;
-        }
-        if (!config.databaseURL || config.databaseURL.trim() === '') {
-          config.databaseURL = `https://${config.projectId}-default-rtdb.firebaseio.com`;
-        }
       }
 
       try {
@@ -2077,18 +2184,18 @@ Sneha P. (F)</pre>
     function updateCloudStatusBadge(connected, labelText) {
       const dot = document.getElementById('cloud-status-dot');
       const text = document.getElementById('cloud-status-text');
-      const btn = document.getElementById('btn-cloud-sync');
+      const btn = document.getElementById('btn-cloud-status') || document.getElementById('btn-cloud-sync');
       if (dot && text && btn) {
         text.textContent = labelText || (connected ? 'Live Synced' : 'Local Mode');
         if (connected) {
-          dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
-          btn.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#132a1f] border border-[#2e5e45] text-emerald-300 hover:border-emerald-400 transition-colors';
+          dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse shrink-0';
+          btn.className = 'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#132a1f] border border-[#2e5e45] text-emerald-300 hover:border-emerald-400 transition-colors';
         } else if (labelText === 'Auth Ready') {
-          dot.className = 'w-2 h-2 rounded-full bg-amber-400';
-          btn.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#241f14] border border-amber-500/40 text-amber-300 hover:border-amber-400 transition-colors';
+          dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 shrink-0';
+          btn.className = 'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#241f14] border border-amber-500/40 text-amber-300 hover:border-amber-400 transition-colors';
         } else {
-          dot.className = 'w-2 h-2 rounded-full bg-slate-500';
-          btn.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#1a211d] border border-[#26372d] text-[#8fa39a] hover:border-emerald-500/50 transition-colors';
+          dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-500 shrink-0';
+          btn.className = 'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#14231c] border border-[#23382d] text-[#8fa398] hover:border-emerald-500/50 transition-colors';
         }
       }
     }
@@ -2448,9 +2555,21 @@ Sneha P. (F)</pre>
     function openFirebaseModal() {
       const modal = document.getElementById('modal-firebase');
       if (modal) {
-        const stored = localStorage.getItem(FIREBASE_CONFIG_KEY);
         const input = document.getElementById('firebase-config-input');
-        if (stored && input) input.value = stored;
+        const statusEl = document.getElementById('firebase-modal-status');
+        const detected = detectFirebaseConfig();
+        if (detected && isValidFirebaseApiKey(detected.apiKey)) {
+          if (input) input.value = JSON.stringify(detected, null, 2);
+          if (statusEl) {
+            statusEl.classList.remove('hidden');
+            statusEl.className = 'text-xs p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300';
+            statusEl.textContent = `✓ Active Firebase config detected (Project: ${detected.projectId || 'Connected'}).`;
+          }
+        } else if (statusEl) {
+          statusEl.classList.remove('hidden');
+          statusEl.className = 'text-xs p-2.5 rounded-xl bg-amber-950/50 border border-amber-500/30 text-amber-200 leading-relaxed';
+          statusEl.textContent = 'Paste your firebaseConfig snippet below and click Connect & Sync. It will be saved in your browser so future index.html updates keep working automatically.';
+        }
         modal.classList.remove('hidden');
       }
     }
@@ -2467,66 +2586,32 @@ Sneha P. (F)</pre>
       const input = inputEl.value.trim();
       statusEl.classList.remove('hidden');
 
-      if (!input) {
-        statusEl.className = 'text-xs p-2 rounded-lg bg-rose-950/60 text-rose-300';
-        statusEl.textContent = 'Please paste your Firebase config snippet or JSON.';
+      let config = null;
+      if (input) {
+        config = parseFirebaseConfigSnippet(input);
+      } else {
+        config = detectFirebaseConfig();
+      }
+
+      if (!config || !isValidFirebaseApiKey(config.apiKey)) {
+        statusEl.className = 'text-xs p-2.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 leading-relaxed';
+        statusEl.textContent = !input
+          ? 'No Firebase config was found in index.html or in the box above. Please paste your const firebaseConfig = { ... } snippet into the text box above and click Connect & Sync.'
+          : 'Could not find a valid apiKey (starting with AIza...) in the pasted text. Please paste the full firebaseConfig object from Firebase Console.';
         return;
       }
 
       try {
-        let config = null;
-        try {
-          if (input.startsWith('{') && input.endsWith('}')) config = JSON.parse(input);
-        } catch (je) {}
-
-        if (!config || !config.apiKey) {
-          const extract = (k) => {
-            const pos = input.indexOf(k);
-            if (pos === -1) return undefined;
-            const after = input.substring(pos + k.length);
-            const q1 = after.indexOf('"');
-            const q2 = after.indexOf("'");
-            let quote = '"';
-            let start = q1;
-            if (q1 === -1 || (q2 !== -1 && q2 < q1)) { quote = "'"; start = q2; }
-            if (start === -1) return undefined;
-            const end = after.indexOf(quote, start + 1);
-            return end !== -1 ? after.substring(start + 1, end) : undefined;
-          };
-          const apiKey = extract('apiKey');
-          const projectId = extract('projectId');
-          let databaseURL = extract('databaseURL');
-          const authDomain = extract('authDomain');
-          const appId = extract('appId');
-
-          if (!databaseURL && projectId) {
-            databaseURL = `https://${projectId}-default-rtdb.firebaseio.com`;
-          }
-          let finalAuthDomain = authDomain;
-          if ((!finalAuthDomain || finalAuthDomain.trim() === '') && projectId) {
-            finalAuthDomain = `${projectId}.firebaseapp.com`;
-          }
-
-          if (apiKey) {
-            config = { apiKey, databaseURL, projectId, authDomain: finalAuthDomain, appId };
-          }
-        }
-
-        if (!config || !config.apiKey) {
-          statusEl.className = 'text-xs p-2 rounded-lg bg-rose-950/60 text-rose-300';
-          statusEl.textContent = 'Could not find a valid apiKey in the pasted config.';
-          return;
-        }
-
         localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(config, null, 2));
-        statusEl.className = 'text-xs p-2 rounded-lg bg-emerald-950/60 text-emerald-300';
-        statusEl.textContent = 'Connecting to Firebase...';
+        if (inputEl) inputEl.value = JSON.stringify(config, null, 2);
+        statusEl.className = 'text-xs p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300';
+        statusEl.textContent = `Connected to Firebase (${config.projectId || 'Live'})! Syncing active.`;
 
         initFirebase();
         showToast('Firebase connected! Real-time syncing active. ☁️');
-        setTimeout(() => closeFirebaseModal(), 1200);
+        setTimeout(() => closeFirebaseModal(), 1000);
       } catch (e) {
-        statusEl.className = 'text-xs p-2 rounded-lg bg-rose-950/60 text-rose-300';
+        statusEl.className = 'text-xs p-2.5 rounded-xl bg-rose-950/60 text-rose-300';
         statusEl.textContent = 'Invalid format. Please paste the config object from Firebase.';
       }
     }
@@ -4267,6 +4352,11 @@ Sneha P. (F)</pre>
       document.addEventListener('DOMContentLoaded', init);
     } else {
       init();
+    }
+    if (typeof window !== 'undefined' && window.addEventListener) {
+      window.addEventListener('load', () => {
+        if (!firebaseApp) initFirebase();
+      });
     }
   </script>
 </body>
