@@ -6,20 +6,20 @@
   <title>Racquet Rumble & Badminton 101 - Dual-Profile Badminton Suite</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <!-- Google Fonts: Bebas Neue for scoreboard, Inter for UI -->
+  <!-- Google Fonts: Bebas Neue for scoreboard, Inter for UI (Non-blocking load) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Firebase SDK (Compat version for pure browser execution without bundler) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <!-- Firebase SDK (Loaded with defer from jsDelivr CDN so page launches immediately without blocking) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-app-compat.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-database-compat.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-auth-compat.js"></script>
   <!-- ☁️ PASTE YOUR FIREBASE CONFIG HERE (or anywhere in index.html / Cloud Sync modal) -->
   <script id="user-firebase-config-script">
     // You can paste `const firebaseConfig = { ... };` here, in EMBEDDED_FIREBASE_CONFIG, or in the UI modal.
   </script>
   <!-- Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <script>
     tailwind.config = {
@@ -214,8 +214,7 @@
         <span>⚔️</span> <span>Head to Head</span>
       </button>
       <button id="nav-btn-c-log" onclick="switchCasualTab('log')" class="casual-tab py-2.5 px-4 text-center flex items-center gap-1.5 text-[#738b81] hover:text-white whitespace-nowrap">
-        <span>📝</span> <span>Log a Match</span>
-        <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">Admin</span>
+        <span>📝</span> <span>Log Match & Friends</span>
       </button>
     </nav>
 
@@ -502,7 +501,7 @@
         </section>
 
         
-        <!-- View 1.2B: Scorer & Coach Console (FOCUSED POINT-BY-POINT EVENT LOGGER) -->
+        <!-- View 1.2B: Scorer & Coach Console (TRADITIONAL 1-21 HORIZONTAL GRAPH & POINT INSPECTOR) -->
         <section id="view-coach" class="space-y-3 p-2.5 sm:p-4 hidden relative">
           <!-- Coach Top Header & Court Switcher -->
           <div class="bg-gradient-to-r from-[#11241a] to-[#122329] border border-emerald-500/40 rounded-2xl p-3 sm:p-3.5 flex flex-col sm:flex-row items-center justify-between gap-2.5 shadow-lg">
@@ -510,177 +509,171 @@
               <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
                 <h3 class="text-base sm:text-lg font-bebas text-white tracking-wider flex items-center gap-1.5 truncate">
-                  <span>⚡</span> COURT-SIDE SCORER & COACH CONSOLE
+                  <span>📋</span> COACH CONSOLE · 1–21 HORIZONTAL SCORESHEET
                 </h3>
               </div>
-              <p class="text-[10px] sm:text-[11px] text-[#8fa39a] mt-0.5">Instant point event tagging: Smash, Drop, Drive, Error, Ace · Scoring view</p>
+              <p class="text-[10px] sm:text-[11px] text-[#8ab09f]">Live score synced from Umpire Console · Click any completed point (<strong class="text-emerald-300">✕</strong>) to log winning shot &amp; personal notes</p>
             </div>
-            
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-              <label for="coach-court-select" class="text-xs font-bold text-emerald-400 whitespace-nowrap">COURT:</label>
-              <select id="coach-court-select" onchange="changeCoachCourt(event)" class="bg-[#0c1410] border border-emerald-500/40 text-white font-bold text-xs rounded-xl px-2.5 sm:px-3 py-1.5 focus:outline-none cursor-pointer flex-1 sm:flex-none min-w-[120px]">
-                <!-- Court 1, Court 2, etc. -->
+            <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+              <label class="text-[11px] text-[#8ab09f] font-semibold uppercase shrink-0">Court:</label>
+              <select id="coach-court-select" onchange="changeCoachCourt(event)" class="bg-[#0b130f] border border-[#284235] rounded-xl px-3 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-emerald-400">
+                <option value="1">Court 1</option>
+                <option value="2">Court 2</option>
               </select>
             </div>
           </div>
 
-          <!-- Coach Match Card -->
-          <div id="coach-match-card" class="bg-[#101915] border border-[#1e3026] rounded-2xl p-3 space-y-2">
-            <div class="flex items-center justify-between text-xs text-[#718b7f] border-b border-[#1b2b23] pb-1.5">
-              <span class="font-bold text-white uppercase text-xs truncate min-w-0" id="coach-match-title">Court 1 · Men's Singles (MS)</span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 shrink-0" id="coach-stage-badge">POOL A</span>
+          <!-- Coach View-Only Banner (Shown when locked) -->
+          <div id="coach-view-only-banner" class="p-3 rounded-2xl bg-[#14221b] border border-amber-500/30 text-xs text-amber-300 flex items-center justify-between shadow-md">
+            <span class="flex items-center gap-2 font-medium">
+              <span>🔒</span> <span>Coach Console is in <strong>View Only</strong> mode. Unlock with PIN or Google Sign-In to annotate points &amp; notes.</span>
+            </span>
+            <button type="button" onclick="openAuthModal()" class="px-3 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-bold text-xs border border-amber-500/40 transition-colors shrink-0">
+              Unlock / Enter PIN →
+            </button>
+          </div>
+
+          <!-- Active Match Live Score Banner (Read-Only Mirror of Umpire Score) -->
+          <div class="bg-[#101915] border border-[#22382c] rounded-2xl p-3 sm:p-4 shadow-xl space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1c2e24] pb-2.5">
+              <div>
+                <span id="coach-match-title" class="text-xs sm:text-sm font-bold text-emerald-400 uppercase tracking-wider">Court 1 · Match</span>
+                <p id="coach-stage-badge" class="text-[11px] text-[#718b7f]">Stage · Series</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">Live Umpire Score</span>
+                <span id="coach-score-tally" class="text-2xl sm:text-3xl font-bebas text-white tracking-widest bg-[#0b120e] px-3.5 py-1 rounded-xl border border-[#23382d]">0 - 0</span>
+              </div>
             </div>
-            <div class="flex items-center justify-between text-xs pt-0.5 gap-1">
-              <div class="text-left w-5/12 min-w-0">
-                <span class="font-bold text-white text-xs sm:text-sm truncate block" id="coach-team-a-name">Cloud Titans</span>
-                <div class="text-[10px] sm:text-[11px] text-emerald-400 truncate" id="coach-players-a">Manish S.</div>
+
+            <!-- Team A & Team B Summary Cards -->
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="bg-[#0c1410] border border-emerald-500/30 rounded-xl p-2.5 flex items-center justify-between">
+                <div class="min-w-0 pr-2">
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">SIDE A</div>
+                  <div id="coach-team-a-name" class="text-xs sm:text-sm font-bold text-white truncate">Team A</div>
+                  <div id="coach-players-a" class="text-[11px] text-[#8ab09f] truncate">Players A</div>
+                </div>
+                <div id="coach-display-a" class="text-3xl sm:text-4xl font-bebas text-emerald-400 shrink-0">0</div>
               </div>
-              <div class="text-center font-bebas text-xl sm:text-2xl text-amber-300 w-2/12 shrink-0" id="coach-score-tally">
-                0 - 0
-              </div>
-              <div class="text-right w-5/12 min-w-0">
-                <span class="font-bold text-white text-xs sm:text-sm truncate block" id="coach-team-b-name">DevOps Dynamos</span>
-                <div class="text-[10px] sm:text-[11px] text-cyan-400 truncate" id="coach-players-b">Nitesh S.</div>
+              <div class="bg-[#0c1410] border border-cyan-500/30 rounded-xl p-2.5 flex items-center justify-between">
+                <div class="min-w-0 pr-2">
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">SIDE B</div>
+                  <div id="coach-team-b-name" class="text-xs sm:text-sm font-bold text-white truncate">Team B</div>
+                  <div id="coach-players-b" class="text-[11px] text-[#8ab09f] truncate">Players B</div>
+                </div>
+                <div id="coach-display-b" class="text-3xl sm:text-4xl font-bebas text-cyan-400 shrink-0">0</div>
               </div>
             </div>
           </div>
 
-          <!-- Quick Scoring Steppers for Coach (+ and -) -->
-          <div class="grid grid-cols-2 gap-2 sm:gap-3">
-            <div class="bg-[#12231b] border border-emerald-500/40 rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between min-w-0">
-              <span class="text-[11px] sm:text-xs font-bold text-emerald-400 uppercase truncate max-w-full" id="coach-box-team-a">TEAM A</span>
-              <div class="text-5xl sm:text-6xl font-bebas text-white my-1 tabular-nums" id="coach-display-a">0</div>
-              <div class="grid grid-cols-2 gap-1.5 sm:gap-2 w-full pt-1">
-                <button type="button" onclick="subtractPoint('A')" class="py-1.5 sm:py-2 rounded-xl bg-[#1b2f24] hover:bg-[#244232] active:scale-95 text-amber-300 text-xs font-bold border border-amber-500/30 flex items-center justify-center gap-1 shadow truncate">
-                  <span>− Minus</span>
-                </button>
-                <button type="button" onclick="addPoint('A')" class="py-1.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-bold flex items-center justify-center gap-1 shadow truncate">
-                  <span>+ Point</span>
-                </button>
+          <!-- Traditional Horizontal 1-21 Point Graph -->
+          <div id="coach-horizontal-graph-card" class="bg-[#101915] border border-[#22382c] rounded-2xl p-3 sm:p-4 shadow-xl space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h4 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span>📊</span> Traditional 1–21 Point Progression Graph
+                </h4>
+                <p class="text-[11px] text-[#718b7f]">Points won show a cross (<strong class="text-white">✕</strong>). Remaining unplayed points are grayed out. Tap any <strong class="text-white">✕</strong> cell to annotate shot details &amp; notes.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 text-[10px]">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 font-semibold">✕ Point Won (Tap to Edit)</span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0a100d] border border-[#1b2822] text-[#455a50] font-semibold">19–21 Not Played</span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/40 text-amber-300 font-semibold">⚡/📝 Annotated</span>
               </div>
             </div>
 
-            <div class="bg-[#122224] border border-cyan-500/40 rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between min-w-0">
-              <span class="text-[11px] sm:text-xs font-bold text-cyan-400 uppercase truncate max-w-full" id="coach-box-team-b">TEAM B</span>
-              <div class="text-5xl sm:text-6xl font-bebas text-white my-1 tabular-nums" id="coach-display-b">0</div>
-              <div class="grid grid-cols-2 gap-1.5 sm:gap-2 w-full pt-1">
-                <button type="button" onclick="subtractPoint('B')" class="py-1.5 sm:py-2 rounded-xl bg-[#172c2c] hover:bg-[#203d3d] active:scale-95 text-amber-300 text-xs font-bold border border-amber-500/30 flex items-center justify-center gap-1 shadow truncate">
-                  <span>− Minus</span>
-                </button>
-                <button type="button" onclick="addPoint('B')" class="py-1.5 sm:py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white text-xs font-bold flex items-center justify-center gap-1 shadow truncate">
-                  <span>+ Point</span>
-                </button>
+            <!-- Scrollable 1-21 Horizontal Grid -->
+            <div class="overflow-x-auto pb-2 -mx-1 px-1">
+              <div id="coach-horizontal-graph" class="min-w-[780px] space-y-2">
+                <!-- Populated dynamically by renderCoachConsole() -->
               </div>
             </div>
           </div>
 
-          <!-- DIRECT 1-TAP SHOT EVENT TAGGING PANEL (PERSISTENT & ALWAYS ACCESSIBLE) -->
-          <div class="bg-[#101915] border border-[#20362b] rounded-2xl p-3 sm:p-4 shadow-xl space-y-2.5 sm:space-y-3">
-            <div class="flex items-center justify-between border-b border-[#1b2b23] pb-2">
-              <div class="flex items-center gap-1.5 min-w-0">
-                <span class="text-[11px] sm:text-xs font-bold text-amber-300 uppercase tracking-wider truncate">🎯 DIRECT SHOT TAGGING</span>
-                <span class="text-[9px] sm:text-[10px] text-[#718b7f] shrink-0">1-Tap Point + Tag</span>
+          <!-- Interactive Point Inspector: Shot Details & Personal Coach Notes -->
+          <div id="coach-point-editor-card" class="bg-[#101915] border border-emerald-500/40 rounded-2xl p-3.5 sm:p-4 shadow-xl space-y-3.5">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1c2e24] pb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <h4 id="coach-editor-heading" class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                  Point Inspector &amp; Coach Notes
+                </h4>
               </div>
-              <span class="text-[10px] text-emerald-400 font-semibold shrink-0" id="coach-last-event-label">Ready</span>
+              <span id="coach-selected-point-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                Select a completed point (✕) above
+              </span>
             </div>
 
-            <!-- Team A Quick Shot Winners -->
-            <div>
-              <div class="text-[10px] sm:text-[11px] font-bold text-emerald-400 mb-1 flex items-center justify-between">
-                <span id="coach-winner-team-a-title" class="truncate">AWARD TEAM A (+1 WINNER):</span>
-                <span class="text-[9px] text-[#718b7f] shrink-0">+1 Point</span>
-              </div>
-              <div class="grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-1.5">
-                <button onclick="awardAndTagPoint('A', 'Smash Winner', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#162e21] hover:bg-[#214732] border border-emerald-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">⚡</span> <span>Smash</span>
-                </button>
-                <button onclick="awardAndTagPoint('A', 'Drop Winner', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#162e21] hover:bg-[#214732] border border-emerald-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">🎯</span> <span>Drop</span>
-                </button>
-                <button onclick="awardAndTagPoint('A', 'Drive Winner', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#162e21] hover:bg-[#214732] border border-emerald-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">💫</span> <span>Drive</span>
-                </button>
-                <button onclick="awardAndTagPoint('A', 'Net Kill', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#162e21] hover:bg-[#214732] border border-emerald-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">🏸</span> <span>Net Kill</span>
-                </button>
-                <button onclick="awardAndTagPoint('A', 'Service Ace', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#162e21] hover:bg-[#214732] border border-emerald-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">🚀</span> <span>Ace</span>
-                </button>
-                <button onclick="awardAndTagPoint('A', 'Clear Winner', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#162e21] hover:bg-[#214732] border border-emerald-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">🏹</span> <span>Clear</span>
-                </button>
-              </div>
-            </div>
+            <div id="coach-editor-body" class="space-y-3">
+              <!-- Winning Shot / Error Quick Selector -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-[11px] font-bold uppercase tracking-wider text-[#8ab09f]">1. Winning Shot / Point Outcome:</label>
+                  <span id="coach-selected-shot-Status" class="text-[11px] font-semibold text-amber-300">No shot type selected</span>
+                </div>
 
-            <!-- Team B Quick Shot Winners -->
-            <div>
-              <div class="text-[10px] sm:text-[11px] font-bold text-cyan-400 mb-1 flex items-center justify-between">
-                <span id="coach-winner-team-b-title" class="truncate">AWARD TEAM B (+1 WINNER):</span>
-                <span class="text-[9px] text-[#718b7f] shrink-0">+1 Point</span>
-              </div>
-              <div class="grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-1.5">
-                <button onclick="awardAndTagPoint('B', 'Smash Winner', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#13282b] hover:bg-[#1a3d42] border border-cyan-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">⚡</span> <span>Smash</span>
-                </button>
-                <button onclick="awardAndTagPoint('B', 'Drop Winner', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#13282b] hover:bg-[#1a3d42] border border-cyan-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">🎯</span> <span>Drop</span>
-                </button>
-                <button onclick="awardAndTagPoint('B', 'Drive Winner', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#13282b] hover:bg-[#1a3d42] border border-cyan-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">💫</span> <span>Drive</span>
-                </button>
-                <button onclick="awardAndTagPoint('B', 'Net Kill', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#13282b] hover:bg-[#1a3d42] border border-cyan-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">🏸</span> <span>Net Kill</span>
-                </button>
-                <button onclick="awardAndTagPoint('B', 'Service Ace', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#13282b] hover:bg-[#1a3d42] border border-cyan-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">🚀</span> <span>Ace</span>
-                </button>
-                <button onclick="awardAndTagPoint('B', 'Clear Winner', 'winner')" class="py-1.5 sm:py-2 px-0.5 sm:px-1 rounded-xl bg-[#13282b] hover:bg-[#214732] border border-cyan-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="text-sm sm:text-base">🏹</span> <span>Clear</span>
-                </button>
-              </div>
-            </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                  <!-- Winning Shots -->
+                  <div class="bg-[#0b120e] border border-emerald-500/25 rounded-xl p-2.5 space-y-1.5">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">⚡ Winning Shot Execution</div>
+                    <div class="grid grid-cols-3 gap-1.5" id="coach-winner-chips">
+                      <button type="button" data-shot="Smash" onclick="pickCoachShotChip('Smash', 'winner')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#12221a] hover:bg-emerald-500/25 text-emerald-200 border border-emerald-500/30 transition">💥 Smash</button>
+                      <button type="button" data-shot="Drop" onclick="pickCoachShotChip('Drop', 'winner')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#12221a] hover:bg-emerald-500/25 text-emerald-200 border border-emerald-500/30 transition">🪶 Drop</button>
+                      <button type="button" data-shot="Net" onclick="pickCoachShotChip('Net', 'winner')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#12221a] hover:bg-emerald-500/25 text-emerald-200 border border-emerald-500/30 transition">🕸️ Net</button>
+                      <button type="button" data-shot="Drive" onclick="pickCoachShotChip('Drive', 'winner')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#12221a] hover:bg-emerald-500/25 text-emerald-200 border border-emerald-500/30 transition">⚡ Drive</button>
+                      <button type="button" data-shot="Ace" onclick="pickCoachShotChip('Ace', 'winner')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#12221a] hover:bg-emerald-500/25 text-emerald-200 border border-emerald-500/30 transition">🎯 Ace</button>
+                      <button type="button" data-shot="Clear" onclick="pickCoachShotChip('Clear', 'winner')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#12221a] hover:bg-emerald-500/25 text-emerald-200 border border-emerald-500/30 transition">🏹 Clear</button>
+                    </div>
+                  </div>
 
-            <!-- Opponent Errors & Faults -->
-            <div>
-              <div class="text-[10px] sm:text-[11px] font-bold text-rose-400 mb-1 flex items-center justify-between">
-                <span class="truncate">ERRORS & FAULTS (AWARD OPPONENT):</span>
-                <span class="text-[9px] text-[#718b7f] shrink-0">Faults</span>
+                  <!-- Opponent Errors -->
+                  <div class="bg-[#0b120e] border border-rose-500/25 rounded-xl p-2.5 space-y-1.5">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-rose-400">❌ Opponent Error / Fault</div>
+                    <div class="grid grid-cols-2 gap-1.5" id="coach-error-chips">
+                      <button type="button" data-shot="Unforced Error" onclick="pickCoachShotChip('Unforced Error', 'error')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#211316] hover:bg-rose-500/25 text-rose-200 border border-rose-500/30 transition">❌ Unforced Error</button>
+                      <button type="button" data-shot="Net Fault" onclick="pickCoachShotChip('Net Fault', 'error')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#211316] hover:bg-rose-500/25 text-rose-200 border border-rose-500/30 transition">🥅 Net Fault</button>
+                      <button type="button" data-shot="Out / Wide" onclick="pickCoachShotChip('Out / Wide', 'error')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#211316] hover:bg-rose-500/25 text-rose-200 border border-rose-500/30 transition">📏 Out / Wide</button>
+                      <button type="button" data-shot="Service Fault" onclick="pickCoachShotChip('Service Fault', 'error')" class="coach-shot-chip px-2 py-1.5 rounded-lg text-[11px] font-bold bg-[#211316] hover:bg-rose-500/25 text-rose-200 border border-rose-500/30 transition">🚫 Service Fault</button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
-                <button onclick="awardErrorPoint('B', 'Unforced Error by Team B')" class="py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-[#281518] hover:bg-[#3d1d23] border border-rose-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="truncate max-w-full">❌ Team B Unforced</span>
-                  <span class="text-[8px] sm:text-[9px] text-emerald-400 font-mono">+1 Team A</span>
+
+              <!-- Personal Coach Notes Input -->
+              <div class="space-y-1.5">
+                <label for="coach-point-note-input" class="text-[11px] font-bold uppercase tracking-wider text-[#8ab09f] block">
+                  2. Coach's Personal Notes for This Point:
+                </label>
+                <textarea id="coach-point-note-input" rows="2" placeholder="Add tactical observation or player note for this point (e.g., 'Great steep cross-court smash', 'Caught flat-footed on backhand transition')..." class="w-full bg-[#0b120e] border border-[#263e32] rounded-xl px-3 py-2 text-xs text-white placeholder-[#526b5f] focus:outline-none focus:border-emerald-400"></textarea>
+              </div>
+
+              <!-- Save / Clear Buttons -->
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <button type="button" onclick="clearCoachPointDetails()" class="px-3 py-2 rounded-xl text-xs font-semibold bg-[#17221c] hover:bg-rose-950/60 text-[#8ab09f] hover:text-rose-300 border border-[#26382f] transition">
+                  🗑️ Clear Point Details
                 </button>
-                <button onclick="awardErrorPoint('A', 'Unforced Error by Team A')" class="py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-[#281518] hover:bg-[#3d1d23] border border-rose-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="truncate max-w-full">❌ Team A Unforced</span>
-                  <span class="text-[8px] sm:text-[9px] text-cyan-400 font-mono">+1 Team B</span>
-                </button>
-                <button onclick="awardErrorPoint('B', 'Service Fault by Team B')" class="py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-[#281518] hover:bg-[#3d1d23] border border-rose-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="truncate max-w-full">🚫 Team B Fault</span>
-                  <span class="text-[8px] sm:text-[9px] text-emerald-400 font-mono">+1 Team A</span>
-                </button>
-                <button onclick="awardErrorPoint('A', 'Service Fault by Team A')" class="py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl bg-[#281518] hover:bg-[#3d1d23] border border-rose-500/40 text-[10px] sm:text-[11px] font-bold text-white flex flex-col items-center gap-0.5 active:scale-95 transition-all truncate">
-                  <span class="truncate max-w-full">🚫 Team A Fault</span>
-                  <span class="text-[8px] sm:text-[9px] text-cyan-400 font-mono">+1 Team B</span>
+                <button type="button" onclick="saveCoachPointDetails()" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-[#06110b] shadow-lg shadow-emerald-500/20 transition flex items-center gap-1.5">
+                  <span>💾</span> Save Shot &amp; Personal Note
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- Chronological Point-by-Point Rally History Feed -->
-          <div class="bg-[#101915] border border-[#20362b] rounded-2xl p-3 sm:p-4 shadow-lg space-y-2">
-            <div class="flex items-center justify-between text-xs font-bold text-[#8fa39a] uppercase border-b border-[#1b2b23] pb-1.5">
-              <span>POINT-BY-POINT RALLY FEED (THIS RUBBER)</span>
-              <span id="coach-rally-count" class="text-[10px] text-emerald-400 font-mono">0 rallies logged</span>
+          <!-- Annotated Points & Coach Notes Feed -->
+          <div class="bg-[#101915] border border-[#22382c] rounded-2xl p-3 sm:p-4 shadow-xl space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <span>📝</span> Coach Annotated Points &amp; Tactical Notes Log
+              </h4>
+              <span id="coach-rally-count" class="text-[11px] text-[#718b7f] font-mono">0 points annotated</span>
             </div>
-            <div id="coach-rally-feed-list" class="space-y-1.5 max-h-48 overflow-y-auto text-xs">
-              <!-- Dynamically populated -->
-            </div>
+            <div id="coach-rally-feed-list" class="space-y-1.5 max-h-56 overflow-y-auto pr-1"></div>
           </div>
 
-          <!-- Strict Umpire Notice: Coach Console cannot end match -->
+          <!-- Notice: Coach Console cannot end match -->
           <div class="p-3 rounded-2xl bg-[#141b17] border border-[#23382d] text-center text-xs text-[#718b7f]">
-            🛡️ <strong>Umpire Restriction</strong>: Only the official court umpire on the <button onclick="switchCorpView('umpire')" class="text-emerald-400 underline font-semibold">Umpire Console</button> has authorization to officially end and finalize matches.
+            🛡️ <strong>Umpire Restriction</strong>: Live scoring and match completion are controlled by the umpire on the <button onclick="switchCorpView('umpire')" class="text-emerald-400 underline font-semibold">Umpire Console</button>.
           </div>
         </section>
 
@@ -856,20 +849,32 @@
       <!-- =================================================================== -->
       <div id="profile-container-casual" class="space-y-4 p-3 sm:p-5 hidden">
         
-        <!-- Casual Header Bar (Period Selector + Game Mode: Singles vs Doubles) -->
+        <!-- Casual Header Bar (User Profile Badge + Period Selector + Game Mode: Singles vs Doubles) -->
         <div class="bg-[#101915] border border-[#203428] rounded-2xl p-3.5 space-y-3 shadow-lg">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h2 class="text-xl sm:text-2xl font-bebas text-white tracking-wider leading-none">BADMINTON 101</h2>
-              <p class="text-[10px] text-[#718b7f]">Casual Circle Tracking · Singles & Doubles</p>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl sm:text-2xl font-bebas text-white tracking-wider leading-none">BADMINTON 101 · CASUAL CIRCLE</h2>
+                <span id="casual-user-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Personal Mode
+                </span>
+              </div>
+              <p class="text-[10px] text-[#718b7f] mt-0.5" id="casual-circle-subtitle">
+                Create your own friends roster & track Singles and Doubles standings from scratch
+              </p>
             </div>
-            <div>
-              <label for="casual-period-select" class="block text-[9px] text-[#718b7f] uppercase font-bold text-right mb-0.5">PERIOD</label>
-              <select id="casual-period-select" onchange="handleCasualPeriodChange(this.value)" class="bg-[#14231b] border border-[#243c2f] text-white text-xs rounded-xl px-2.5 py-1 font-semibold focus:outline-none focus:border-emerald-400 cursor-pointer">
-                <option value="2026-10">October 2026</option>
-                <option value="2026-09">September 2026</option>
-                <option value="ALL">All Time</option>
-              </select>
+            <div class="flex items-center gap-2 self-end sm:self-auto">
+              <button type="button" onclick="toggleCasualFriendsDrawer()" class="px-2.5 py-1.5 rounded-xl bg-[#14231b] hover:bg-[#1c3327] border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-1.5 transition-colors">
+                <span>👥</span> <span id="casual-friends-count-btn">Friends (0)</span>
+              </button>
+              <div>
+                <select id="casual-period-select" onchange="handleCasualPeriodChange(this.value)" class="bg-[#14231b] border border-[#243c2f] text-white text-xs rounded-xl px-2.5 py-1.5 font-semibold focus:outline-none focus:border-emerald-400 cursor-pointer">
+                  <option value="2026-10">October 2026</option>
+                  <option value="2026-09">September 2026</option>
+                  <option value="2026-11">November 2026</option>
+                  <option value="ALL">All Time</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -884,6 +889,88 @@
           </div>
         </div>
 
+        <!-- STEP 1: CASUAL LOGIN / PERSONAL PROFILE GATE (SHOWN IF NOT LOGGED IN) -->
+        <div id="casual-auth-onboarding-card" class="hidden bg-gradient-to-b from-[#13241b] to-[#0e1813] border-2 border-emerald-500/50 rounded-3xl p-5 shadow-2xl space-y-4">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xl shrink-0">
+              👋
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-base sm:text-lg font-bold text-white">Start Your Own Casual Circle</h3>
+              <p class="text-xs text-[#9eb4aa] leading-relaxed">
+                Any user can sign in and build their own personal group of friends from scratch to track Singles & Doubles standings, Head-to-Head rivalries, and monthly champions.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <!-- Option A: Sign in with Google (Any Gmail) -->
+            <div class="bg-[#0c1410] border border-[#1f3329] rounded-2xl p-3.5 flex flex-col justify-between space-y-3">
+              <div>
+                <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">OPTION 1 · GOOGLE ACCOUNT</div>
+                <p class="text-[11px] text-[#8fa39a] mt-1">Sign in with any Google account to sync your personal circle across devices.</p>
+              </div>
+              <button type="button" onclick="loginWithGoogle()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Sign in with Google</span>
+              </button>
+            </div>
+
+            <!-- Option B: Quick Personal Profile Login -->
+            <form onsubmit="handleCasualProfileLogin(event)" class="bg-[#0c1410] border border-[#1f3329] rounded-2xl p-3.5 space-y-2.5">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">OPTION 2 · QUICK PROFILE LOGIN</div>
+              <input type="text" id="casual-login-name" required placeholder="Your Name (e.g. Rahul)" class="w-full bg-[#14231b] border border-[#243c2f] text-white text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400">
+              <input type="email" id="casual-login-email" required placeholder="Your Email (e.g. rahul@gmail.com)" class="w-full bg-[#14231b] border border-[#243c2f] text-white text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400">
+              <button type="button" onclick="handleCasualProfileLogin(event)" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all">
+                Launch My Personal Circle →
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- STEP 2: CREATE FRIENDS ROSTER FROM SCRATCH (SHOWN WHEN LOGGED IN & <2 PLAYERS OR WHEN TOGGLED) -->
+        <div id="casual-friends-setup-card" class="hidden bg-[#101915] border-2 border-emerald-500/50 rounded-3xl p-4 sm:p-5 shadow-xl space-y-3.5">
+          <div class="flex items-center justify-between border-b border-[#1b2b23] pb-2.5">
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                <span>👥</span> <span id="casual-setup-heading">Create Your Friends Roster (From Scratch)</span>
+              </h3>
+              <p class="text-[11px] text-[#8fa39a] mt-0.5" id="casual-setup-subheading">
+                Add the friends you play with (enter names one by one or comma-separated). Minimum 2 players for Singles, 4 for Doubles.
+              </p>
+            </div>
+            <button type="button" id="btn-close-friends-drawer" onclick="toggleCasualFriendsDrawer(false)" class="hidden text-xs text-[#718b7f] hover:text-white px-2 py-1 rounded-lg bg-[#14231b]">
+              Done ✕
+            </button>
+          </div>
+
+          <!-- Add Friends Input Form -->
+          <form onsubmit="handleAddCasualFriendSubmit(event)" class="flex flex-col sm:flex-row gap-2">
+            <input type="text" id="casual-friend-name-input" placeholder="Enter friend name(s), e.g. Alex, Priya, Karthik, Neha" class="flex-1 bg-[#0c1410] border border-[#243c2f] text-white text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-emerald-400">
+            <button type="button" onclick="handleAddCasualFriendSubmit(event)" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-colors whitespace-nowrap">
+              + Add to My Circle
+            </button>
+          </form>
+
+          <!-- Current Friends Chips -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] font-bold uppercase text-[#718b7f]">
+              <span id="casual-roster-count-label">YOUR FRIENDS ROSTER (0 PLAYERS)</span>
+              <button type="button" onclick="handleResetCasualCircle()" class="text-rose-400 hover:underline font-semibold">
+                Clear & Start Fresh
+              </button>
+            </div>
+            <div id="casual-friends-chips-list" class="flex flex-wrap gap-1.5 pt-1">
+              <!-- Populated by renderCasualFriendsSetup() -->
+            </div>
+          </div>
+        </div>
+
         <!-- View 2.1: Casual Standings & Leaderboard -->
         <section id="view-casual-standings" class="space-y-4">
           <!-- Leading / Champion Card -->
@@ -894,8 +981,8 @@
                 👑 Adjudge Winner
               </button>
             </div>
-            <h3 id="casual-leading-name" class="text-3xl sm:text-4xl font-bebas text-white">Manish</h3>
-            <p id="casual-leading-stats" class="text-xs font-semibold text-[#e5a93c] mt-0.5">3 wins · 78 points won (75% win rate)</p>
+            <h3 id="casual-leading-name" class="text-3xl sm:text-4xl font-bebas text-white">No Players Yet</h3>
+            <p id="casual-leading-stats" class="text-xs font-semibold text-[#e5a93c] mt-0.5">Add friends above & log matches to track standings</p>
           </div>
 
           <!-- Standings Table -->
@@ -983,9 +1070,9 @@
           <div id="casual-doubles-chem-card" class="hidden bg-[#14231b] border border-[#243c2f] rounded-2xl p-3.5 space-y-1">
             <div class="flex items-center justify-between text-xs font-bold text-emerald-400">
               <span>🤝 PARTNER CHEMISTRY (WHEN PLAYING ON SAME TEAM)</span>
-              <span id="casual-chem-rate" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">100% Win</span>
+              <span id="casual-chem-rate" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">0% Win</span>
             </div>
-            <div id="casual-chem-desc" class="text-xs text-[#c4d4cc]">Played 2 matches together: 2 Wins, 0 Losses</div>
+            <div id="casual-chem-desc" class="text-xs text-[#c4d4cc]">Played 0 matches together</div>
           </div>
 
           <!-- Recent Matches Between Them -->
@@ -995,14 +1082,14 @@
           </div>
         </section>
 
-        <!-- View 2.3: Casual Match Logger (ADMIN RESTRICTED) -->
+        <!-- View 2.3: Casual Match Logger (OPEN TO ANY LOGGED-IN CASUAL USER) -->
         <section id="view-casual-log" class="space-y-4 hidden">
-          <!-- Admin Notice Banner -->
-          <div id="casual-admin-banner" class="p-3 rounded-2xl bg-[#14221b] border border-[#243c2f] text-xs text-[#8fa39a] flex items-center justify-between">
+          <!-- Sign-In Prompt Banner (Only shown if user has not signed in to their personal Casual Circle yet) -->
+          <div id="casual-admin-banner" class="hidden p-3 rounded-2xl bg-[#14221b] border border-[#243c2f] text-xs text-[#8fa39a] flex items-center justify-between">
             <span class="flex items-center gap-1.5 font-medium">
-              <span>🔒</span> <span>Only tournament admins can log or delete matches.</span>
+              <span>👤</span> <span>Sign in above to add your friends and log matches in your personal Casual Circle.</span>
             </span>
-            <button onclick="openAuthModal()" class="text-xs text-emerald-400 font-bold underline">Admin Login →</button>
+            <button onclick="openAuthModal()" class="text-xs text-emerald-400 font-bold underline">Sign In →</button>
           </div>
 
           <!-- Singles Match Form -->
@@ -1041,10 +1128,10 @@
             </div>
             <div>
               <label for="c-date-s" class="block text-[10px] text-[#718b7f] font-bold uppercase mb-1">DATE PLAYED</label>
-              <input type="date" id="c-date-s" value="2026-10-23" required class="w-full bg-[#14231b] border border-[#243c2f] text-white text-xs rounded-xl p-2 font-semibold">
+              <input type="date" id="c-date-s" value="2026-10-24" required class="w-full bg-[#14231b] border border-[#243c2f] text-white text-xs rounded-xl p-2 font-semibold">
             </div>
-            <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md">
-              Save Singles Match (Admin)
+            <button type="button" onclick="handleCasualSinglesSubmit(event)" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md">
+              Save Singles Match
             </button>
           </form>
 
@@ -1078,14 +1165,14 @@
             </div>
             <div>
               <label for="c-date-d" class="block text-[10px] text-[#718b7f] font-bold uppercase mb-1">DATE PLAYED</label>
-              <input type="date" id="c-date-d" value="2026-10-23" required class="w-full bg-[#14231b] border border-[#243c2f] text-white text-xs rounded-xl p-2 font-semibold">
+              <input type="date" id="c-date-d" value="2026-10-24" required class="w-full bg-[#14231b] border border-[#243c2f] text-white text-xs rounded-xl p-2 font-semibold">
             </div>
-            <button type="submit" class="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-md">
-              Save Doubles Match (Admin)
+            <button type="button" onclick="handleCasualDoublesSubmit(event)" class="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-md">
+              Save Doubles Match
             </button>
           </form>
 
-          <!-- Casual Matches History List with Delete button for Admin -->
+          <!-- Casual Matches History List with Delete button -->
           <div class="bg-[#101915] border border-[#203428] rounded-2xl p-4 space-y-2">
             <h4 class="text-xs font-bold text-[#8fa39a] uppercase">LOGGED MATCHES HISTORY</h4>
             <div id="casual-logged-matches-list" class="space-y-2 divide-y divide-[#17271e]"></div>
@@ -1093,7 +1180,6 @@
         </section>
 
       </div>
-
     </main>
 
     <!-- =================================================================== -->
@@ -1408,7 +1494,7 @@ Sneha P. (F)</pre>
     ];
 
     // Optional Embedded Firebase Config (Paste values below OR paste `const firebaseConfig = { ... };` anywhere in script)
-     var EMBEDDED_FIREBASE_CONFIG = (typeof EMBEDDED_FIREBASE_CONFIG !== 'undefined') ? EMBEDDED_FIREBASE_CONFIG : { {
+    const EMBEDDED_FIREBASE_CONFIG = {
       apiKey: "AIzaSyD3IkAifCkJQuzOSlNUjy-1aAzj5JZWFv0",
       authDomain: "badminton-101-57f82.firebaseapp.com",
       databaseURL: "https://badminton-101-57f82-default-rtdb.firebaseio.com/",
@@ -1539,19 +1625,14 @@ Sneha P. (F)</pre>
 
       fixtures: [],
 
-      // Profile 2: Casual Circle (Badminton 101) Dataset
+      casualUser: null,
+      casualFriendsDrawerOpen: false,
+
+      // Profile 2: Casual Circle (Badminton 101) Dataset — Starts clean from scratch per user!
       casual: {
-        players: ['Manish', 'Nitesh', 'Pranav', 'Sampreeth', 'Adarsh', 'Karthik'],
-        matches: [
-          { id: 'cm1', playerA: 'Manish', playerB: 'Pranav', scoreA: 22, scoreB: 20, date: '2026-10-19' },
-          { id: 'cm2', playerA: 'Manish', playerB: 'Pranav', scoreA: 14, scoreB: 21, date: '2026-10-19' },
-          { id: 'cm3', playerA: 'Manish', playerB: 'Pranav', scoreA: 21, scoreB: 13, date: '2026-10-19' },
-          { id: 'cm4', playerA: 'Manish', playerB: 'Pranav', scoreA: 21, scoreB: 19, date: '2026-10-19' }
-        ],
-        doublesMatches: [
-          { id: 'cd1', teamA: ['Manish', 'Pranav'], teamB: ['Nitesh', 'Sampreeth'], scoreA: 21, scoreB: 17, date: '2026-10-19' },
-          { id: 'cd2', teamA: ['Manish', 'Nitesh'], teamB: ['Pranav', 'Sampreeth'], scoreA: 18, scoreB: 21, date: '2026-10-19' }
-        ],
+        players: [],
+        matches: [],
+        doublesMatches: [],
         adjudgedWinners: { singles: {}, doubles: {} }
       }
     };
@@ -1734,9 +1815,88 @@ Sneha P. (F)</pre>
           scoreA: 0,
           scoreB: 0,
           winnerId: null,
-          rallyHistory: []
+          rallyHistory: [],
+          pointDetails: { A: {}, B: {} }
         };
       });
+    }
+
+    function normalizeCorporateState() {
+      if (!Array.isArray(appState.teams)) {
+        appState.teams = Object.values(appState.teams || {});
+      }
+      appState.teams = appState.teams.filter(t => t && typeof t === 'object');
+      appState.teams.forEach(t => {
+        if (!Array.isArray(t.players)) t.players = Object.values(t.players || {});
+        t.players = t.players.filter(p => p && typeof p === 'object');
+      });
+
+      if (!Array.isArray(appState.fixtures)) {
+        appState.fixtures = Object.values(appState.fixtures || {});
+      }
+      appState.fixtures = appState.fixtures.filter(f => f && typeof f === 'object');
+      appState.fixtures.forEach(f => {
+        if (f.courtId !== null && f.courtId !== undefined && f.courtId !== '') {
+          f.courtId = Number(f.courtId);
+        } else {
+          f.courtId = null;
+        }
+        f.teamAScore = Number(f.teamAScore || 0);
+        f.teamBScore = Number(f.teamBScore || 0);
+        f.totalPtsA = Number(f.totalPtsA || 0);
+        f.totalPtsB = Number(f.totalPtsB || 0);
+
+        if (!Array.isArray(f.rubbers)) {
+          f.rubbers = f.rubbers ? Object.values(f.rubbers) : [];
+        }
+        f.rubbers = f.rubbers.filter(r => r && typeof r === 'object');
+        if (f.status === 'live' && f.rubbers.length === 0) {
+          const tA = getTeam(f.teamAId);
+          const tB = getTeam(f.teamBId);
+          if (tA && tB) {
+            if (!f.lineup) f.lineup = generateBalancedLineup(tA, tB);
+            f.rubbers = createRubbersForFixture(f);
+          }
+        }
+        f.rubbers.forEach(r => {
+          r.scoreA = Number(r.scoreA || 0);
+          r.scoreB = Number(r.scoreB || 0);
+          if (!Array.isArray(r.rallyHistory)) {
+            r.rallyHistory = r.rallyHistory ? Object.values(r.rallyHistory) : [];
+          }
+          r.rallyHistory = r.rallyHistory.filter(x => x && typeof x === 'object');
+          if (!r.pointDetails || typeof r.pointDetails !== 'object') {
+            r.pointDetails = { A: {}, B: {} };
+          }
+          if (!r.pointDetails.A || typeof r.pointDetails.A !== 'object') r.pointDetails.A = {};
+          if (!r.pointDetails.B || typeof r.pointDetails.B !== 'object') r.pointDetails.B = {};
+        });
+        if (f.status === 'live' && f.rubbers.length > 0) {
+          const hasLive = f.rubbers.some(r => r.status === 'live');
+          if (!hasLive) {
+            const firstPending = f.rubbers.find(r => r.status === 'pending');
+            if (firstPending) {
+              firstPending.status = 'live';
+            }
+          }
+        }
+      });
+
+      if (!appState.casual || typeof appState.casual !== 'object') {
+        appState.casual = { players: [], matches: [], doublesMatches: [], adjudgedWinners: { singles: {}, doubles: {} } };
+      }
+      if (!Array.isArray(appState.casual.players)) {
+        appState.casual.players = appState.casual.players ? Object.values(appState.casual.players) : [];
+      }
+      if (!Array.isArray(appState.casual.matches)) {
+        appState.casual.matches = appState.casual.matches ? Object.values(appState.casual.matches) : [];
+      }
+      if (!Array.isArray(appState.casual.doublesMatches)) {
+        appState.casual.doublesMatches = appState.casual.doublesMatches ? Object.values(appState.casual.doublesMatches) : [];
+      }
+      if (!appState.casual.adjudgedWinners || typeof appState.casual.adjudgedWinners !== 'object') {
+        appState.casual.adjudgedWinners = { singles: {}, doubles: {} };
+      }
     }
 
     function getTeam(teamId) {
@@ -1746,16 +1906,44 @@ Sneha P. (F)</pre>
       return appState.fixtures.find(f => f.id === fixtureId);
     }
     function getActiveFixtureOnCourt(courtId) {
-      return appState.fixtures.find(f => f.courtId === Number(courtId) && f.status === 'live');
+      const targetCourt = Number(courtId);
+      let fix = appState.fixtures.find(f => Number(f.courtId) === targetCourt && f.status === 'live');
+      if (!fix) {
+        fix = appState.fixtures.find(f => Number(f.courtId) === targetCourt && f.status === 'scheduled');
+        if (fix) fix.status = 'live';
+      }
+      return fix || null;
     }
     function getActiveRubberOnCourt(courtId) {
       const fix = getActiveFixtureOnCourt(courtId);
-      if (!fix || !fix.rubbers) return null;
-      return fix.rubbers.find(r => r.status === 'live') || null;
+      if (!fix) return null;
+      if (!Array.isArray(fix.rubbers)) {
+        fix.rubbers = fix.rubbers ? Object.values(fix.rubbers) : [];
+      }
+      if (fix.rubbers.length === 0) {
+        const tA = getTeam(fix.teamAId);
+        const tB = getTeam(fix.teamBId);
+        if (tA && tB) {
+          if (!fix.lineup) fix.lineup = generateBalancedLineup(tA, tB);
+          fix.rubbers = createRubbersForFixture(fix);
+        }
+      }
+      let liveRubber = fix.rubbers.find(r => r.status === 'live');
+      if (!liveRubber) {
+        const nextPending = fix.rubbers.find(r => r.status === 'pending');
+        if (nextPending) {
+          nextPending.status = 'live';
+          liveRubber = nextPending;
+        }
+      }
+      if (liveRubber && !Array.isArray(liveRubber.rallyHistory)) {
+        liveRubber.rallyHistory = liveRubber.rallyHistory ? Object.values(liveRubber.rallyHistory) : [];
+      }
+      return liveRubber || null;
     }
     function getQueuedRubbersOnCourt(courtId) {
       const fix = getActiveFixtureOnCourt(courtId);
-      if (!fix || !fix.rubbers) return [];
+      if (!fix || !Array.isArray(fix.rubbers)) return [];
       return fix.rubbers.filter(r => r.status === 'pending');
     }
 
@@ -1792,11 +1980,13 @@ Sneha P. (F)</pre>
         boxCas.classList.remove('hidden');
         pTag.textContent = 'CASUAL CIRCLE';
         pTag.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase';
-        pSub.textContent = 'Friends Badminton 101 · Singles & Doubles';
+        pSub.textContent = 'Personal Friends Circle · Singles & Doubles';
         if (tvLinkBtn) tvLinkBtn.classList.add('hidden');
+        loadCasualProfileForCurrentUser();
         switchCasualTab(appState.activeCasualTab || 'standings');
       }
 
+      updateAuthUI();
       showToast(`Switched profile to ${profileKey === 'corporate' ? 'Corporate League' : 'Casual Circle'}!`, '🏸');
     }
 
@@ -1856,16 +2046,33 @@ Sneha P. (F)</pre>
     // =========================================================================
     const ADMIN_OWNER_EMAIL = 'manish.shreedhar@gmail.com';
     const DEFAULT_PREDEFINED_PIN = '2026';
+    const AUTH_SESSION_STORAGE_KEY = 'racquet_rumble_auth_session_v1';
+    const CASUAL_USER_SESSION_KEY = 'racquet_rumble_casual_user_session_v1';
+    const CASUAL_PROFILE_PREFIX = 'racquet_rumble_casual_v2_';
 
     function isOwnerAdmin() {
-      if (!appState.authUser || !appState.authUser.email) return false;
-      return appState.authUser.email.trim().toLowerCase() === ADMIN_OWNER_EMAIL;
+      if (appState.authUser && appState.authUser.email && appState.authUser.email.trim().toLowerCase() === ADMIN_OWNER_EMAIL) {
+        return true;
+      }
+      if (appState.adminUser && appState.adminUser.email && appState.adminUser.email.trim().toLowerCase() === ADMIN_OWNER_EMAIL) {
+        return true;
+      }
+      return false;
+    }
+
+    function isAuthorizedEmail(email) {
+      if (!email || typeof email !== 'string') return false;
+      const clean = email.trim().toLowerCase();
+      if (clean === ADMIN_OWNER_EMAIL.toLowerCase()) return true;
+      return AUTHORIZED_EMAILS.some(e => e.trim().toLowerCase() === clean);
     }
 
     function isAuthorizedEditor() {
-      // 1. Google login as Manish.shreedhar@gmail.com (Owner Admin)
+      // Corporate League editor permissions:
+      // 1. Google login as Owner Admin (Manish.shreedhar@gmail.com) or authorized organizer email
       if (isOwnerAdmin()) return true;
-      // 2. PIN-authenticated session (Umpires, Scorers, Coaches)
+      if (appState.authUser && appState.authUser.email && isAuthorizedEmail(appState.authUser.email)) return true;
+      // 2. PIN-authenticated session (Umpires, Scorers, Coaches) or active admin session
       if (appState.isPinAuthenticated || appState.isAdmin) return true;
       return false;
     }
@@ -1874,11 +2081,155 @@ Sneha P. (F)</pre>
       return isAuthorizedEditor();
     }
 
-    function isAuthorizedEmail(email) {
-      if (!email || typeof email !== 'string') return false;
-      const clean = email.trim().toLowerCase();
-      if (clean === ADMIN_OWNER_EMAIL.toLowerCase()) return true;
-      return AUTHORIZED_EMAILS.some(e => e.trim().toLowerCase() === clean);
+    // --- Casual Circle Per-User Identity (Any Logged-In User Can Use Casual Circle From Scratch) ---
+    function sanitizeCasualUserId(raw) {
+      if (!raw || typeof raw !== 'string') return 'guest';
+      return raw.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+    }
+
+    function getCasualActiveUser() {
+      if (appState.authUser && appState.authUser.email) {
+        return {
+          id: sanitizeCasualUserId(appState.authUser.email),
+          name: appState.authUser.displayName || appState.authUser.email.split('@')[0],
+          email: appState.authUser.email
+        };
+      }
+      if (appState.casualUser && appState.casualUser.email) {
+        return {
+          id: sanitizeCasualUserId(appState.casualUser.email),
+          name: appState.casualUser.name || appState.casualUser.email.split('@')[0],
+          email: appState.casualUser.email
+        };
+      }
+      if (appState.adminUser && appState.adminUser.email && appState.adminUser.email !== 'pin_organizer@court.badminton') {
+        return {
+          id: sanitizeCasualUserId(appState.adminUser.email),
+          name: appState.adminUser.name || appState.adminUser.email.split('@')[0],
+          email: appState.adminUser.email
+        };
+      }
+      return null;
+    }
+
+    function isCasualUserLoggedIn() {
+      return getCasualActiveUser() !== null;
+    }
+
+    function saveAuthSessionToStorage() {
+      try {
+        localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify({
+          isAdmin: Boolean(appState.isAdmin),
+          isPinAuthenticated: Boolean(appState.isPinAuthenticated),
+          adminUser: appState.adminUser || null
+        }));
+        if (appState.casualUser) {
+          localStorage.setItem(CASUAL_USER_SESSION_KEY, JSON.stringify(appState.casualUser));
+        } else {
+          localStorage.removeItem(CASUAL_USER_SESSION_KEY);
+        }
+      } catch (e) {}
+    }
+
+    function loadAuthSessionFromStorage() {
+      try {
+        const raw = localStorage.getItem(AUTH_SESSION_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && (parsed.isAdmin || parsed.isPinAuthenticated)) {
+            appState.isAdmin = Boolean(parsed.isAdmin);
+            appState.isPinAuthenticated = Boolean(parsed.isPinAuthenticated);
+            appState.adminUser = parsed.adminUser || null;
+          }
+        }
+        const rawCasualUser = localStorage.getItem(CASUAL_USER_SESSION_KEY);
+        if (rawCasualUser) {
+          const cu = JSON.parse(rawCasualUser);
+          if (cu && cu.email) {
+            appState.casualUser = cu;
+          }
+        }
+      } catch (e) {}
+    }
+
+    function loadCasualProfileForCurrentUser() {
+      const user = getCasualActiveUser();
+      if (!user) {
+        appState.casual = {
+          players: [],
+          matches: [],
+          doublesMatches: [],
+          adjudgedWinners: { singles: {}, doubles: {} }
+        };
+        return;
+      }
+      const key = CASUAL_PROFILE_PREFIX + user.id;
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            appState.casual = {
+              players: Array.isArray(parsed.players) ? parsed.players : Object.values(parsed.players || {}),
+              matches: Array.isArray(parsed.matches) ? parsed.matches : Object.values(parsed.matches || {}),
+              doublesMatches: Array.isArray(parsed.doublesMatches) ? parsed.doublesMatches : Object.values(parsed.doublesMatches || {}),
+              adjudgedWinners: parsed.adjudgedWinners || { singles: {}, doubles: {} }
+            };
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // Start completely from scratch for this user
+      appState.casual = {
+        players: [],
+        matches: [],
+        doublesMatches: [],
+        adjudgedWinners: { singles: {}, doubles: {} }
+      };
+    }
+
+    function saveCasualProfileForCurrentUser() {
+      const user = getCasualActiveUser();
+      if (!user) return;
+      const key = CASUAL_PROFILE_PREFIX + user.id;
+      try {
+        const cleanCasual = JSON.parse(JSON.stringify({
+          ownerName: user.name,
+          ownerEmail: user.email,
+          players: appState.casual.players || [],
+          matches: appState.casual.matches || [],
+          doublesMatches: appState.casual.doublesMatches || [],
+          adjudgedWinners: appState.casual.adjudgedWinners || { singles: {}, doubles: {} },
+          lastUpdated: Date.now()
+        }));
+        localStorage.setItem(key, JSON.stringify(cleanCasual));
+        if (isCloudConnected && firebaseDb) {
+          firebaseDb.ref('racquet_rumble_casual_users/' + user.id).set(cleanCasual).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    function subscribeCasualUserCloudSync() {
+      const user = getCasualActiveUser();
+      if (!user || !isCloudConnected || !firebaseDb) return;
+      try {
+        const userRef = firebaseDb.ref('racquet_rumble_casual_users/' + user.id);
+        userRef.once('value', (snapshot) => {
+          const val = snapshot.val();
+          if (val && typeof val === 'object') {
+            appState.casual = {
+              players: Array.isArray(val.players) ? val.players : Object.values(val.players || {}),
+              matches: Array.isArray(val.matches) ? val.matches : Object.values(val.matches || {}),
+              doublesMatches: Array.isArray(val.doublesMatches) ? val.doublesMatches : Object.values(val.doublesMatches || {}),
+              adjudgedWinners: val.adjudgedWinners || { singles: {}, doubles: {} }
+            };
+            const key = CASUAL_PROFILE_PREFIX + user.id;
+            try { localStorage.setItem(key, JSON.stringify(appState.casual)); } catch (e) {}
+            renderCasualAll();
+          }
+        });
+      } catch (e) {}
     }
 
     function escapeHtml(str) {
@@ -1908,6 +2259,7 @@ Sneha P. (F)</pre>
     let cloudDbRef = null;
     let isCloudConnected = false;
     let isRemoteUpdate = false;
+    let lastLocalWriteTimestamp = 0;
 
     function isValidFirebaseApiKey(val) {
       if (!val || typeof val !== 'string') return false;
@@ -1929,7 +2281,6 @@ Sneha P. (F)</pre>
         appId: rawCfg.appId ? String(rawCfg.appId).trim() : ''
       };
 
-      // Infer projectId if omitted
       if (!cfg.projectId) {
         if (cfg.authDomain && cfg.authDomain.includes('.')) {
           cfg.projectId = cfg.authDomain.split('.')[0];
@@ -1957,7 +2308,6 @@ Sneha P. (F)</pre>
       const trimmed = raw.trim();
       if (!trimmed) return null;
 
-      // 1. Try direct JSON parse
       try {
         if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
           const parsed = JSON.parse(trimmed);
@@ -1966,7 +2316,6 @@ Sneha P. (F)</pre>
         }
       } catch (e) {}
 
-      // 2. Scan for all occurrences of apiKey: "..." or apiKey = "..."
       const keyRegex = /["']?apiKey["']?\s*[:=]\s*["'`]([^"'`\s,;}{]+)["'`]/g;
       let match;
       while ((match = keyRegex.exec(trimmed)) !== null) {
@@ -2000,7 +2349,6 @@ Sneha P. (F)</pre>
     function detectFirebaseConfig() {
       let found = null;
 
-      // 1. Check if Firebase is already initialized anywhere on the page
       try {
         if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
           const opts = firebase.app().options;
@@ -2009,7 +2357,6 @@ Sneha P. (F)</pre>
         }
       } catch (e) {}
 
-      // 2. Check EMBEDDED_FIREBASE_CONFIG
       try {
         if (typeof EMBEDDED_FIREBASE_CONFIG !== 'undefined' && EMBEDDED_FIREBASE_CONFIG) {
           found = normalizeFirebaseConfig(EMBEDDED_FIREBASE_CONFIG);
@@ -2020,7 +2367,6 @@ Sneha P. (F)</pre>
         }
       } catch (e) {}
 
-      // 3. Check standard firebaseConfig variable (lexical or global)
       try {
         if (typeof firebaseConfig !== 'undefined' && firebaseConfig) {
           found = normalizeFirebaseConfig(firebaseConfig);
@@ -2031,7 +2377,6 @@ Sneha P. (F)</pre>
         }
       } catch (e) {}
 
-      // 4. Check window globals
       try {
         if (typeof window !== 'undefined') {
           for (const k of ['firebaseConfig', 'FIREBASE_CONFIG', 'fbConfig', '_firebaseConfig', 'EMBEDDED_FIREBASE_CONFIG']) {
@@ -2046,13 +2391,12 @@ Sneha P. (F)</pre>
         }
       } catch (e) {}
 
-      // 5. Scan all <script> tags in the DOM (catches <script type="module"> from Firebase Console or separate <script> blocks)
       try {
         if (typeof document !== 'undefined' && document.querySelectorAll) {
           const scripts = document.querySelectorAll('script');
           for (let i = 0; i < scripts.length; i++) {
             const txt = scripts[i].textContent || scripts[i].innerHTML || '';
-            if (txt && txt.includes('apiKey')) {
+            if (txt && txt.length < 15000 && txt.includes('apiKey')) {
               found = parseFirebaseConfigSnippet(txt);
               if (found) {
                 try { localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(found, null, 2)); } catch (e) {}
@@ -2063,7 +2407,6 @@ Sneha P. (F)</pre>
         }
       } catch (e) {}
 
-      // 6. Check modal textarea if user already pasted text into it
       try {
         if (typeof document !== 'undefined') {
           const inputEl = document.getElementById('firebase-config-input');
@@ -2077,7 +2420,6 @@ Sneha P. (F)</pre>
         }
       } catch (e) {}
 
-      // 7. Fallback to localStorage (checks both Corporate League key and Casual Badminton 101 key)
       try {
         for (const storageKey of [FIREBASE_CONFIG_KEY, 'badminton_101_firebase_config_v1', 'firebaseConfig']) {
           const stored = localStorage.getItem(storageKey);
@@ -2121,37 +2463,61 @@ Sneha P. (F)</pre>
       // 1. Initialize Auth FIRST so Google Sign-in always succeeds regardless of Database status
       if (typeof firebase !== 'undefined' && firebase.auth) {
         try {
+          const isNewAuth = !firebaseAuth;
           firebaseAuth = firebase.auth();
-          firebaseAuth.onAuthStateChanged((user) => {
+          if (isNewAuth) {
+            firebaseAuth.onAuthStateChanged((user) => {
             appState.authUser = user;
+            if (user && user.email) {
+              appState.casualUser = {
+                name: user.displayName || user.email.split('@')[0],
+                email: user.email
+              };
+              if (isAuthorizedEmail(user.email)) {
+                appState.isAdmin = true;
+              }
+              saveAuthSessionToStorage();
+              loadCasualProfileForCurrentUser();
+              subscribeCasualUserCloudSync();
+            }
             updateAuthUI();
-          });
+            });
+          }
         } catch (authErr) {
           console.warn('Firebase Auth initialization warning:', authErr);
         }
       }
 
-      // 2. Initialize Realtime Database in its own try-catch block so DB issues never block login
+      // 2. Initialize Realtime Database in its own try-catch block
       if (typeof firebase !== 'undefined' && firebase.database) {
         try {
           firebaseDb = firebase.database();
+          if (cloudDbRef) {
+            try { cloudDbRef.off(); } catch (e) {}
+          }
           cloudDbRef = firebaseDb.ref('racquet_rumble_shared_data');
 
-          // Realtime listener for incoming court updates
+          // Realtime listener for incoming Corporate court updates
           cloudDbRef.on('value', (snapshot) => {
             const val = snapshot.val();
-            if (val && Array.isArray(val.fixtures)) {
+            if (val && val.fixtures) {
+              // Ignore self-echo from our own immediate local write to prevent overwriting active clicks
+              if (val.lastUpdated && val.lastUpdated === lastLocalWriteTimestamp) {
+                updateCloudStatusBadge(true, 'Live Synced');
+                return;
+              }
               isRemoteUpdate = true;
-              appState.fixtures = val.fixtures;
-              if (val.teams) appState.teams = val.teams;
-              if (val.casual) appState.casual = val.casual;
+              appState.fixtures = Array.isArray(val.fixtures) ? val.fixtures : Object.values(val.fixtures);
+              if (val.teams) {
+                appState.teams = Array.isArray(val.teams) ? val.teams : Object.values(val.teams);
+              }
+              normalizeCorporateState();
+              saveStateToLocalStorage();
               renderTVConsole();
               renderUmpireConsole();
+              renderCoachConsole();
               renderPoolTables();
               renderFixturesList();
-              renderCasualStandings();
-              renderCasualH2H();
-              renderCasualLog();
               isRemoteUpdate = false;
               updateCloudStatusBadge(true, 'Live Synced');
             } else if (!val && isAuthorizedEditor()) {
@@ -2169,6 +2535,7 @@ Sneha P. (F)</pre>
 
           isCloudConnected = true;
           updateCloudStatusBadge(true, 'Live Synced');
+          subscribeCasualUserCloudSync();
         } catch (dbErr) {
           console.warn('Firebase Realtime Database warning (Auth is still operational):', dbErr);
           isCloudConnected = false;
@@ -2184,7 +2551,7 @@ Sneha P. (F)</pre>
     function updateCloudStatusBadge(connected, labelText) {
       const dot = document.getElementById('cloud-status-dot');
       const text = document.getElementById('cloud-status-text');
-      const btn = document.getElementById('btn-cloud-status') || document.getElementById('btn-cloud-sync');
+      const btn = document.getElementById('btn-cloud-status');
       if (dot && text && btn) {
         text.textContent = labelText || (connected ? 'Live Synced' : 'Local Mode');
         if (connected) {
@@ -2205,40 +2572,47 @@ Sneha P. (F)</pre>
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify({
           teams: appState.teams,
           fixtures: appState.fixtures,
-          casual: appState.casual,
           lastUpdated: Date.now()
         }));
+        saveCasualProfileForCurrentUser();
       } catch (e) {}
     }
 
     function loadStateFromLocalStorage() {
       try {
+        loadAuthSessionFromStorage();
         const raw = localStorage.getItem(APP_STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.fixtures) && parsed.fixtures.length > 0) {
-            appState.fixtures = parsed.fixtures;
+          if (parsed && parsed.fixtures) {
+            const fixArr = Array.isArray(parsed.fixtures) ? parsed.fixtures : Object.values(parsed.fixtures);
+            if (fixArr.length > 0) appState.fixtures = fixArr;
           }
-          if (parsed && Array.isArray(parsed.teams) && parsed.teams.length > 0) {
-            appState.teams = parsed.teams;
-          }
-          if (parsed && parsed.casual) {
-            appState.casual = parsed.casual;
+          if (parsed && parsed.teams) {
+            const teamArr = Array.isArray(parsed.teams) ? parsed.teams : Object.values(parsed.teams);
+            if (teamArr.length > 0) appState.teams = teamArr;
           }
         }
+        loadCasualProfileForCurrentUser();
+        normalizeCorporateState();
       } catch (e) {}
     }
 
     function syncStateToCloud() {
+      normalizeCorporateState();
       saveStateToLocalStorage();
       if (!isCloudConnected || !cloudDbRef || isRemoteUpdate) return;
       if (!isAuthorizedEditor()) return;
       try {
-        cloudDbRef.set({
+        const ts = Date.now();
+        lastLocalWriteTimestamp = ts;
+        const payload = JSON.parse(JSON.stringify({
           teams: appState.teams,
           fixtures: appState.fixtures,
-          casual: appState.casual,
-          lastUpdated: Date.now()
+          lastUpdated: ts
+        }));
+        cloudDbRef.set(payload).catch(err => {
+          console.warn('Cloud sync set error:', err);
         });
       } catch (err) {
         console.warn('Cloud sync write warning:', err);
@@ -2246,7 +2620,6 @@ Sneha P. (F)</pre>
     }
 
     async function loginWithGoogle() {
-      // Re-check and auto-recover instance if needed
       if (!firebaseApp && typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) {
         firebaseApp = firebase.app();
       }
@@ -2258,7 +2631,6 @@ Sneha P. (F)</pre>
         initFirebase();
       }
 
-      // If still missing, check detectFirebaseConfig()
       if (!firebaseApp || !firebaseAuth) {
         const cfg = detectFirebaseConfig();
         if (cfg && cfg.apiKey && typeof firebase !== 'undefined') {
@@ -2278,7 +2650,7 @@ Sneha P. (F)</pre>
       }
 
       if (!firebaseApp || !firebaseAuth) {
-        showToast('Please paste your Firebase config in the modal or use 1-Click Manish Login', '⚠️');
+        showToast('Please paste your Firebase config in the modal or use Quick Login', '⚠️');
         openFirebaseModal();
         return;
       }
@@ -2287,12 +2659,26 @@ Sneha P. (F)</pre>
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         const result = await firebaseAuth.signInWithPopup(provider);
-        const email = result.user.email;
+        appState.authUser = result.user;
+        const email = result.user.email || '';
+        const displayName = result.user.displayName || email.split('@')[0];
+
+        // Any Google user gets their own personal Casual Circle profile
+        appState.casualUser = {
+          name: displayName,
+          email: email
+        };
+
         if (isAuthorizedEmail(email)) {
-          showToast(`Welcome ${result.user.displayName || email}! Organizer editing active.`, '✅');
+          appState.isAdmin = true;
+          appState.adminUser = { email, name: displayName };
+          showToast(`Welcome ${displayName}! Corporate Admin & Personal Casual Circle unlocked.`, '✅');
         } else {
-          showToast(`Signed in as ${email}. View only mode (Only authorized emails can edit).`, 'ℹ️');
+          showToast(`Welcome ${displayName}! Your Personal Casual Circle is ready.`, '✅');
         }
+        saveAuthSessionToStorage();
+        loadCasualProfileForCurrentUser();
+        subscribeCasualUserCloudSync();
         closeAuthModal();
         updateAuthUI();
       } catch (err) {
@@ -2317,6 +2703,13 @@ Sneha P. (F)</pre>
         email: email,
         name: email.split('@')[0]
       };
+      appState.casualUser = {
+        email: email,
+        name: email.split('@')[0]
+      };
+      saveAuthSessionToStorage();
+      loadCasualProfileForCurrentUser();
+      subscribeCasualUserCloudSync();
       showToast(`Organizer access granted for ${email}!`, '✅');
       closeAuthModal();
       updateAuthUI();
@@ -2332,8 +2725,11 @@ Sneha P. (F)</pre>
           email: 'pin_organizer@court.badminton',
           name: 'Court Scorer'
         };
+        saveAuthSessionToStorage();
         closeAuthModal();
         updateAuthUI();
+        renderUmpireConsole();
+        renderCoachConsole();
         showToast('PIN Verified! Organizer & Scorer access unlocked.', '✅');
       } else {
         showToast('Incorrect PIN. Please check with tournament organizer.', '⚠️');
@@ -2346,13 +2742,20 @@ Sneha P. (F)</pre>
 
     async function logoutUser() {
       try {
-        if (firebase.auth && firebase.apps.length) {
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.apps && firebase.apps.length) {
           await firebase.auth().signOut();
         }
       } catch (e) {}
       appState.authUser = null;
       appState.isAdmin = false;
+      appState.isPinAuthenticated = false;
       appState.adminUser = null;
+      appState.casualUser = null;
+      try {
+        localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
+        localStorage.removeItem(CASUAL_USER_SESSION_KEY);
+      } catch (e) {}
+      loadCasualProfileForCurrentUser();
       updateAuthUI();
       closeAuthModal();
       showToast('Signed out. Web app is in View Only mode.', 'ℹ️');
@@ -2373,14 +2776,18 @@ Sneha P. (F)</pre>
       const container = document.getElementById('auth-modal-content');
       if (!container) return;
 
-      const authorized = isAuthorizedEditor();
+      const corpAuthorized = isAuthorizedEditor();
+      const casualUser = getCasualActiveUser();
 
-      if (authorized) {
-        let displayName = 'Organizer';
+      if (corpAuthorized || casualUser) {
+        let displayName = 'User';
         let email = '';
         if (appState.authUser) {
           displayName = appState.authUser.displayName || appState.authUser.email.split('@')[0];
           email = appState.authUser.email;
+        } else if (casualUser) {
+          displayName = casualUser.name;
+          email = casualUser.email;
         } else if (appState.adminUser) {
           displayName = appState.adminUser.name;
           email = appState.adminUser.email;
@@ -2390,16 +2797,28 @@ Sneha P. (F)</pre>
           <div class="p-3.5 rounded-2xl bg-[#14231b] border border-emerald-500/50 space-y-1.5">
             <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs">
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-              <span>ORGANIZER ACCESS ACTIVE</span>
+              <span>${corpAuthorized ? 'CORPORATE ORGANIZER & CASUAL ACTIVE' : 'PERSONAL CASUAL CIRCLE ACTIVE'}</span>
             </div>
             <div class="text-xs text-white font-semibold">${escapeHtml(displayName)}</div>
             <div class="text-[11px] text-[#8fa39a] font-mono">${escapeHtml(email)}</div>
           </div>
-          <p class="text-[11px] text-[#718b7f] leading-relaxed">
-            You have full authorization to score matches on any court, assign fixtures, configure lineups, and log casual games.
-          </p>
+          ${!corpAuthorized ? `
+            <div class="pt-2 border-t border-[#1b2b23] space-y-1.5">
+              <label for="admin-pin-input" class="block text-[10px] font-bold text-amber-300 uppercase">🔑 UNLOCK CORPORATE SCORING (UMPIRES & SCORERS):</label>
+              <div class="flex gap-1.5">
+                <input type="password" id="admin-pin-input" placeholder="Enter PIN" class="flex-1 bg-[#0c1410] border border-amber-500/40 text-white text-xs rounded-xl px-3 py-2 font-mono text-center tracking-widest focus:border-amber-400 focus:outline-none">
+                <button type="button" onclick="verifyOrganizerPin()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-[#0c1410] text-xs font-bold rounded-xl shadow transition-colors">
+                  Unlock →
+                </button>
+              </div>
+            </div>
+          ` : `
+            <p class="text-[11px] text-[#718b7f] leading-relaxed">
+              You have full authorization to score matches on any court, assign fixtures, configure lineups, and manage your personal Casual Circle.
+            </p>
+          `}
           <button onclick="logoutUser()" class="w-full py-2.5 rounded-xl bg-[#1e2f26] hover:bg-rose-950/60 hover:text-rose-300 text-xs font-bold text-[#c4d4cc] transition-colors">
-            Sign Out (Revert to View Only) 🔒
+            Sign Out 🔒
           </button>
         `;
       } else {
@@ -2407,17 +2826,17 @@ Sneha P. (F)</pre>
           <div class="space-y-3.5">
             <div class="p-3 rounded-2xl bg-[#141d18] border border-[#243c2f] space-y-1.5">
               <div class="flex items-center gap-2 text-amber-300 font-bold text-xs">
-                <span>🔒</span> <span>ORGANIZER & ADMIN ACCESS</span>
+                <span>🔒</span> <span>SIGN IN OR UNLOCK ACCESS</span>
               </div>
               <p class="text-[11px] text-[#8fa39a] leading-relaxed">
-                <strong>Admin Owner:</strong> Sign in with <code>Manish.shreedhar@gmail.com</code>.<br>
-                <strong>Umpires & Scorers:</strong> Enter the predefined PIN below to unlock scoring on court.
+                <strong>Corporate League:</strong> Admin Owner (<code>Manish.shreedhar@gmail.com</code>) or Volunteer PIN.<br>
+                <strong>Casual Circle:</strong> Any user can sign in with Google or create a personal profile!
               </p>
             </div>
 
-            <!-- Section 1: Admin Google Sign-In for Manish -->
+            <!-- Section 1: Google Sign-In -->
             <div>
-              <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1">👑 ADMIN GOOGLE SIGN-IN (Manish):</label>
+              <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1">🌐 GOOGLE SIGN-IN (ADMIN OR CASUAL PROFILE):</label>
               <button type="button" onclick="loginWithGoogle()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -2425,14 +2844,14 @@ Sneha P. (F)</pre>
                   <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                   <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
-                <span>Sign in with Google (Manish)</span>
+                <span>Sign in with Google</span>
               </button>
             </div>
 
             <!-- Section 2: Predefined PIN Access for Umpires and Scorers -->
             <div class="pt-2 border-t border-[#1b2b23] space-y-1.5">
               <label for="admin-pin-input" class="block text-[10px] font-bold text-amber-300 uppercase">🔑 ENTER ORGANIZER / VOLUNTEER PIN:</label>
-              <p class="text-[10px] text-[#718b7f]">Umpires, scorers, and coaches can enter the PIN to unlock scoring & event tagging:</p>
+              <p class="text-[10px] text-[#718b7f]">Umpires, scorers, and coaches can enter the PIN to unlock court scoring & event tagging:</p>
               <div class="flex gap-1.5">
                 <input type="password" id="admin-pin-input" placeholder="Enter PIN" class="flex-1 bg-[#0c1410] border border-amber-500/40 text-white text-xs rounded-xl px-3 py-2 font-mono text-center tracking-widest focus:border-amber-400 focus:outline-none">
                 <button type="button" onclick="verifyOrganizerPin()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-[#0c1410] text-xs font-bold rounded-xl shadow transition-colors">
@@ -2454,78 +2873,61 @@ Sneha P. (F)</pre>
     }
 
     function updateAuthUI() {
-      const authorized = isAuthorizedEditor();
+      const corpAuthorized = isAuthorizedEditor();
+      const casualUser = getCasualActiveUser();
       const authBtn = document.getElementById('btn-auth-status');
       const authIcon = document.getElementById('auth-status-icon');
       const authText = document.getElementById('auth-status-text');
 
+      const isActiveAuth = appState.currentProfile === 'casual' ? Boolean(casualUser) : corpAuthorized;
+
       if (authBtn && authIcon && authText) {
-        if (authorized) {
+        if (isActiveAuth) {
           let shortName = 'Editor';
           if (appState.authUser && appState.authUser.displayName) shortName = appState.authUser.displayName.split(' ')[0];
           else if (appState.authUser && appState.authUser.email) shortName = appState.authUser.email.split('@')[0];
+          else if (casualUser && casualUser.name) shortName = casualUser.name.split(' ')[0];
           else if (appState.adminUser && appState.adminUser.name) shortName = appState.adminUser.name.split(' ')[0];
 
           authIcon.textContent = '🟢';
           authText.textContent = shortName;
-          authBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#132a1f] border border-[#2e5e45] text-emerald-300 hover:border-emerald-400 transition-all';
+          authBtn.className = 'flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#132a1f] border border-[#2e5e45] text-emerald-300 hover:border-emerald-400 transition-all';
         } else {
           authIcon.textContent = '🔒';
-          authText.textContent = 'View Only';
-          authBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#1a211d] border border-[#26372d] text-[#8fa39a] hover:border-emerald-500/50 transition-colors';
+          authText.textContent = appState.currentProfile === 'casual' ? 'Sign In' : 'View Only';
+          authBtn.className = 'flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#1a211d] border border-[#26372d] text-[#8fa39a] hover:border-emerald-500/50 transition-colors';
         }
       }
 
-      // Umpire Console view-only banner
+      // Umpire & Coach Console view-only banners
       const umpireBanner = document.getElementById('umpire-view-only-banner');
       if (umpireBanner) {
-        if (authorized) umpireBanner.classList.add('hidden');
+        if (corpAuthorized) umpireBanner.classList.add('hidden');
         else umpireBanner.classList.remove('hidden');
+      }
+      const coachBanner = document.getElementById('coach-view-only-banner');
+      if (coachBanner) {
+        if (corpAuthorized) coachBanner.classList.add('hidden');
+        else coachBanner.classList.remove('hidden');
       }
 
       // Touch pads labels
       const padA = document.getElementById('pad-team-a-action-label');
       const padB = document.getElementById('pad-team-b-action-label');
       if (padA && padB) {
-        if (authorized) {
-          padA.textContent = 'TAP TO AWARD POINT';
-          padB.textContent = 'TAP TO AWARD POINT';
+        if (corpAuthorized) {
+          padA.textContent = 'TAP SCORE OR + TO AWARD POINT';
+          padB.textContent = 'TAP SCORE OR + TO AWARD POINT';
         } else {
-          padA.textContent = 'VIEW ONLY · SIGN IN TO SCORE 🔒';
-          padB.textContent = 'VIEW ONLY · SIGN IN TO SCORE 🔒';
-        }
-      }
-
-      // Casual match logger banners and forms
-      const casualBanner = document.getElementById('casual-admin-banner');
-      const fSingles = document.getElementById('form-casual-singles');
-      const fDoubles = document.getElementById('form-casual-doubles');
-
-      if (casualBanner) {
-        if (authorized) casualBanner.classList.add('hidden');
-        else casualBanner.classList.remove('hidden');
-      }
-
-      if (fSingles && fDoubles) {
-        if (authorized) {
-          if (appState.casualGameMode === 'singles') {
-            fSingles.classList.remove('hidden');
-            fDoubles.classList.add('hidden');
-          } else {
-            fSingles.classList.add('hidden');
-            fDoubles.classList.remove('hidden');
-          }
-        } else {
-          fSingles.classList.add('hidden');
-          fDoubles.classList.add('hidden');
+          padA.textContent = 'VIEW ONLY · TAP TO UNLOCK 🔒';
+          padB.textContent = 'VIEW ONLY · TAP TO UNLOCK 🔒';
         }
       }
 
       // Re-render components
       renderFixturesList();
       renderAdminTeams();
-      renderCasualStandings();
-      renderCasualLog();
+      renderCasualAll();
     }
 
     // --- Firebase Modal Functions ---
@@ -2639,31 +3041,31 @@ Sneha P. (F)</pre>
         showToast('Scoreboard is view only. Sign in or enter PIN to score.', '🔒');
         return;
       }
+      normalizeCorporateState();
       const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
       const fixture = getActiveFixtureOnCourt(appState.selectedCourtId);
       if (!rubber || !fixture) {
         showToast('No active match running on this court.', '⚠️');
         return;
       }
+      if (!Array.isArray(rubber.rallyHistory)) rubber.rallyHistory = [];
 
       if (team === 'A') {
         if (rubber.scoreA <= 0) { showToast('Score is already 0', 'ℹ️'); return; }
-        rubber.scoreA--;
+        rubber.scoreA = Math.max(0, Number(rubber.scoreA || 0) - 1);
         if (fixture.totalPtsA > 0) fixture.totalPtsA--;
-        // Pop last rally if it was for team A
         for (let i = rubber.rallyHistory.length - 1; i >= 0; i--) {
-          if (rubber.rallyHistory[i].pointTeam === 'A') {
+          if (rubber.rallyHistory[i] && rubber.rallyHistory[i].pointTeam === 'A') {
             rubber.rallyHistory.splice(i, 1);
             break;
           }
         }
       } else {
         if (rubber.scoreB <= 0) { showToast('Score is already 0', 'ℹ️'); return; }
-        rubber.scoreB--;
+        rubber.scoreB = Math.max(0, Number(rubber.scoreB || 0) - 1);
         if (fixture.totalPtsB > 0) fixture.totalPtsB--;
-        // Pop last rally if it was for team B
         for (let i = rubber.rallyHistory.length - 1; i >= 0; i--) {
-          if (rubber.rallyHistory[i].pointTeam === 'B') {
+          if (rubber.rallyHistory[i] && rubber.rallyHistory[i].pointTeam === 'B') {
             rubber.rallyHistory.splice(i, 1);
             break;
           }
@@ -2671,8 +3073,11 @@ Sneha P. (F)</pre>
       }
 
       playAudio('undo');
-      document.getElementById('score-display-a').textContent = rubber.scoreA;
-      document.getElementById('score-display-b').textContent = rubber.scoreB;
+      const dispA = document.getElementById('score-display-a');
+      const dispB = document.getElementById('score-display-b');
+      if (dispA) dispA.textContent = rubber.scoreA;
+      if (dispB) dispB.textContent = rubber.scoreB;
+      renderUmpireConsole();
       renderCoachConsole();
       renderTVConsole();
       syncStateToCloud();
@@ -2685,41 +3090,50 @@ Sneha P. (F)</pre>
         showToast('Scoreboard is view only. Sign in or enter PIN to score.', '🔒');
         return;
       }
+      normalizeCorporateState();
       const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
       const fixture = getActiveFixtureOnCourt(appState.selectedCourtId);
       if (!rubber || !fixture) {
         showToast('No active match on this court. Assign fixture first!', '⚠️');
         return;
       }
+      if (!Array.isArray(rubber.rallyHistory)) rubber.rallyHistory = [];
 
       rubber.rallyHistory.push({
-        scoreA: rubber.scoreA,
-        scoreB: rubber.scoreB,
+        scoreA: Number(rubber.scoreA || 0),
+        scoreB: Number(rubber.scoreB || 0),
         pointTeam: team,
-        shotType: shotType,
-        outcome: outcome,
+        shotType: shotType || 'Point',
+        outcome: outcome || 'winner',
         timestamp: new Date().toLocaleTimeString('en-US', { hour12: false })
       });
 
-      if (team === 'A') { rubber.scoreA++; fixture.totalPtsA++; }
-      else { rubber.scoreB++; fixture.totalPtsB++; }
+      if (team === 'A') {
+        rubber.scoreA = Number(rubber.scoreA || 0) + 1;
+        fixture.totalPtsA = Number(fixture.totalPtsA || 0) + 1;
+      } else {
+        rubber.scoreB = Number(rubber.scoreB || 0) + 1;
+        fixture.totalPtsB = Number(fixture.totalPtsB || 0) + 1;
+      }
 
       playAudio('point');
-      if (navigator.vibrate) try { navigator.vibrate(50); } catch (e) {}
+      if (navigator && navigator.vibrate) { try { navigator.vibrate(50); } catch (e) {} }
 
-      document.getElementById('score-display-a').textContent = rubber.scoreA;
-      document.getElementById('score-display-b').textContent = rubber.scoreB;
+      const dispA = document.getElementById('score-display-a');
+      const dispB = document.getElementById('score-display-b');
+      if (dispA) dispA.textContent = rubber.scoreA;
+      if (dispB) dispB.textContent = rubber.scoreB;
 
       const teamName = team === 'A' ? rubber.teamAName : rubber.teamBName;
       showToast(`+1 for ${teamName} · ${shotType}!`, '⚡');
 
+      renderUmpireConsole();
       renderCoachConsole();
       renderTVConsole();
       syncStateToCloud();
     }
 
     function awardErrorPoint(erringTeam, errorDescription) {
-      // Award point to OPPONENT of erring team
       const scoringTeam = erringTeam === 'A' ? 'B' : 'A';
       awardAndTagPoint(scoringTeam, errorDescription, 'error');
     }
@@ -2730,7 +3144,179 @@ Sneha P. (F)</pre>
       renderUmpireConsole();
     }
 
-    function renderCoachConsole() {
+    // Coach Console State for Selected Completed Point
+    let coachSelectedPoint = {
+      courtId: null,
+      rubberId: null,
+      team: 'A',
+      pointNum: null,
+      draftShotType: '',
+      draftCategory: 'winner'
+    };
+
+    function ensureRubberPointDetails(rubber) {
+      if (!rubber) return { A: {}, B: {} };
+      if (!rubber.pointDetails || typeof rubber.pointDetails !== 'object') {
+        rubber.pointDetails = { A: {}, B: {} };
+      }
+      if (!rubber.pointDetails.A || typeof rubber.pointDetails.A !== 'object') rubber.pointDetails.A = {};
+      if (!rubber.pointDetails.B || typeof rubber.pointDetails.B !== 'object') rubber.pointDetails.B = {};
+      return rubber.pointDetails;
+    }
+
+    function selectCoachPoint(team, pointNum) {
+      normalizeCorporateState();
+      const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
+      if (!rubber) return;
+      const teamScore = team === 'A' ? Number(rubber.scoreA || 0) : Number(rubber.scoreB || 0);
+      const pt = Number(pointNum);
+      if (pt < 1 || pt > teamScore) {
+        showToast(`Point #${pt} has not been won by ${team === 'A' ? rubber.teamAName : rubber.teamBName} yet.`, 'ℹ️');
+        return;
+      }
+
+      const detailsMap = ensureRubberPointDetails(rubber);
+      const existing = (detailsMap[team] && detailsMap[team][pt]) ? detailsMap[team][pt] : {};
+
+      coachSelectedPoint = {
+        courtId: appState.selectedCourtId,
+        rubberId: rubber.id,
+        team: team,
+        pointNum: pt,
+        draftShotType: existing.shotType || '',
+        draftCategory: existing.category || 'winner'
+      };
+
+      const noteInput = document.getElementById('coach-point-note-input');
+      if (noteInput) {
+        noteInput.value = existing.notes || '';
+      }
+
+      renderCoachConsole(true);
+    }
+
+    function pickCoachShotChip(shotType, category) {
+      if (!isAuthorizedEditor()) {
+        openAuthModal();
+        showToast('Coach console is view only. Sign in or enter PIN to annotate points.', '🔒');
+        return;
+      }
+      normalizeCorporateState();
+      const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
+      if (!rubber) {
+        showToast('No active match on this court.', '⚠️');
+        return;
+      }
+      if (!coachSelectedPoint.pointNum || coachSelectedPoint.rubberId !== rubber.id) {
+        showToast('Click a completed point (✕) on the 1–21 graph first!', '👆');
+        return;
+      }
+
+      const team = coachSelectedPoint.team;
+      const pt = coachSelectedPoint.pointNum;
+      const teamScore = team === 'A' ? Number(rubber.scoreA || 0) : Number(rubber.scoreB || 0);
+      if (pt > teamScore) {
+        showToast('Selected point is no longer active.', '⚠️');
+        return;
+      }
+
+      coachSelectedPoint.draftShotType = shotType;
+      coachSelectedPoint.draftCategory = category || 'winner';
+
+      // Auto-save shot selection immediately so 1-tap works seamlessly
+      const detailsMap = ensureRubberPointDetails(rubber);
+      const noteInput = document.getElementById('coach-point-note-input');
+      const currentNotes = noteInput ? noteInput.value.trim() : ((detailsMap[team][pt] && detailsMap[team][pt].notes) || '');
+
+      detailsMap[team][pt] = {
+        shotType: shotType,
+        category: category || 'winner',
+        notes: currentNotes,
+        updatedAt: new Date().toLocaleTimeString('en-US', { hour12: false })
+      };
+
+      renderCoachConsole(true);
+      syncStateToCloud();
+      const teamName = team === 'A' ? rubber.teamAName : rubber.teamBName;
+      showToast(`Saved "${shotType}" on ${teamName} Point #${pt}`, '⚡');
+    }
+
+    function saveCoachPointDetails() {
+      if (!isAuthorizedEditor()) {
+        openAuthModal();
+        showToast('Coach console is view only. Sign in or enter PIN to save point details.', '🔒');
+        return;
+      }
+      normalizeCorporateState();
+      const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
+      if (!rubber) {
+        showToast('No active match on this court.', '⚠️');
+        return;
+      }
+      if (!coachSelectedPoint.pointNum || coachSelectedPoint.rubberId !== rubber.id) {
+        showToast('Click a completed point (✕) on the 1–21 graph first!', '👆');
+        return;
+      }
+
+      const team = coachSelectedPoint.team;
+      const pt = coachSelectedPoint.pointNum;
+      const teamScore = team === 'A' ? Number(rubber.scoreA || 0) : Number(rubber.scoreB || 0);
+      if (pt < 1 || pt > teamScore) {
+        showToast('Selected point has not been completed yet.', '⚠️');
+        return;
+      }
+
+      const detailsMap = ensureRubberPointDetails(rubber);
+      const existing = detailsMap[team][pt] || {};
+      const noteInput = document.getElementById('coach-point-note-input');
+      const notesVal = noteInput ? noteInput.value.trim() : '';
+      const shotVal = coachSelectedPoint.draftShotType || existing.shotType || '';
+      const catVal = coachSelectedPoint.draftCategory || existing.category || 'winner';
+
+      if (!shotVal && !notesVal) {
+        showToast('Select a winning shot/error or type a personal note to save.', 'ℹ️');
+        return;
+      }
+
+      detailsMap[team][pt] = {
+        shotType: shotVal,
+        category: catVal,
+        notes: notesVal,
+        updatedAt: new Date().toLocaleTimeString('en-US', { hour12: false })
+      };
+
+      renderCoachConsole(true);
+      syncStateToCloud();
+      const teamName = team === 'A' ? rubber.teamAName : rubber.teamBName;
+      showToast(`Saved details for ${teamName} · Point #${pt}`, '💾');
+    }
+
+    function clearCoachPointDetails() {
+      if (!isAuthorizedEditor()) {
+        openAuthModal();
+        showToast('Coach console is view only. Sign in or enter PIN to clear point details.', '🔒');
+        return;
+      }
+      normalizeCorporateState();
+      const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
+      if (!rubber || !coachSelectedPoint.pointNum) return;
+
+      const team = coachSelectedPoint.team;
+      const pt = coachSelectedPoint.pointNum;
+      const detailsMap = ensureRubberPointDetails(rubber);
+      if (detailsMap[team] && detailsMap[team][pt]) {
+        delete detailsMap[team][pt];
+      }
+      coachSelectedPoint.draftShotType = '';
+      const noteInput = document.getElementById('coach-point-note-input');
+      if (noteInput) noteInput.value = '';
+
+      renderCoachConsole(true);
+      syncStateToCloud();
+      showToast(`Cleared details for Point #${pt}`, '🗑️');
+    }
+
+    function renderCoachConsole(preserveNoteInput) {
       const select = document.getElementById('coach-court-select');
       if (select) {
         select.innerHTML = '';
@@ -2755,19 +3341,27 @@ Sneha P. (F)</pre>
       const scoreTally = document.getElementById('coach-score-tally');
       const dispA = document.getElementById('coach-display-a');
       const dispB = document.getElementById('coach-display-b');
-      const boxA = document.getElementById('coach-box-team-a');
-      const boxB = document.getElementById('coach-box-team-b');
-      const winnerA = document.getElementById('coach-winner-team-a-title');
-      const winnerB = document.getElementById('coach-winner-team-b-title');
+      const graphEl = document.getElementById('coach-horizontal-graph');
       const feedList = document.getElementById('coach-rally-feed-list');
       const countEl = document.getElementById('coach-rally-count');
+      const selBadge = document.getElementById('coach-selected-point-badge');
+      const shotStatus = document.getElementById('coach-selected-shot-Status');
+      const noteInput = document.getElementById('coach-point-note-input');
 
       if (!fixture || !rubber) {
         if (title) title.textContent = `Court ${appState.selectedCourtId} · No Active Match`;
         if (scoreTally) scoreTally.textContent = '0 - 0';
-        if (feedList) feedList.innerHTML = '<div class="text-xs text-[#718b7f] p-3 text-center">No active match. Assign fixture in Fixtures tab.</div>';
+        if (dispA) dispA.textContent = '0';
+        if (dispB) dispB.textContent = '0';
+        if (graphEl) graphEl.innerHTML = '<div class="text-xs text-[#718b7f] p-4 text-center">No active match on this court. Assign a fixture in the Fixtures tab.</div>';
+        if (feedList) feedList.innerHTML = '<div class="text-xs text-[#718b7f] p-3 text-center">No active match.</div>';
         return;
       }
+
+      const scoreA = Number(rubber.scoreA || 0);
+      const scoreB = Number(rubber.scoreB || 0);
+      const maxPts = Math.min(30, Math.max(21, scoreA, scoreB));
+      const detailsMap = ensureRubberPointDetails(rubber);
 
       if (title) title.textContent = `Court ${fixture.courtId} · ${rubber.categoryName} (${rubber.categoryCode})`;
       if (badge) badge.textContent = `${fixture.stageName} · Series: ${fixture.teamAScore}-${fixture.teamBScore}`;
@@ -2775,40 +3369,207 @@ Sneha P. (F)</pre>
       if (teamBName) teamBName.textContent = rubber.teamBName;
       if (playersA) playersA.textContent = rubber.playersA;
       if (playersB) playersB.textContent = rubber.playersB;
-      if (scoreTally) scoreTally.textContent = `${rubber.scoreA} - ${rubber.scoreB}`;
-      if (dispA) dispA.textContent = rubber.scoreA;
-      if (dispB) dispB.textContent = rubber.scoreB;
-      if (boxA) boxA.textContent = rubber.teamAName;
-      if (boxB) boxB.textContent = rubber.teamBName;
-      if (winnerA) winnerA.textContent = `AWARD TO ${rubber.teamAName.toUpperCase()} (+1 WINNER SHOT):`;
-      if (winnerB) winnerB.textContent = `AWARD TO ${rubber.teamBName.toUpperCase()} (+1 WINNER SHOT):`;
+      if (scoreTally) scoreTally.textContent = `${scoreA} - ${scoreB}`;
+      if (dispA) dispA.textContent = scoreA;
+      if (dispB) dispB.textContent = scoreB;
 
+      // Auto-select latest completed point if none selected or if selected point exceeds current score
+      const currentSelTeamScore = coachSelectedPoint.team === 'B' ? scoreB : scoreA;
+      if (
+        coachSelectedPoint.rubberId !== rubber.id ||
+        !coachSelectedPoint.pointNum ||
+        coachSelectedPoint.pointNum > currentSelTeamScore
+      ) {
+        if (scoreA > 0 || scoreB > 0) {
+          let defTeam = scoreA >= scoreB ? 'A' : 'B';
+          if (Array.isArray(rubber.rallyHistory) && rubber.rallyHistory.length > 0) {
+            const lastRally = rubber.rallyHistory[rubber.rallyHistory.length - 1];
+            if (lastRally && (lastRally.pointTeam === 'A' || lastRally.pointTeam === 'B')) {
+              defTeam = lastRally.pointTeam;
+            }
+          }
+          const defPt = defTeam === 'A' ? scoreA : scoreB;
+          if (defPt > 0) {
+            const existing = (detailsMap[defTeam] && detailsMap[defTeam][defPt]) || {};
+            coachSelectedPoint = {
+              courtId: appState.selectedCourtId,
+              rubberId: rubber.id,
+              team: defTeam,
+              pointNum: defPt,
+              draftShotType: existing.shotType || '',
+              draftCategory: existing.category || 'winner'
+            };
+            if (noteInput && !preserveNoteInput) {
+              noteInput.value = existing.notes || '';
+            }
+          } else {
+            coachSelectedPoint = { courtId: appState.selectedCourtId, rubberId: rubber.id, team: 'A', pointNum: null, draftShotType: '', draftCategory: 'winner' };
+            if (noteInput && !preserveNoteInput) noteInput.value = '';
+          }
+        } else {
+          coachSelectedPoint = { courtId: appState.selectedCourtId, rubberId: rubber.id, team: 'A', pointNum: null, draftShotType: '', draftCategory: 'winner' };
+          if (noteInput && !preserveNoteInput) noteInput.value = '';
+        }
+      }
+
+      // Render Horizontal 1-21 Point Graph for Player/Team A and Player/Team B
+      if (graphEl) {
+        const buildRowHtml = (teamKey, teamLabel, playerLabel, teamScore, accentColor) => {
+          const isEmerald = accentColor === 'emerald';
+          let cellsHtml = '';
+          for (let pt = 1; pt <= maxPts; pt++) {
+            const isDone = pt <= teamScore;
+            const isSelected = coachSelectedPoint.rubberId === rubber.id && coachSelectedPoint.team === teamKey && coachSelectedPoint.pointNum === pt;
+            const info = (detailsMap[teamKey] && detailsMap[teamKey][pt]) ? detailsMap[teamKey][pt] : null;
+            const hasShot = info && info.shotType;
+            const hasNotes = info && info.notes;
+
+            if (isDone) {
+              const baseBorder = isSelected
+                ? 'border-amber-400 ring-2 ring-amber-400/50 bg-amber-500/20'
+                : (isEmerald ? 'border-emerald-500/50 bg-emerald-500/15 hover:bg-emerald-500/25' : 'border-cyan-500/50 bg-cyan-500/15 hover:bg-cyan-500/25');
+              const numColor = isSelected ? 'text-amber-200' : (isEmerald ? 'text-emerald-300' : 'text-cyan-300');
+              const crossColor = isSelected ? 'text-amber-300' : 'text-white';
+              const badgeDot = (hasShot || hasNotes)
+                ? `<span class="text-[9px] leading-none">${hasShot ? (info.category === 'error' ? '❌' : '⚡') : ''}${hasNotes ? '📝' : ''}</span>`
+                : `<span class="text-[8px] leading-none text-[#6c877a]">done</span>`;
+
+              cellsHtml += `
+                <button type="button"
+                  id="coach-pt-cell-${teamKey}-${pt}"
+                  onclick="selectCoachPoint('${teamKey}', ${pt})"
+                  title="${teamLabel} Point #${pt}${hasShot ? ' · ' + info.shotType : ''}${hasNotes ? ' · Note: ' + info.notes : ''} (Click to edit)"
+                  class="coach-pt-cell completed shrink-0 w-9 sm:w-10 h-14 rounded-xl border ${baseBorder} flex flex-col items-center justify-between py-1 px-0.5 cursor-pointer transition select-none">
+                  <span class="text-[10px] font-mono font-bold ${numColor} leading-none">${pt}</span>
+                  <span class="text-sm sm:text-base font-extrabold ${crossColor} leading-none">✕</span>
+                  ${badgeDot}
+                </button>
+              `;
+            } else {
+              cellsHtml += `
+                <div
+                  id="coach-pt-cell-${teamKey}-${pt}"
+                  title="Point #${pt} not yet won"
+                  class="coach-pt-cell upcoming shrink-0 w-9 sm:w-10 h-14 rounded-xl border border-[#18241e] bg-[#0a100d] opacity-35 flex flex-col items-center justify-between py-1 px-0.5 cursor-not-allowed select-none">
+                  <span class="text-[10px] font-mono font-semibold text-[#3b4f45] leading-none">${pt}</span>
+                  <span class="text-xs font-bold text-[#25352d] leading-none">·</span>
+                  <span class="text-[8px] leading-none text-[#25352d]">—</span>
+                </div>
+              `;
+            }
+          }
+
+          const stickyBorder = isEmerald ? 'border-emerald-500/40 bg-[#0d1913]' : 'border-cyan-500/40 bg-[#0d171a]';
+          const nameColor = isEmerald ? 'text-emerald-300' : 'text-cyan-300';
+
+          return `
+            <div class="flex items-stretch gap-2">
+              <div class="sticky left-0 z-10 w-36 sm:w-44 shrink-0 rounded-xl border ${stickyBorder} p-2 flex flex-col justify-center shadow-md">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-xs font-bold ${nameColor} truncate">${teamLabel}</span>
+                  <span class="px-1.5 py-0.5 rounded bg-[#070d0a] text-xs font-bebas text-white border border-[#22382c]">${teamScore} pts</span>
+                </div>
+                <div class="text-[10px] text-[#8ab09f] truncate">${playerLabel || ''}</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                ${cellsHtml}
+              </div>
+            </div>
+          `;
+        };
+
+        graphEl.innerHTML =
+          buildRowHtml('A', rubber.teamAName, rubber.playersA, scoreA, 'emerald') +
+          buildRowHtml('B', rubber.teamBName, rubber.playersB, scoreB, 'cyan');
+      }
+
+      // Update Point Inspector Header & Shot Chip Highlights
+      if (coachSelectedPoint.pointNum && coachSelectedPoint.rubberId === rubber.id) {
+        const selTeamName = coachSelectedPoint.team === 'A' ? rubber.teamAName : rubber.teamBName;
+        const savedInfo = (detailsMap[coachSelectedPoint.team] && detailsMap[coachSelectedPoint.team][coachSelectedPoint.pointNum]) || {};
+        const activeShot = coachSelectedPoint.draftShotType || savedInfo.shotType || '';
+
+        if (selBadge) {
+          selBadge.textContent = `Editing: ${selTeamName} · Point #${coachSelectedPoint.pointNum} (✕)`;
+          selBadge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        }
+        if (shotStatus) {
+          shotStatus.textContent = activeShot ? `Selected: ${activeShot}` : 'Tap a shot button below to tag';
+        }
+        if (noteInput && !preserveNoteInput) {
+          noteInput.value = savedInfo.notes || '';
+        }
+
+        document.querySelectorAll('.coach-shot-chip').forEach(btn => {
+          const bShot = btn.getAttribute('data-shot');
+          if (bShot === activeShot) {
+            btn.classList.add('ring-2', 'ring-amber-400', 'bg-amber-500/30', 'text-white');
+          } else {
+            btn.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-500/30', 'text-white');
+          }
+        });
+      } else {
+        if (selBadge) {
+          selBadge.textContent = 'No completed point selected (Wait for Umpire to score or tap ✕)';
+          selBadge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-[#16221c] text-[#718b7f] border border-[#23382d]';
+        }
+        if (shotStatus) shotStatus.textContent = 'No point selected';
+        document.querySelectorAll('.coach-shot-chip').forEach(btn => {
+          btn.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-500/30', 'text-white');
+        });
+      }
+
+      // Render Annotated Points & Coach Notes Feed
       if (feedList) {
         feedList.innerHTML = '';
-        const rallies = rubber.rallyHistory || [];
-        if (countEl) countEl.textContent = `${rallies.length} points logged`;
+        const entries = [];
+        ['A', 'B'].forEach(tKey => {
+          const maxTeamPt = tKey === 'A' ? scoreA : scoreB;
+          const mapForTeam = detailsMap[tKey] || {};
+          Object.keys(mapForTeam).forEach(ptStr => {
+            const ptNum = Number(ptStr);
+            if (ptNum >= 1 && ptNum <= maxTeamPt) {
+              const item = mapForTeam[ptStr];
+              if (item && (item.shotType || item.notes)) {
+                entries.push({
+                  team: tKey,
+                  teamName: tKey === 'A' ? rubber.teamAName : rubber.teamBName,
+                  pointNum: ptNum,
+                  shotType: item.shotType || '',
+                  category: item.category || 'winner',
+                  notes: item.notes || '',
+                  updatedAt: item.updatedAt || ''
+                });
+              }
+            }
+          });
+        });
 
-        if (rallies.length === 0) {
-          feedList.innerHTML = '<div class="text-xs text-[#718b7f] py-3 text-center">No rallies logged yet. Tap any shot winner or error button above to log points!</div>';
+        entries.sort((a, b) => b.pointNum - a.pointNum);
+        if (countEl) countEl.textContent = `${entries.length} point${entries.length === 1 ? '' : 's'} annotated`;
+
+        if (entries.length === 0) {
+          feedList.innerHTML = '<div class="text-xs text-[#718b7f] py-3 text-center">No point annotations yet. Click any completed point (<strong>✕</strong>) on the 1–21 graph above to add winning shot details or personal coaching notes!</div>';
         } else {
-          rallies.slice().reverse().forEach((r, idx) => {
-            const pointNum = rallies.length - idx;
-            const isA = r.pointTeam === 'A';
-            const teamName = isA ? rubber.teamAName : rubber.teamBName;
-            const item = document.createElement('div');
-            item.className = 'flex items-center justify-between p-2 rounded-xl bg-[#0c1410] border border-[#1b2b23]';
-            item.innerHTML = `
-              <div class="flex items-center gap-2">
-                <span class="font-mono text-[10px] text-[#718b7f]">#${pointNum}</span>
-                <span class="font-bold ${isA ? 'text-emerald-400' : 'text-cyan-400'}">${teamName}</span>
-                <span class="text-white text-[11px] font-semibold">${r.shotType || 'Point Awarded'}</span>
+          entries.forEach(entry => {
+            const isA = entry.team === 'A';
+            const row = document.createElement('div');
+            row.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 p-2.5 rounded-xl bg-[#0c1410] border border-[#1b2b23] hover:border-emerald-500/40 cursor-pointer transition';
+            row.onclick = () => selectCoachPoint(entry.team, entry.pointNum);
+            row.innerHTML = `
+              <div class="space-y-0.5">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isA ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'}">${entry.teamName} · Pt #${entry.pointNum} (✕)</span>
+                  ${entry.shotType ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${entry.category === 'error' ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">${entry.category === 'error' ? '❌' : '⚡'} ${entry.shotType}</span>` : ''}
+                </div>
+                ${entry.notes ? `<p class="text-xs text-[#cde2d8] pl-1">📝 "${entry.notes}"</p>` : ''}
               </div>
-              <div class="flex items-center gap-2">
-                <span class="font-bebas text-amber-300 text-sm">${r.scoreA}-${r.scoreB}</span>
-                <span class="text-[10px] text-[#718b7f] font-mono">${r.timestamp || ''}</span>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[10px] text-[#718b7f] font-mono">${entry.updatedAt || ''}</span>
+                <span class="text-[10px] text-emerald-400 underline">Edit</span>
               </div>
             `;
-            feedList.appendChild(item);
+            feedList.appendChild(row);
           });
         }
       }
@@ -2817,35 +3578,51 @@ Sneha P. (F)</pre>
     function changeUmpireCourt(e) {
       appState.selectedCourtId = Number(e.target.value);
       renderUmpireConsole();
+      renderCoachConsole();
     }
 
     function addPoint(team) {
       if (!isAuthorizedEditor()) {
         openAuthModal();
-        showToast('Scoreboard is view only. Sign in with an authorized email to score.', '🔒');
+        showToast('Scoreboard is view only. Enter PIN or Sign In to score.', '🔒');
         return;
       }
+      normalizeCorporateState();
       const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
       const fixture = getActiveFixtureOnCourt(appState.selectedCourtId);
       if (!rubber || !fixture) {
         showToast('No active match running on this court. Assign fixture first!', '⚠️');
         return;
       }
+      if (!Array.isArray(rubber.rallyHistory)) rubber.rallyHistory = [];
 
       rubber.rallyHistory.push({
-        scoreA: rubber.scoreA, scoreB: rubber.scoreB, pointTeam: team, shotType: null
+        scoreA: Number(rubber.scoreA || 0),
+        scoreB: Number(rubber.scoreB || 0),
+        pointTeam: team,
+        shotType: 'Rally Point',
+        timestamp: new Date().toLocaleTimeString('en-US', { hour12: false })
       });
 
-      if (team === 'A') { rubber.scoreA++; fixture.totalPtsA++; }
-      else { rubber.scoreB++; fixture.totalPtsB++; }
+      if (team === 'A') {
+        rubber.scoreA = Number(rubber.scoreA || 0) + 1;
+        fixture.totalPtsA = Number(fixture.totalPtsA || 0) + 1;
+      } else {
+        rubber.scoreB = Number(rubber.scoreB || 0) + 1;
+        fixture.totalPtsB = Number(fixture.totalPtsB || 0) + 1;
+      }
 
       playAudio('point');
-      if (navigator.vibrate) try { navigator.vibrate(50); } catch (e) {}
+      if (navigator && navigator.vibrate) { try { navigator.vibrate(50); } catch (e) {} }
 
-      document.getElementById('score-display-a').textContent = rubber.scoreA;
-      document.getElementById('score-display-b').textContent = rubber.scoreB;
+      const dispA = document.getElementById('score-display-a');
+      const dispB = document.getElementById('score-display-b');
+      if (dispA) dispA.textContent = rubber.scoreA;
+      if (dispB) dispB.textContent = rubber.scoreB;
 
       openTagDrawer(team, rubber);
+      renderUmpireConsole();
+      renderCoachConsole();
       renderTVConsole();
       syncStateToCloud();
     }
@@ -2889,10 +3666,28 @@ Sneha P. (F)</pre>
 
     function tagPointShot(shotType, outcome) {
       const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
-      if (rubber && rubber.rallyHistory.length > 0) {
-        const last = rubber.rallyHistory[rubber.rallyHistory.length - 1];
-        last.shotType = shotType;
-        showToast(`${shotType} tagged!`, outcome === 'winner' ? '⚡' : '❌');
+      if (rubber) {
+        if (!Array.isArray(rubber.rallyHistory)) rubber.rallyHistory = [];
+        if (rubber.rallyHistory.length > 0) {
+          const last = rubber.rallyHistory[rubber.rallyHistory.length - 1];
+          last.shotType = shotType;
+          last.outcome = outcome || 'winner';
+          if (!rubber.pointDetails) rubber.pointDetails = { A: {}, B: {} };
+          if (!rubber.pointDetails.A) rubber.pointDetails.A = {};
+          if (!rubber.pointDetails.B) rubber.pointDetails.B = {};
+          const ptTeam = last.pointTeam === 'B' ? 'B' : 'A';
+          const ptNum = ptTeam === 'A' ? Number(rubber.scoreA || 1) : Number(rubber.scoreB || 1);
+          const existing = rubber.pointDetails[ptTeam][ptNum] || {};
+          rubber.pointDetails[ptTeam][ptNum] = {
+            shotType: shotType,
+            category: outcome || 'winner',
+            notes: existing.notes || '',
+            updatedAt: new Date().toLocaleTimeString('en-US', { hour12: false })
+          };
+          showToast(`${shotType} tagged!`, outcome === 'winner' ? '⚡' : '❌');
+          renderCoachConsole();
+          syncStateToCloud();
+        }
       }
       closeTagDrawer();
     }
@@ -2903,21 +3698,26 @@ Sneha P. (F)</pre>
         showToast('Officiating controls are locked in view-only mode.', '🔒');
         return;
       }
+      normalizeCorporateState();
       const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
       const fixture = getActiveFixtureOnCourt(appState.selectedCourtId);
-      if (!rubber || rubber.rallyHistory.length === 0) return;
+      if (!rubber || !Array.isArray(rubber.rallyHistory) || rubber.rallyHistory.length === 0) return;
 
       const prev = rubber.rallyHistory.pop();
-      if (prev.pointTeam === 'A') fixture.totalPtsA--;
-      else fixture.totalPtsB--;
+      if (prev.pointTeam === 'A') fixture.totalPtsA = Math.max(0, Number(fixture.totalPtsA || 0) - 1);
+      else fixture.totalPtsB = Math.max(0, Number(fixture.totalPtsB || 0) - 1);
 
-      rubber.scoreA = prev.scoreA;
-      rubber.scoreB = prev.scoreB;
+      rubber.scoreA = Number(prev.scoreA || 0);
+      rubber.scoreB = Number(prev.scoreB || 0);
 
       playAudio('undo');
-      document.getElementById('score-display-a').textContent = rubber.scoreA;
-      document.getElementById('score-display-b').textContent = rubber.scoreB;
+      const dispA = document.getElementById('score-display-a');
+      const dispB = document.getElementById('score-display-b');
+      if (dispA) dispA.textContent = rubber.scoreA;
+      if (dispB) dispB.textContent = rubber.scoreB;
       closeTagDrawer();
+      renderUmpireConsole();
+      renderCoachConsole();
       renderTVConsole();
       syncStateToCloud();
       showToast('Point Undone', '↩');
@@ -2929,35 +3729,42 @@ Sneha P. (F)</pre>
     function finishRubberAndAdvance() {
       if (!isAuthorizedEditor()) {
         openAuthModal();
-        showToast('Scoreboard is view only. Sign in to finish rubbers.', '🔒');
+        showToast('Scoreboard is view only. Enter PIN or Sign In to finish matches.', '🔒');
         return;
       }
+      normalizeCorporateState();
       const fixture = getActiveFixtureOnCourt(appState.selectedCourtId);
       const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
-      if (!fixture || !rubber) return;
+      if (!fixture || !rubber) {
+        showToast('No active match on this court. Assign a fixture first!', '⚠️');
+        return;
+      }
 
       closeTagDrawer();
-      const isWinnerA = rubber.scoreA >= rubber.scoreB;
+      const sA = Number(rubber.scoreA || 0);
+      const sB = Number(rubber.scoreB || 0);
+      const isWinnerA = sA >= sB;
       rubber.winnerId = isWinnerA ? rubber.teamAId : rubber.teamBId;
       rubber.status = 'completed';
 
-      if (isWinnerA) fixture.teamAScore++; else fixture.teamBScore++;
+      if (isWinnerA) fixture.teamAScore = Number(fixture.teamAScore || 0) + 1;
+      else fixture.teamBScore = Number(fixture.teamBScore || 0) + 1;
 
       playAudio('win');
-      try { confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+      try { if (typeof confetti === 'function') confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
 
       const winnerName = isWinnerA ? rubber.teamAName : rubber.teamBName;
-      showToast(`${rubber.categoryCode} Won by ${winnerName}! (${rubber.scoreA}-${rubber.scoreB})`, '🏆');
-
       const nextRubber = fixture.rubbers.find(r => r.status === 'pending');
       if (nextRubber) {
         nextRubber.status = 'live';
-        showToast(`Next Rubber on Court: ${nextRubber.categoryName}`, '🚀');
+        if (!Array.isArray(nextRubber.rallyHistory)) nextRubber.rallyHistory = [];
+        showToast(`${rubber.categoryCode} won by ${winnerName} (${sA}-${sB})! Now Live: ${nextRubber.categoryCode}`, '🏆');
       } else {
         completeFullFixture(fixture);
       }
 
       renderUmpireConsole();
+      renderCoachConsole();
       renderTVConsole();
       renderPoolTables();
       renderFixturesList();
@@ -3885,13 +4692,192 @@ Sneha P. (F)</pre>
     }
 
     // =========================================================================
-    // CASUAL CIRCLE LOGIC (BADMINTON 101)
+    // CASUAL CIRCLE LOGIC (BADMINTON 101 — PERSONAL WORKSPACE PER USER)
     // =========================================================================
-    function handleCasualPeriodChange(val) {
-      appState.casualPeriod = val;
+
+    function handleCasualProfileLogin(e) {
+      if (e) e.preventDefault();
+      const nameInput = document.getElementById('casual-login-name');
+      const emailInput = document.getElementById('casual-login-email');
+      const name = nameInput ? nameInput.value.trim() : '';
+      const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+      if (!name || !email) {
+        showToast('Please enter your name and email to start your personal circle.', '⚠️');
+        return;
+      }
+
+      appState.casualUser = { name, email };
+      if (isAuthorizedEmail(email)) {
+        appState.isAdmin = true;
+        appState.adminUser = { name, email };
+      }
+      saveAuthSessionToStorage();
+      loadCasualProfileForCurrentUser();
+      subscribeCasualUserCloudSync();
+      updateAuthUI();
+      showToast(`Welcome ${name}! Add your friends below to start tracking your circle.`, '🏸');
+    }
+
+    function toggleCasualFriendsDrawer(forceState) {
+      if (!isCasualUserLoggedIn()) {
+        showToast('Please sign in first to create your friends circle', '👤');
+        return;
+      }
+      if (typeof forceState === 'boolean') {
+        appState.casualFriendsDrawerOpen = forceState;
+      } else {
+        appState.casualFriendsDrawerOpen = !appState.casualFriendsDrawerOpen;
+      }
+      renderCasualOnboardingAndFriends();
+    }
+
+    function handleAddCasualFriendSubmit(e) {
+      if (e) e.preventDefault();
+      if (!isCasualUserLoggedIn()) {
+        showToast('Please sign in first to add friends to your circle', '👤');
+        return;
+      }
+      const input = document.getElementById('casual-friend-name-input');
+      if (!input || !input.value.trim()) return;
+
+      // Support adding single name or comma-separated list of friends
+      const names = input.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      if (!Array.isArray(appState.casual.players)) appState.casual.players = [];
+
+      let addedCount = 0;
+      names.forEach(n => {
+        const exists = appState.casual.players.some(p => p.toLowerCase() === n.toLowerCase());
+        if (!exists) {
+          appState.casual.players.push(n);
+          addedCount++;
+        }
+      });
+
+      input.value = '';
+      if (addedCount > 0) {
+        saveCasualProfileForCurrentUser();
+        renderCasualAll();
+        showToast(`Added ${addedCount} friend${addedCount > 1 ? 's' : ''} to your Casual Circle!`, '✓');
+      } else {
+        showToast('Player name already exists in your circle', 'ℹ️');
+      }
+    }
+
+    function removeCasualFriend(playerName) {
+      if (!isCasualUserLoggedIn()) return;
+      appState.casual.players = (appState.casual.players || []).filter(p => p !== playerName);
+      saveCasualProfileForCurrentUser();
+      renderCasualAll();
+      showToast(`Removed ${playerName} from your roster`, '🗑️');
+    }
+
+    function handleResetCasualCircle() {
+      if (!isCasualUserLoggedIn()) return;
+      appState.casual = {
+        players: [],
+        matches: [],
+        doublesMatches: [],
+        adjudgedWinners: { singles: {}, doubles: {} }
+      };
+      saveCasualProfileForCurrentUser();
+      renderCasualAll();
+      showToast('Your Casual Circle has been cleared to start fresh!', '✨');
+    }
+
+    function renderCasualOnboardingAndFriends() {
+      const user = getCasualActiveUser();
+      const authCard = document.getElementById('casual-auth-onboarding-card');
+      const setupCard = document.getElementById('casual-friends-setup-card');
+      const closeBtn = document.getElementById('btn-close-friends-drawer');
+      const userBadge = document.getElementById('casual-user-badge');
+      const subTitle = document.getElementById('casual-circle-subtitle');
+      const friendsBtn = document.getElementById('casual-friends-count-btn');
+      const countLabel = document.getElementById('casual-roster-count-label');
+      const chipsList = document.getElementById('casual-friends-chips-list');
+      const setupHeading = document.getElementById('casual-setup-heading');
+
+      const players = (appState.casual && Array.isArray(appState.casual.players)) ? appState.casual.players : [];
+
+      if (friendsBtn) {
+        friendsBtn.textContent = `Friends (${players.length})`;
+      }
+
+      if (!user) {
+        if (authCard) authCard.classList.remove('hidden');
+        if (setupCard) setupCard.classList.add('hidden');
+        if (userBadge) {
+          userBadge.textContent = 'Not Signed In';
+          userBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        }
+        if (subTitle) {
+          subTitle.textContent = 'Sign in below to create your own friends circle from scratch';
+        }
+        return;
+      }
+
+      // User is logged in
+      if (authCard) authCard.classList.add('hidden');
+      if (userBadge) {
+        userBadge.textContent = `${user.name}'s Circle`;
+        userBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      }
+      if (subTitle) {
+        subTitle.textContent = `Signed in as ${user.email} · Personal Singles & Doubles Tracker`;
+      }
+
+      const needsInitialPlayers = players.length < 2;
+      const showSetup = needsInitialPlayers || appState.casualFriendsDrawerOpen;
+
+      if (setupCard) {
+        if (showSetup) setupCard.classList.remove('hidden');
+        else setupCard.classList.add('hidden');
+      }
+      if (closeBtn) {
+        if (!needsInitialPlayers) closeBtn.classList.remove('hidden');
+        else closeBtn.classList.add('hidden');
+      }
+      if (setupHeading) {
+        setupHeading.textContent = needsInitialPlayers
+          ? `Welcome ${user.name}! Create Your Friends Roster From Scratch`
+          : `Manage ${user.name}'s Friends Roster`;
+      }
+      if (countLabel) {
+        countLabel.textContent = `YOUR FRIENDS ROSTER (${players.length} PLAYER${players.length === 1 ? '' : 'S'})`;
+      }
+
+      if (chipsList) {
+        chipsList.innerHTML = '';
+        if (players.length === 0) {
+          chipsList.innerHTML = `<div class="text-xs text-[#718b7f] py-1.5">No players added yet. Type your friends names above (e.g. "Alex, Priya, Rohan, Neha") and click "+ Add to My Circle".</div>`;
+        } else {
+          players.forEach(p => {
+            const chip = document.createElement('div');
+            chip.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#14231b] border border-emerald-500/30 text-xs font-semibold text-white';
+            const span = document.createElement('span');
+            span.textContent = p;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'text-[#718b7f] hover:text-rose-400 font-bold ml-1';
+            btn.textContent = '✕';
+            btn.onclick = () => removeCasualFriend(p);
+            chip.appendChild(span);
+            chip.appendChild(btn);
+            chipsList.appendChild(chip);
+          });
+        }
+      }
+    }
+
+    function renderCasualAll() {
+      renderCasualOnboardingAndFriends();
       renderCasualStandings();
       renderCasualH2H();
       renderCasualLog();
+    }
+
+    function handleCasualPeriodChange(val) {
+      appState.casualPeriod = val;
+      renderCasualAll();
     }
 
     function switchCasualGameMode(mode) {
@@ -3905,48 +4891,50 @@ Sneha P. (F)</pre>
       const formD = document.getElementById('form-casual-doubles');
 
       if (mode === 'singles') {
-        btnS.className = 'flex-1 py-1.5 rounded-lg text-center transition-all bg-[#14231b] text-white shadow-sm flex items-center justify-center gap-1.5 border border-[#233c2f] font-semibold';
-        btnD.className = 'flex-1 py-1.5 rounded-lg text-center transition-all text-[#718b7f] hover:text-white flex items-center justify-center gap-1.5 border border-transparent';
+        if (btnS) btnS.className = 'flex-1 py-1.5 rounded-lg text-center transition-all bg-[#14231b] text-white shadow-sm flex items-center justify-center gap-1.5 border border-[#233c2f] font-semibold';
+        if (btnD) btnD.className = 'flex-1 py-1.5 rounded-lg text-center transition-all text-[#718b7f] hover:text-white flex items-center justify-center gap-1.5 border border-transparent';
         if (pickS) pickS.classList.remove('hidden');
         if (pickD) pickD.classList.add('hidden');
         if (pairsSec) pairsSec.classList.add('hidden');
-        if (formS) formS.classList.remove('hidden');
+        if (formS && isCasualUserLoggedIn()) formS.classList.remove('hidden');
         if (formD) formD.classList.add('hidden');
       } else {
-        btnD.className = 'flex-1 py-1.5 rounded-lg text-center transition-all bg-[#14231b] text-cyan-300 shadow-sm flex items-center justify-center gap-1.5 border border-[#233c2f] font-semibold';
-        btnS.className = 'flex-1 py-1.5 rounded-lg text-center transition-all text-[#718b7f] hover:text-white flex items-center justify-center gap-1.5 border border-transparent';
+        if (btnD) btnD.className = 'flex-1 py-1.5 rounded-lg text-center transition-all bg-[#14231b] text-cyan-300 shadow-sm flex items-center justify-center gap-1.5 border border-[#233c2f] font-semibold';
+        if (btnS) btnS.className = 'flex-1 py-1.5 rounded-lg text-center transition-all text-[#718b7f] hover:text-white flex items-center justify-center gap-1.5 border border-transparent';
         if (pickS) pickS.classList.add('hidden');
         if (pickD) pickD.classList.remove('hidden');
         if (pairsSec) pairsSec.classList.remove('hidden');
         if (formS) formS.classList.add('hidden');
-        if (formD) formD.classList.remove('hidden');
+        if (formD && isCasualUserLoggedIn()) formD.classList.remove('hidden');
       }
 
-      renderCasualStandings();
-      renderCasualH2H();
+      renderCasualAll();
     }
 
     function calculateCasualStandings(mode = appState.casualGameMode) {
       const stats = {};
-      appState.casual.players.forEach(p => {
+      const players = (appState.casual && Array.isArray(appState.casual.players)) ? appState.casual.players : [];
+      players.forEach(p => {
         stats[p] = { name: p, played: 0, wins: 0, lost: 0, winPct: 0, ptsWon: 0 };
       });
 
       if (mode === 'singles') {
-        const matches = (appState.casualPeriod === 'ALL') ? appState.casual.matches : appState.casual.matches.filter(m => m.date.startsWith(appState.casualPeriod));
+        const allM = (appState.casual && Array.isArray(appState.casual.matches)) ? appState.casual.matches : [];
+        const matches = (appState.casualPeriod === 'ALL') ? allM : allM.filter(m => m.date && m.date.startsWith(appState.casualPeriod));
         matches.forEach(m => {
           if (!stats[m.playerA]) stats[m.playerA] = { name: m.playerA, played: 0, wins: 0, lost: 0, ptsWon: 0 };
           if (!stats[m.playerB]) stats[m.playerB] = { name: m.playerB, played: 0, wins: 0, lost: 0, ptsWon: 0 };
           stats[m.playerA].played++; stats[m.playerB].played++;
-          stats[m.playerA].ptsWon += Number(m.scoreA); stats[m.playerB].ptsWon += Number(m.scoreB);
-          if (m.scoreA > m.scoreB) { stats[m.playerA].wins++; stats[m.playerB].lost++; }
+          stats[m.playerA].ptsWon += Number(m.scoreA || 0); stats[m.playerB].ptsWon += Number(m.scoreB || 0);
+          if (Number(m.scoreA) > Number(m.scoreB)) { stats[m.playerA].wins++; stats[m.playerB].lost++; }
           else { stats[m.playerB].wins++; stats[m.playerA].lost++; }
         });
       } else {
-        const matches = (appState.casualPeriod === 'ALL') ? appState.casual.doublesMatches : appState.casual.doublesMatches.filter(m => m.date.startsWith(appState.casualPeriod));
+        const allD = (appState.casual && Array.isArray(appState.casual.doublesMatches)) ? appState.casual.doublesMatches : [];
+        const matches = (appState.casualPeriod === 'ALL') ? allD : allD.filter(m => m.date && m.date.startsWith(appState.casualPeriod));
         matches.forEach(m => {
           const tA = m.teamA || [], tB = m.teamB || [];
-          const sA = Number(m.scoreA), sB = Number(m.scoreB);
+          const sA = Number(m.scoreA || 0), sB = Number(m.scoreB || 0);
           tA.forEach(p => {
             if (!stats[p]) stats[p] = { name: p, played: 0, wins: 0, lost: 0, ptsWon: 0 };
             stats[p].played++; stats[p].ptsWon += sA;
@@ -3967,6 +4955,7 @@ Sneha P. (F)</pre>
     }
 
     function renderCasualStandings() {
+      renderCasualOnboardingAndFriends();
       const standings = calculateCasualStandings();
       const tbody = document.getElementById('casual-standings-table-body');
       const lName = document.getElementById('casual-leading-name');
@@ -3980,28 +4969,67 @@ Sneha P. (F)</pre>
       if (standings.length > 0 && standings[0].played > 0) {
         if (lName) lName.textContent = standings[0].name;
         if (lStats) lStats.textContent = `${standings[0].wins} wins · ${standings[0].ptsWon} points won (${standings[0].winPct}% win rate)`;
+      } else if (standings.length > 0) {
+        if (lName) lName.textContent = standings[0].name;
+        if (lStats) lStats.textContent = '0 wins · 0 points (Ready to log matches)';
       } else {
-        if (lName) lName.textContent = appState.casual.players[0] || 'No Data';
-        if (lStats) lStats.textContent = '0 wins · 0 points';
+        if (lName) lName.textContent = 'No Players Yet';
+        if (lStats) lStats.textContent = 'Add friends above to start your personal leaderboard';
       }
 
       if (tbody) {
         tbody.innerHTML = '';
-        standings.forEach((s, idx) => {
-          const isFirst = idx === 0 && s.played > 0;
-          const tr = document.createElement('tr');
-          tr.className = isFirst ? 'bg-[#251c10] text-[#fcd34d] font-semibold' : 'hover:bg-[#15231b] text-[#c4d4cc]';
-          tr.innerHTML = `
-            <td class="py-2.5 px-3 font-bold ${isFirst ? 'text-[#e5a93c]' : 'text-[#718b7f]'}">#${idx + 1}</td>
-            <td class="py-2.5 px-3 font-bold text-white">${s.name}</td>
-            <td class="py-2.5 px-2 text-center">${s.played}</td>
-            <td class="py-2.5 px-2 text-center font-bold text-emerald-400">${s.wins}</td>
-            <td class="py-2.5 px-2 text-center text-[#718b7f]">${s.lost}</td>
-            <td class="py-2.5 px-2 text-center">${s.winPct}%</td>
-            <td class="py-2.5 px-3 text-right font-mono font-bold">${s.ptsWon}</td>
-          `;
-          tbody.appendChild(tr);
+        if (standings.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-xs text-[#718b7f]">Your personal roster is empty. Add your friends above to start tracking standings!</td></tr>';
+        } else {
+          standings.forEach((s, idx) => {
+            const isFirst = idx === 0 && s.played > 0;
+            const tr = document.createElement('tr');
+            tr.className = isFirst ? 'bg-[#251c10] text-[#fcd34d] font-semibold' : 'hover:bg-[#15231b] text-[#c4d4cc]';
+            tr.innerHTML = `
+              <td class="py-2.5 px-3 font-bold ${isFirst ? 'text-[#e5a93c]' : 'text-[#718b7f]'}">#${idx + 1}</td>
+              <td class="py-2.5 px-3 font-bold text-white">${escapeHtml(s.name)}</td>
+              <td class="py-2.5 px-2 text-center">${s.played}</td>
+              <td class="py-2.5 px-2 text-center font-bold text-emerald-400">${s.wins}</td>
+              <td class="py-2.5 px-2 text-center text-[#718b7f]">${s.lost}</td>
+              <td class="py-2.5 px-2 text-center">${s.winPct}%</td>
+              <td class="py-2.5 px-3 text-right font-mono font-bold">${s.ptsWon}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      }
+
+      // Doubles pairs summary
+      const pairsContainer = document.getElementById('casual-doubles-pairs-container');
+      if (pairsContainer && appState.casualGameMode === 'doubles') {
+        pairsContainer.innerHTML = '';
+        const allD = (appState.casual && Array.isArray(appState.casual.doublesMatches)) ? appState.casual.doublesMatches : [];
+        const matches = (appState.casualPeriod === 'ALL') ? allD : allD.filter(m => m.date && m.date.startsWith(appState.casualPeriod));
+        const pairStats = {};
+        matches.forEach(m => {
+          const kA = [...(m.teamA || [])].sort().join(' & ');
+          const kB = [...(m.teamB || [])].sort().join(' & ');
+          if (!pairStats[kA]) pairStats[kA] = { pair: kA, played: 0, wins: 0, lost: 0, pts: 0 };
+          if (!pairStats[kB]) pairStats[kB] = { pair: kB, played: 0, wins: 0, lost: 0, pts: 0 };
+          pairStats[kA].played++; pairStats[kB].played++;
+          pairStats[kA].pts += Number(m.scoreA || 0); pairStats[kB].pts += Number(m.scoreB || 0);
+          if (Number(m.scoreA) > Number(m.scoreB)) { pairStats[kA].wins++; pairStats[kB].lost++; }
+          else { pairStats[kB].wins++; pairStats[kA].lost++; }
         });
+        const pList = Object.values(pairStats).sort((a, b) => b.wins - a.wins || b.pts - a.pts);
+        if (pList.length === 0) {
+          pairsContainer.innerHTML = '<div class="text-xs text-[#718b7f] py-2 text-center">No doubles matches logged yet.</div>';
+        } else {
+          pList.forEach((p, idx) => {
+            pairsContainer.innerHTML += `
+              <div class="flex items-center justify-between p-2 rounded-xl bg-[#14231b] text-xs">
+                <span class="font-bold text-white">#${idx + 1} ${escapeHtml(p.pair)}</span>
+                <span class="text-emerald-400 font-mono font-bold">${p.wins}W - ${p.lost}L (${p.pts} pts)</span>
+              </div>
+            `;
+          });
+        }
       }
     }
 
@@ -4010,19 +5038,24 @@ Sneha P. (F)</pre>
       const selB = document.getElementById('casual-h2h-player-b');
       const selDA = document.getElementById('casual-h2h-d-player-a');
       const selDB = document.getElementById('casual-h2h-d-player-b');
+      const players = (appState.casual && Array.isArray(appState.casual.players)) ? appState.casual.players : [];
 
       const popSel = (el, val) => {
         if (!el) return;
-        el.innerHTML = appState.casual.players.map(p => `<option value="${p}" ${p === val ? 'selected' : ''}>${p}</option>`).join('');
+        if (players.length === 0) {
+          el.innerHTML = '<option value="">Add friends first</option>';
+          return;
+        }
+        el.innerHTML = players.map(p => `<option value="${escapeHtml(p)}" ${p === val ? 'selected' : ''}>${escapeHtml(p)}</option>`).join('');
       };
 
       if (selA && selB) {
-        popSel(selA, selA.value || appState.casual.players[0]);
-        popSel(selB, selB.value || appState.casual.players[1]);
+        popSel(selA, (selA.value && players.includes(selA.value)) ? selA.value : players[0]);
+        popSel(selB, (selB.value && players.includes(selB.value)) ? selB.value : (players[1] || players[0]));
       }
       if (selDA && selDB) {
-        popSel(selDA, selDA.value || appState.casual.players[0]);
-        popSel(selDB, selDB.value || appState.casual.players[1]);
+        popSel(selDA, (selDA.value && players.includes(selDA.value)) ? selDA.value : players[0]);
+        popSel(selDB, (selDB.value && players.includes(selDB.value)) ? selDB.value : (players[1] || players[0]));
       }
 
       const pA = appState.casualGameMode === 'singles' ? selA?.value : selDA?.value;
@@ -4039,17 +5072,28 @@ Sneha P. (F)</pre>
       if (!listEl) return;
       listEl.innerHTML = '';
 
+      if (!pA || !pB) {
+        document.getElementById('casual-h2h-wins-a').textContent = '0';
+        document.getElementById('casual-h2h-wins-b').textContent = '0';
+        document.getElementById('casual-h2h-pts-a').textContent = '0 pts';
+        document.getElementById('casual-h2h-pts-b').textContent = '0 pts';
+        document.getElementById('casual-h2h-matches-count').textContent = '0 MATCHES';
+        listEl.innerHTML = '<div class="text-xs text-[#718b7f] py-2 text-center">Add at least 2 friends to compare Head-to-Head records.</div>';
+        return;
+      }
+
       if (appState.casualGameMode === 'singles') {
-        const matches = appState.casual.matches.filter(m => (m.playerA === pA && m.playerB === pB) || (m.playerA === pB && m.playerB === pA));
+        const allM = (appState.casual && Array.isArray(appState.casual.matches)) ? appState.casual.matches : [];
+        const matches = allM.filter(m => (m.playerA === pA && m.playerB === pB) || (m.playerA === pB && m.playerB === pA));
         let wA = 0, wB = 0, ptsA = 0, ptsB = 0;
         matches.forEach(m => {
-          const sA = (m.playerA === pA) ? m.scoreA : m.scoreB;
-          const sB = (m.playerA === pA) ? m.scoreB : m.scoreA;
+          const sA = (m.playerA === pA) ? Number(m.scoreA) : Number(m.scoreB);
+          const sB = (m.playerA === pA) ? Number(m.scoreB) : Number(m.scoreA);
           ptsA += sA; ptsB += sB;
           if (sA > sB) wA++; else wB++;
           listEl.innerHTML += `
             <div class="flex items-center justify-between p-2 rounded-xl bg-[#14231b]">
-              <span><strong>${m.playerA}</strong> vs <strong>${m.playerB}</strong></span>
+              <span><strong>${escapeHtml(m.playerA)}</strong> vs <strong>${escapeHtml(m.playerB)}</strong></span>
               <span class="font-bebas text-amber-300 px-2">${m.scoreA} - ${m.scoreB}</span>
               <span class="text-[#718b7f] text-[10px]">${m.date}</span>
             </div>
@@ -4057,12 +5101,60 @@ Sneha P. (F)</pre>
         });
         document.getElementById('casual-h2h-wins-a').textContent = wA;
         document.getElementById('casual-h2h-wins-b').textContent = wB;
+        document.getElementById('casual-h2h-rate-a').textContent = `${matches.length > 0 ? Math.round((wA / matches.length) * 100) : 0}% win rate`;
+        document.getElementById('casual-h2h-rate-b').textContent = `${matches.length > 0 ? Math.round((wB / matches.length) * 100) : 0}% win rate`;
         document.getElementById('casual-h2h-pts-a').textContent = `${ptsA} pts`;
         document.getElementById('casual-h2h-pts-b').textContent = `${ptsB} pts`;
         document.getElementById('casual-h2h-matches-count').textContent = `${matches.length} MATCHES`;
         const pct = matches.length > 0 ? (wA / matches.length) * 100 : 50;
         document.getElementById('casual-h2h-bar-a').style.width = `${pct}%`;
         document.getElementById('casual-h2h-bar-b').style.width = `${100 - pct}%`;
+      } else {
+        const allD = (appState.casual && Array.isArray(appState.casual.doublesMatches)) ? appState.casual.doublesMatches : [];
+        const oppMatches = allD.filter(m =>
+          ((m.teamA || []).includes(pA) && (m.teamB || []).includes(pB)) ||
+          ((m.teamA || []).includes(pB) && (m.teamB || []).includes(pA))
+        );
+        const partnerMatches = allD.filter(m =>
+          ((m.teamA || []).includes(pA) && (m.teamA || []).includes(pB)) ||
+          ((m.teamB || []).includes(pA) && (m.teamB || []).includes(pB))
+        );
+
+        let wA = 0, wB = 0, ptsA = 0, ptsB = 0;
+        oppMatches.forEach(m => {
+          const isA = (m.teamA || []).includes(pA);
+          const sA = isA ? Number(m.scoreA) : Number(m.scoreB);
+          const sB = isA ? Number(m.scoreB) : Number(m.scoreA);
+          ptsA += sA; ptsB += sB;
+          if (sA > sB) wA++; else wB++;
+          listEl.innerHTML += `
+            <div class="flex items-center justify-between p-2 rounded-xl bg-[#14231b]">
+              <span><strong>${escapeHtml((m.teamA || []).join(' & '))}</strong> vs <strong>${escapeHtml((m.teamB || []).join(' & '))}</strong></span>
+              <span class="font-bebas text-amber-300 px-2">${m.scoreA} - ${m.scoreB}</span>
+              <span class="text-[#718b7f] text-[10px]">${m.date}</span>
+            </div>
+          `;
+        });
+        document.getElementById('casual-h2h-wins-a').textContent = wA;
+        document.getElementById('casual-h2h-wins-b').textContent = wB;
+        document.getElementById('casual-h2h-rate-a').textContent = `${oppMatches.length > 0 ? Math.round((wA / oppMatches.length) * 100) : 0}% win rate`;
+        document.getElementById('casual-h2h-rate-b').textContent = `${oppMatches.length > 0 ? Math.round((wB / oppMatches.length) * 100) : 0}% win rate`;
+        document.getElementById('casual-h2h-pts-a').textContent = `${ptsA} pts`;
+        document.getElementById('casual-h2h-pts-b').textContent = `${ptsB} pts`;
+        document.getElementById('casual-h2h-matches-count').textContent = `${oppMatches.length} MATCHES`;
+        const pct = oppMatches.length > 0 ? (wA / oppMatches.length) * 100 : 50;
+        document.getElementById('casual-h2h-bar-a').style.width = `${pct}%`;
+        document.getElementById('casual-h2h-bar-b').style.width = `${100 - pct}%`;
+
+        let pWins = 0;
+        partnerMatches.forEach(m => {
+          const onA = (m.teamA || []).includes(pA);
+          if ((onA && Number(m.scoreA) > Number(m.scoreB)) || (!onA && Number(m.scoreB) > Number(m.scoreA))) pWins++;
+        });
+        const chemRate = document.getElementById('casual-chem-rate');
+        const chemDesc = document.getElementById('casual-chem-desc');
+        if (chemRate) chemRate.textContent = `${partnerMatches.length > 0 ? Math.round((pWins / partnerMatches.length) * 100) : 0}% Win`;
+        if (chemDesc) chemDesc.textContent = `Played ${partnerMatches.length} matches together: ${pWins} Wins, ${partnerMatches.length - pWins} Losses`;
       }
     }
 
@@ -4074,9 +5166,39 @@ Sneha P. (F)</pre>
       const db1 = document.getElementById('c-doubles-b1');
       const db2 = document.getElementById('c-doubles-b2');
 
+      const casualBanner = document.getElementById('casual-admin-banner');
+      const fSingles = document.getElementById('form-casual-singles');
+      const fDoubles = document.getElementById('form-casual-doubles');
+      const loggedIn = isCasualUserLoggedIn();
+
+      if (casualBanner) {
+        if (loggedIn) casualBanner.classList.add('hidden');
+        else casualBanner.classList.remove('hidden');
+      }
+      if (fSingles && fDoubles) {
+        if (loggedIn) {
+          if (appState.casualGameMode === 'singles') {
+            fSingles.classList.remove('hidden');
+            fDoubles.classList.add('hidden');
+          } else {
+            fSingles.classList.add('hidden');
+            fDoubles.classList.remove('hidden');
+          }
+        } else {
+          fSingles.classList.add('hidden');
+          fDoubles.classList.add('hidden');
+        }
+      }
+
+      const players = (appState.casual && Array.isArray(appState.casual.players)) ? appState.casual.players : [];
       const pop = (el, idx) => {
         if (!el) return;
-        el.innerHTML = appState.casual.players.map((p, i) => `<option value="${p}" ${i === idx ? 'selected' : ''}>${p}</option>`).join('');
+        if (players.length === 0) {
+          el.innerHTML = '<option value="">Add friends above first</option>';
+          return;
+        }
+        const safeIdx = idx < players.length ? idx : 0;
+        el.innerHTML = players.map((p, i) => `<option value="${escapeHtml(p)}" ${i === safeIdx ? 'selected' : ''}>${escapeHtml(p)}</option>`).join('');
       };
 
       pop(selA, 0); pop(selB, 1);
@@ -4086,18 +5208,41 @@ Sneha P. (F)</pre>
       if (!listEl) return;
       listEl.innerHTML = '';
 
-      const matches = appState.casual.matches;
-      matches.slice().reverse().forEach(m => {
-        listEl.innerHTML += `
-          <div class="flex items-center justify-between py-2 text-xs">
-            <div>
-              <span class="font-bold text-white">${m.playerA} (${m.scoreA}) vs (${m.scoreB}) ${m.playerB}</span>
-              <span class="text-[10px] text-[#718b7f] ml-2">${m.date}</span>
-            </div>
-            ${checkIsAdmin() ? `<button onclick="deleteCasualMatch('${m.id}')" class="text-xs text-rose-400 hover:underline">Delete</button>` : ''}
-          </div>
-        `;
-      });
+      if (appState.casualGameMode === 'singles') {
+        const matches = (appState.casual && Array.isArray(appState.casual.matches)) ? appState.casual.matches : [];
+        if (matches.length === 0) {
+          listEl.innerHTML = '<div class="text-xs text-[#718b7f] py-3 text-center">No singles matches logged in your circle yet.</div>';
+        } else {
+          matches.slice().reverse().forEach(m => {
+            listEl.innerHTML += `
+              <div class="flex items-center justify-between py-2 text-xs">
+                <div>
+                  <span class="font-bold text-white">${escapeHtml(m.playerA)} (${m.scoreA}) vs (${m.scoreB}) ${escapeHtml(m.playerB)}</span>
+                  <span class="text-[10px] text-[#718b7f] ml-2">${m.date}</span>
+                </div>
+                ${loggedIn ? `<button onclick="deleteCasualMatch('${m.id}', 'singles')" class="text-xs text-rose-400 hover:underline">Delete</button>` : ''}
+              </div>
+            `;
+          });
+        }
+      } else {
+        const matches = (appState.casual && Array.isArray(appState.casual.doublesMatches)) ? appState.casual.doublesMatches : [];
+        if (matches.length === 0) {
+          listEl.innerHTML = '<div class="text-xs text-[#718b7f] py-3 text-center">No doubles matches logged in your circle yet.</div>';
+        } else {
+          matches.slice().reverse().forEach(m => {
+            listEl.innerHTML += `
+              <div class="flex items-center justify-between py-2 text-xs">
+                <div>
+                  <span class="font-bold text-white">${escapeHtml((m.teamA || []).join(' & '))} (${m.scoreA}) vs (${m.scoreB}) ${escapeHtml((m.teamB || []).join(' & '))}</span>
+                  <span class="text-[10px] text-[#718b7f] ml-2">${m.date}</span>
+                </div>
+                ${loggedIn ? `<button onclick="deleteCasualMatch('${m.id}', 'doubles')" class="text-xs text-rose-400 hover:underline">Delete</button>` : ''}
+              </div>
+            `;
+          });
+        }
+      }
     }
 
     function setQuickScore(idA, sA, idB, sB) {
@@ -4108,9 +5253,8 @@ Sneha P. (F)</pre>
 
     function handleCasualSinglesSubmit(e) {
       e.preventDefault();
-      if (!checkIsAdmin()) {
-        openAdminModal();
-        showToast('Only tournament admins can log matches', '🔒');
+      if (!isCasualUserLoggedIn()) {
+        showToast('Please sign in to your Casual Circle first', '👤');
         return;
       }
       const pA = document.getElementById('c-player-a').value;
@@ -4119,23 +5263,23 @@ Sneha P. (F)</pre>
       const sB = Number(document.getElementById('c-score-b').value);
       const dt = document.getElementById('c-date-s').value;
 
+      if (!pA || !pB) { showToast('Add at least 2 friends to your circle first!', '⚠️'); return; }
       if (pA === pB) { showToast('Select two different players', '⚠️'); return; }
+      if (sA === sB) { showToast('Badminton matches cannot end in a tie', '⚠️'); return; }
 
+      if (!Array.isArray(appState.casual.matches)) appState.casual.matches = [];
       appState.casual.matches.push({
         id: 'cm_' + Date.now(), playerA: pA, playerB: pB, scoreA: sA, scoreB: sB, date: dt
       });
+      saveCasualProfileForCurrentUser();
       showToast(`Singles match logged: ${pA} ${sA} - ${sB} ${pB}`, '✓');
-      renderCasualStandings();
-      renderCasualLog();
-      renderCasualH2H();
-      syncStateToCloud();
+      renderCasualAll();
     }
 
     function handleCasualDoublesSubmit(e) {
       e.preventDefault();
-      if (!checkIsAdmin()) {
-        openAdminModal();
-        showToast('Only tournament admins can log matches', '🔒');
+      if (!isCasualUserLoggedIn()) {
+        showToast('Please sign in to your Casual Circle first', '👤');
         return;
       }
       const a1 = document.getElementById('c-doubles-a1').value;
@@ -4146,39 +5290,50 @@ Sneha P. (F)</pre>
       const sB = Number(document.getElementById('c-d-score-b').value);
       const dt = document.getElementById('c-date-d').value;
 
+      const uniquePlayers = new Set([a1, a2, b1, b2].filter(Boolean));
+      if (uniquePlayers.size < 4) {
+        showToast('Doubles requires 4 distinct players. Add at least 4 friends to your circle!', '⚠️');
+        return;
+      }
+      if (sA === sB) { showToast('Badminton matches cannot end in a tie', '⚠️'); return; }
+
+      if (!Array.isArray(appState.casual.doublesMatches)) appState.casual.doublesMatches = [];
       appState.casual.doublesMatches.push({
         id: 'cd_' + Date.now(), teamA: [a1, a2], teamB: [b1, b2], scoreA: sA, scoreB: sB, date: dt
       });
+      saveCasualProfileForCurrentUser();
       showToast(`Doubles match logged!`, '✓');
-      syncStateToCloud();
-      renderCasualStandings();
-      renderCasualLog();
-      renderCasualH2H();
+      renderCasualAll();
     }
 
-    function deleteCasualMatch(matchId) {
-      if (!checkIsAdmin()) {
-        openAdminModal();
-        showToast('Only admins can delete matches', '🔒');
+    function deleteCasualMatch(matchId, mode = 'singles') {
+      if (!isCasualUserLoggedIn()) {
+        showToast('Please sign in to delete matches in your circle', '🔒');
         return;
       }
-      appState.casual.matches = appState.casual.matches.filter(m => m.id !== matchId);
-      renderCasualStandings();
-      renderCasualLog();
-      renderCasualH2H();
-      syncStateToCloud();
+      if (mode === 'doubles') {
+        appState.casual.doublesMatches = (appState.casual.doublesMatches || []).filter(m => m.id !== matchId);
+      } else {
+        appState.casual.matches = (appState.casual.matches || []).filter(m => m.id !== matchId);
+      }
+      saveCasualProfileForCurrentUser();
+      renderCasualAll();
       showToast('Match deleted', '🗑️');
     }
 
     function handleAdjudgeWinnerClick() {
-      if (!checkIsAdmin()) {
-        openAdminModal();
-        showToast('Only admins can officially crown champions', '🔒');
+      if (!isCasualUserLoggedIn()) {
+        showToast('Please sign in to crown a champion in your circle', '🔒');
         return;
       }
-      try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } }); } catch (e) {}
+      const standings = calculateCasualStandings();
+      if (standings.length === 0 || standings[0].played === 0) {
+        showToast('Log at least one match before crowning a champion!', 'ℹ️');
+        return;
+      }
+      try { if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } }); } catch (e) {}
       playAudio('win');
-      showToast('Month Champion officially crowned!', '👑');
+      showToast(`${standings[0].name} officially crowned Champion!`, '👑');
     }
 
     // --- TV Modal Utilities ---
@@ -4249,29 +5404,57 @@ Sneha P. (F)</pre>
       setTimeout(() => toast.classList.add('hidden'), 2400);
     }
 
+    let appInitialized = false;
+    let clockIntervalId = null;
+
     // --- Initialization ---
     function init() {
-      appState.fixtures = initCorporateFixtures();
-      loadStateFromLocalStorage();
-      initFirebase();
-      updateAuthUI();
+      if (appInitialized) return;
+      appInitialized = true;
 
-      const h = window.location.hash;
-      if (h === '#tv') {
-        switchTournamentProfile('corporate');
-        switchCorpView('tv');
-      } else if (h === '#coach' || h === '#scorer') {
-        switchTournamentProfile('corporate');
-        switchCorpView('coach');
-        // Scorer/Coach locked view: hide other nav tabs so coach only sees scoring
-        const nav = document.getElementById('nav-corporate');
-        if (nav) nav.classList.add('hidden');
-      } else {
-        switchTournamentProfile('corporate');
-        switchCorpView('tv');
+      try {
+        appState.fixtures = initCorporateFixtures();
+      } catch (e) {
+        console.warn('initCorporateFixtures warning:', e);
       }
 
-      setInterval(() => {
+      try {
+        loadStateFromLocalStorage();
+      } catch (e) {
+        console.warn('loadStateFromLocalStorage warning:', e);
+      }
+
+      try {
+        updateAuthUI();
+      } catch (e) {
+        console.warn('updateAuthUI warning:', e);
+      }
+
+      try {
+        const h = (window.location && window.location.hash) ? window.location.hash : '';
+        if (h === '#tv') {
+          switchTournamentProfile('corporate');
+          switchCorpView('tv');
+        } else if (h === '#coach' || h === '#scorer') {
+          switchTournamentProfile('corporate');
+          switchCorpView('coach');
+          const nav = document.getElementById('nav-corporate');
+          if (nav) nav.classList.add('hidden');
+        } else {
+          switchTournamentProfile('corporate');
+          switchCorpView('tv');
+        }
+      } catch (e) {
+        console.warn('Initial view render warning:', e);
+      }
+
+      // Initialize Firebase asynchronously so UI renders immediately without waiting for network
+      setTimeout(() => {
+        try { initFirebase(); } catch (e) { console.warn('Async initFirebase warning:', e); }
+      }, 50);
+
+      if (clockIntervalId) clearInterval(clockIntervalId);
+      clockIntervalId = setInterval(() => {
         const clock = document.getElementById('tv-clock');
         if (clock) {
           const now = new Date();
@@ -4318,6 +5501,10 @@ Sneha P. (F)</pre>
     window.awardAndTagPoint = awardAndTagPoint;
     window.awardErrorPoint = awardErrorPoint;
     window.changeCoachCourt = changeCoachCourt;
+      window.selectCoachPoint = selectCoachPoint;
+      window.pickCoachShotChip = pickCoachShotChip;
+      window.saveCoachPointDetails = saveCoachPointDetails;
+      window.clearCoachPointDetails = clearCoachPointDetails;
     window.renderCoachConsole = renderCoachConsole;
     window.openImportGuideModal = openImportGuideModal;
     window.closeImportGuideModal = closeImportGuideModal;
@@ -4347,6 +5534,12 @@ Sneha P. (F)</pre>
     window.deleteCasualMatch = deleteCasualMatch;
     window.handleAdjudgeWinnerClick = handleAdjudgeWinnerClick;
     window.renderCasualH2H = renderCasualH2H;
+    window.handleCasualProfileLogin = handleCasualProfileLogin;
+    window.toggleCasualFriendsDrawer = toggleCasualFriendsDrawer;
+    window.handleAddCasualFriendSubmit = handleAddCasualFriendSubmit;
+    window.removeCasualFriend = removeCasualFriend;
+    window.handleResetCasualCircle = handleResetCasualCircle;
+    window.renderCasualAll = renderCasualAll;
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
