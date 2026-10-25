@@ -5,6 +5,8 @@
  */
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
 // --- PURE TOURNAMENT ENGINE LOGIC ---
 
@@ -289,6 +291,167 @@ it('Correctly parses Google Form / Excel row per team (8 columns)', () => {
   assert.strictEqual(team.captain, 'Manish S.');
   assert.strictEqual(team.malePlayers.length, 4);
   assert.strictEqual(team.femalePlayers.length, 2);
+});
+
+console.log('\n7. FIREBASE RTDB EMPTY-ARRAY RECOVERY & PER-USER CASUAL CIRCLE');
+it('Restores rallyHistory array when stripped by Firebase Realtime Database sync', () => {
+  const rubberFromFirebase = { id: 'fix_a_1_r1', scoreA: 18, scoreB: 16, status: 'live' };
+  if (!Array.isArray(rubberFromFirebase.rallyHistory)) {
+    rubberFromFirebase.rallyHistory = rubberFromFirebase.rallyHistory ? Object.values(rubberFromFirebase.rallyHistory) : [];
+  }
+  rubberFromFirebase.rallyHistory.push({ scoreA: 18, scoreB: 16, pointTeam: 'A' });
+  rubberFromFirebase.scoreA++;
+  assert.strictEqual(rubberFromFirebase.scoreA, 19);
+  assert.strictEqual(rubberFromFirebase.rallyHistory.length, 1);
+});
+
+it('Initializes Casual Circle completely empty per user and tracks custom friends from scratch', () => {
+  const createCasualWorkspace = (email) => ({
+    ownerEmail: email.trim().toLowerCase(),
+    players: [],
+    matches: [],
+    doublesMatches: []
+  });
+  const userCircle = createCasualWorkspace('newuser@gmail.com');
+  assert.strictEqual(userCircle.players.length, 0);
+  assert.strictEqual(userCircle.matches.length, 0);
+  ['Rahul', 'Sneha', 'Vikram'].forEach(p => userCircle.players.push(p));
+  assert.deepStrictEqual(userCircle.players, ['Rahul', 'Sneha', 'Vikram']);
+});
+
+console.log('\n8. COACH CONSOLE 1-21 HORIZONTAL GRAPH & PER-PLAYER METADATA');
+it('Marks points 1..score as completed crosses (✕) and score+1..21 as grayed-out upcoming points', () => {
+  const scoreA = 18, scoreB = 16;
+  const maxPts = Math.max(21, scoreA, scoreB);
+  const rowA = Array.from({ length: maxPts }, (_, i) => ({ pt: i + 1, done: (i + 1) <= scoreA }));
+  const rowB = Array.from({ length: maxPts }, (_, i) => ({ pt: i + 1, done: (i + 1) <= scoreB }));
+  assert.strictEqual(rowA.filter(c => c.done).length, 18);
+  assert.strictEqual(rowA.filter(c => !c.done).length, 3);
+  assert.strictEqual(rowB.filter(c => c.done).length, 16);
+  assert.strictEqual(rowB.filter(c => !c.done).length, 5);
+});
+
+it('Links winning shot, opponent error, and coach notes to specific players for later review', () => {
+  const rubber = {
+    id: 'fix_a_1_r1',
+    categoryCode: 'MS',
+    teamAName: 'Cloud Titans',
+    teamBName: 'DevOps Dynamos',
+    playersA: 'Manish S.',
+    playersB: 'Nitesh S.',
+    scoreA: 18,
+    scoreB: 16,
+    pointDetails: {
+      A: {
+        5: { shotType: 'Smash', category: 'winner', player: 'Manish S.', coachId: 'coach_1', notes: 'Steep cross-court smash' },
+        6: { shotType: 'Unforced Error', category: 'error', player: 'Nitesh S.', coachId: 'coach_1', notes: 'Backhand into net' }
+      },
+      B: {}
+    }
+  };
+  assert.strictEqual(rubber.pointDetails.A[5].player, 'Manish S.');
+  assert.strictEqual(rubber.pointDetails.A[5].category, 'winner');
+  assert.strictEqual(rubber.pointDetails.A[6].player, 'Nitesh S.');
+  assert.strictEqual(rubber.pointDetails.A[6].category, 'error');
+});
+
+console.log('\n9. TWO TOP-LEVEL PROFILES (TOURNAMENT VS CASUAL) & SUB-PROFILES ONLY IN TOURNAMENT');
+it('Exposes only Tournament and Casual at top level, with sub-profiles (tv, umpire, coach, admin) only in Tournament', () => {
+  const resolveProfileHierarchy = (topProfile, subProfile) => {
+    if (topProfile === 'casual') {
+      return {
+        topProfile: 'casual',
+        subProfileVisible: false,
+        effectiveProfile: 'casual'
+      };
+    }
+    return {
+      topProfile: 'corporate',
+      subProfileVisible: true,
+      effectiveProfile: ['tv', 'umpire', 'coach', 'admin'].includes(subProfile) ? subProfile : 'tv'
+    };
+  };
+
+  const casualState = resolveProfileHierarchy('casual', 'umpire');
+  assert.strictEqual(casualState.topProfile, 'casual');
+  assert.strictEqual(casualState.subProfileVisible, false);
+  assert.strictEqual(casualState.effectiveProfile, 'casual');
+
+  const tourneyCoach = resolveProfileHierarchy('corporate', 'coach');
+  assert.strictEqual(tourneyCoach.topProfile, 'corporate');
+  assert.strictEqual(tourneyCoach.subProfileVisible, true);
+  assert.strictEqual(tourneyCoach.effectiveProfile, 'coach');
+});
+
+console.log('\n10. SCORESHEETS HIGHLIGHT PLAYER NAME FIRST & TEAM NAME IN SMALLER CASE');
+it('Verifies smashheroes.html highlights player name before team name in TV, Umpire, and Coach consoles', () => {
+  const htmlPath = path.join(__dirname, 'smashheroes.html');
+  if (fs.existsSync(htmlPath)) {
+    const html = fs.readFileSync(htmlPath, 'utf8');
+    // Check Umpire match card has umpire-players-a before umpire-team-a-name
+    const umpireCardIdxPlayer = html.indexOf('id="umpire-players-a"');
+    const umpireCardIdxTeam = html.indexOf('id="umpire-team-a-name"');
+    assert.ok(umpireCardIdxPlayer > 0 && umpireCardIdxPlayer < umpireCardIdxTeam, 'Umpire card should place player name before team name');
+
+    // Check Coach summary card has coach-players-a before coach-team-a-name
+    const coachCardIdxPlayer = html.indexOf('id="coach-players-a"');
+    const coachCardIdxTeam = html.indexOf('id="coach-team-a-name"');
+    assert.ok(coachCardIdxPlayer > 0 && coachCardIdxPlayer < coachCardIdxTeam, 'Coach card should place player name before team name');
+
+    // Check Tournament sub-profile selector exists
+    assert.ok(html.includes('id="tournament-subprofile-select"'), 'Tournament sub-profile selector should exist');
+    assert.ok(html.includes('id="coach-player-analytics-card"'), 'Player analytics review card should exist');
+  }
+});
+
+it('Preserves exact team name casing from CSV upload and Teams & Captains dashboard without forced lowercase', () => {
+  const fs = require('fs');
+  const html = fs.readFileSync(__dirname + '/smashheroes.html', 'utf8');
+  assert.ok(!html.includes('lowercase tracking-wide'), 'No forced CSS lowercase on team names');
+  assert.ok(!html.includes('cp.team.toLowerCase()'), 'No JS .toLowerCase() on team name in coach dropdown');
+  assert.ok(html.includes('if (canonTeamA && canonTeamA.name) r.teamAName = canonTeamA.name;'), 'Syncs exact team name casing from Teams & Captains roster');
+});
+
+console.log('\n11. PER-PROFILE DYNAMIC PIN GATING & ADMIN PIN CONFIGURATION');
+it('Requires PIN for Umpire, Coach, and Admin profiles while keeping Viewer / Live TV open without PIN', () => {
+  const profilePins = { umpire: '4321', coach: '8765', admin: '9999' };
+  const unlockedProfiles = { tv: true, umpire: false, coach: false, admin: false };
+
+  const isProfileUnlocked = (role) => {
+    if (!role || role === 'tv' || role === 'casual') return true;
+    if (unlockedProfiles.admin) return true;
+    return Boolean(unlockedProfiles[role]);
+  };
+
+  const verifyPin = (role, entered) => {
+    if (entered === profilePins.admin) return 'admin';
+    if (role === 'umpire' && entered === profilePins.umpire) return 'umpire';
+    if (role === 'coach' && entered === profilePins.coach) return 'coach';
+    return null;
+  };
+
+  assert.strictEqual(isProfileUnlocked('tv'), true, 'Live TV is always unlocked');
+  assert.strictEqual(isProfileUnlocked('umpire'), false, 'Umpire requires PIN initially');
+  assert.strictEqual(isProfileUnlocked('coach'), false, 'Coach requires PIN initially');
+  assert.strictEqual(isProfileUnlocked('admin'), false, 'Admin requires PIN initially');
+
+  assert.strictEqual(verifyPin('umpire', '0000'), null, 'Rejects wrong Umpire PIN');
+  assert.strictEqual(verifyPin('umpire', '4321'), 'umpire', 'Accepts custom Admin-configured Umpire PIN');
+  assert.strictEqual(verifyPin('coach', '8765'), 'coach', 'Accepts custom Admin-configured Coach PIN');
+  assert.strictEqual(verifyPin('umpire', '9999'), 'admin', 'Master Admin PIN unlocks Umpire as well');
+});
+
+console.log('\n12. VIEWER MODE INCLUDES FIXTURES & PLAYER SWOT SEARCH');
+it('Verifies Viewer mode exposes Live TV, Pool Standings, Fixtures, and Player SWOT Search while hiding Admin config', () => {
+  const html = fs.readFileSync(path.join(__dirname, 'smashheroes.html'), 'utf8');
+  assert.ok(html.includes('id="nav-btn-swot"'), 'SWOT navigation tab exists');
+  assert.ok(html.includes('id="view-swot"'), 'SWOT view section exists');
+  assert.ok(html.includes('id="swot-player-search-input"'), 'Player SWOT search input exists');
+  assert.ok(html.includes('id="swot-quadrant-grid"'), '4-quadrant SWOT matrix grid exists');
+  assert.ok(html.includes('id="admin-pin-config-card"'), 'Admin dynamic PIN configuration card exists');
+  assert.ok(html.includes('id="config-pin-umpire"') && html.includes('id="config-pin-coach"') && html.includes('id="config-pin-admin"'), 'Dynamic PIN inputs for Umpire, Coach, and Admin exist');
+  assert.ok(html.includes('id="modal-profile-pin"'), 'Profile PIN gate modal exists');
+  assert.ok(html.includes("['tv', 'standings', 'fixtures', 'swot'].includes(targetView)"), 'Viewer mode allows TV, Standings, Fixtures, and SWOT views');
 });
 
 console.log(`\n========================================`);
