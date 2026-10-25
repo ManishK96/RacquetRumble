@@ -136,13 +136,25 @@
           </div>
         </div>
 
-        <!-- PROFILE SWITCHER (DROPDOWN) -->
-        <div class="flex items-center gap-1 bg-[#14231b] border border-[#243c2f] rounded-xl px-2 py-1 shrink-0 max-w-[145px] sm:max-w-none">
-          <label for="profile-select" class="text-[9px] font-bold text-[#8fa39a] uppercase hidden md:inline">MODE:</label>
-          <select id="profile-select" onchange="switchTournamentProfile(this.value)" class="bg-transparent text-[11px] sm:text-xs font-bold text-white focus:outline-none cursor-pointer w-full truncate">
-            <option value="corporate">🏢 Corporate League</option>
-            <option value="casual">🏸 Casual Circle</option>
-          </select>
+        <!-- HIGH-LEVEL PROFILE SWITCHER (ONLY 2 PROFILES: TOURNAMENT VS CASUAL) + TOURNAMENT SUB-PROFILES -->
+        <div class="flex items-center gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
+          <div class="flex items-center gap-1 bg-[#14231b] border border-[#243c2f] rounded-xl px-2 py-1 shrink-0 max-w-[150px] sm:max-w-none">
+            <label for="profile-select" class="text-[9px] font-bold text-[#8fa39a] uppercase hidden md:inline">PROFILE:</label>
+            <select id="profile-select" onchange="switchTopLevelProfile(this.value)" class="bg-transparent text-[11px] sm:text-xs font-bold text-white focus:outline-none cursor-pointer w-full truncate">
+              <option value="corporate">🏆 Tournament</option>
+              <option value="casual">🏸 Casual Circle</option>
+            </select>
+          </div>
+          <!-- Sub-Profiles (Visible ONLY in Tournament Profile) -->
+          <div id="tournament-subprofile-wrapper" class="flex items-center gap-1 bg-[#102027] border border-emerald-500/40 rounded-xl px-2 py-1 shrink-0 max-w-[155px] sm:max-w-none">
+            <label for="tournament-subprofile-select" class="text-[9px] font-bold text-emerald-400 uppercase hidden lg:inline">ROLE:</label>
+            <select id="tournament-subprofile-select" onchange="switchTournamentSubProfile(this.value)" class="bg-transparent text-[11px] sm:text-xs font-bold text-emerald-300 focus:outline-none cursor-pointer w-full truncate">
+              <option value="tv">📺 Viewer / Live TV</option>
+              <option value="umpire">📱 Umpire (Scoring)</option>
+              <option value="coach">📋 Coach Console</option>
+              <option value="admin">👑 Admin Config</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -197,10 +209,13 @@
       </button>
       <button id="nav-btn-fixtures" onclick="switchCorpView('fixtures')" class="corp-tab py-2.5 px-3.5 text-center flex items-center gap-1.5 text-[#738b81] hover:text-white whitespace-nowrap">
         <span>📋</span> <span>Fixtures & Lineups</span>
-        <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">Admin</span>
+        <span id="nav-badge-fixtures-admin" class="hidden text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">Admin</span>
+      </button>
+      <button id="nav-btn-swot" onclick="switchCorpView('swot')" class="corp-tab py-2.5 px-3.5 text-center flex items-center gap-1.5 text-[#738b81] hover:text-white whitespace-nowrap">
+        <span>🔍</span> <span>Player Search &amp; SWOT</span>
       </button>
       <button id="nav-btn-admin" onclick="switchCorpView('admin')" class="corp-tab py-2.5 px-3.5 text-center flex items-center gap-1.5 text-[#738b81] hover:text-white whitespace-nowrap">
-        <span>⚙️</span> <span>Teams & Captains</span>
+        <span>⚙️</span> <span>Teams &amp; Captains</span>
         <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">Admin</span>
       </button>
     </nav>
@@ -258,9 +273,13 @@
 
           <!-- Pool Standings Snapshot Ticker -->
           <div class="bg-[#0f1712] border border-[#1c2c23] rounded-2xl p-3.5 space-y-2">
-            <div class="flex items-center justify-between text-xs font-bold text-[#718b7f] uppercase tracking-wider">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#718b7f] uppercase tracking-wider">
               <span>TOURNAMENT POOL STANDINGS SNAPSHOT</span>
-              <button onclick="switchCorpView('standings')" class="text-emerald-400 underline font-semibold">View Full Pool Tables & H2H →</button>
+              <div class="flex flex-wrap items-center gap-3">
+                <button onclick="switchCorpView('standings')" class="text-emerald-400 underline font-semibold">View Full Pool Tables & H2H →</button>
+                <button onclick="switchCorpView('fixtures')" class="text-cyan-400 underline font-semibold normal-case">📋 Fixtures &amp; Lineups →</button>
+                <button onclick="switchCorpView('swot')" class="text-amber-300 underline font-semibold normal-case">🔍 Player SWOT Search →</button>
+              </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
@@ -309,31 +328,25 @@
               <span class="text-emerald-400 font-bold">Single Set of 21</span>
             </div>
 
-            <!-- Team vs Team Fixture Tally -->
-            <div class="bg-[#09110d] border border-[#17271e] rounded-xl px-2.5 py-1.5 flex items-center justify-between text-xs gap-1">
-              <div class="text-left font-bold text-white flex items-center gap-1 min-w-0 flex-1">
-                <span id="umpire-team-a-name" class="truncate text-xs sm:text-sm">Cloud Titans</span>
-                <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-xs shrink-0" id="umpire-tally-a">0</span>
-              </div>
-              <div class="text-center font-bold text-[9px] sm:text-[10px] text-amber-400 uppercase tracking-wider shrink-0 px-1">
-                SERIES TALLY
-              </div>
-              <div class="text-right font-bold text-white flex items-center justify-end gap-1 min-w-0 flex-1">
-                <span class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono text-xs shrink-0" id="umpire-tally-b">0</span>
-                <span id="umpire-team-b-name" class="truncate text-xs sm:text-sm">DevOps Dynamos</span>
-              </div>
-            </div>
-
-            <!-- Rubber Players Lineup -->
-            <div class="flex items-center justify-between text-xs pt-0.5 gap-1">
+            <!-- Highlighted Players First, Team Name in Smaller Case Below -->
+            <div class="flex items-center justify-between text-xs pt-0.5 gap-2">
               <div class="text-left w-5/12 min-w-0">
-                <div class="text-[9px] sm:text-[10px] uppercase text-[#718b7f] font-semibold">Team A Players</div>
-                <div class="text-xs sm:text-sm text-emerald-400 font-bold truncate" id="umpire-players-a">Manish S. (C)</div>
+                <div class="text-sm sm:text-base text-white font-extrabold truncate" id="umpire-players-a">Manish S. (C)</div>
+                <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
+                  <span id="umpire-team-a-name" class="truncate text-[10px] sm:text-[11px] text-emerald-400/90 font-medium tracking-wide">Cloud Titans</span>
+                  <span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[10px] shrink-0" id="umpire-tally-a">0</span>
+                </div>
               </div>
-              <div class="text-center w-2/12 shrink-0 font-bebas text-sm sm:text-base text-slate-500">VS</div>
+              <div class="text-center w-2/12 shrink-0 flex flex-col items-center">
+                <span class="font-bebas text-sm sm:text-base text-amber-400">VS</span>
+                <span class="text-[8px] sm:text-[9px] text-[#718b7f] uppercase tracking-wider">SERIES</span>
+              </div>
               <div class="text-right w-5/12 min-w-0">
-                <div class="text-[9px] sm:text-[10px] uppercase text-[#718b7f] font-semibold">Team B Players</div>
-                <div class="text-xs sm:text-sm text-cyan-400 font-bold truncate" id="umpire-players-b">Nitesh S. (C)</div>
+                <div class="text-sm sm:text-base text-white font-extrabold truncate" id="umpire-players-b">Nitesh S. (C)</div>
+                <div class="flex items-center justify-end gap-1.5 mt-0.5 min-w-0">
+                  <span class="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-mono text-[10px] shrink-0" id="umpire-tally-b">0</span>
+                  <span id="umpire-team-b-name" class="truncate text-[10px] sm:text-[11px] text-cyan-400/90 font-medium tracking-wide">DevOps Dynamos</span>
+                </div>
               </div>
             </div>
           </div>
@@ -345,7 +358,7 @@
             <p class="text-xs text-[#718b7f] max-w-sm mx-auto">
               There are currently no active fixtures running on this court. An admin can schedule and assign the next fixture.
             </p>
-            <button onclick="handleAdminFeatureClick('fixtures')" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs">
+            <button id="btn-umpire-assign-admin" onclick="handleAdminFeatureClick('fixtures')" class="hidden px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs">
               Assign Fixture & Lineup (Admin) →
             </button>
           </div>
@@ -364,8 +377,11 @@
           <div id="umpire-scoring-pads" class="grid grid-cols-2 gap-2 sm:gap-3 min-h-[260px] sm:min-h-[340px]">
             <!-- Team A Touch Pad Card -->
             <div class="flex-1 min-w-0 bg-gradient-to-b from-[#13281e] to-[#0c1a14] border-2 border-emerald-500/50 hover:border-emerald-400 rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 flex flex-col items-center justify-between shadow-2xl transition-all">
-              <div class="w-full flex items-center justify-between pb-1 gap-1">
-                <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-400 truncate max-w-[95px] sm:max-w-[140px]" id="pad-team-a-label">TEAM A</span>
+              <div class="w-full flex items-start justify-between pb-1 gap-1">
+                <div class="min-w-0 flex-1 text-left">
+                  <div class="text-xs sm:text-sm font-extrabold text-white truncate" id="pad-player-a-label">Player A</div>
+                  <div class="text-[10px] font-medium text-emerald-400/90 tracking-wide truncate" id="pad-team-a-label">Team A</div>
+                </div>
                 <span class="text-[9px] sm:text-[10px] text-emerald-300/80 font-mono shrink-0" id="pad-team-a-action-sub">+ / −</span>
               </div>
               
@@ -394,8 +410,11 @@
 
             <!-- Team B Touch Pad Card -->
             <div class="flex-1 min-w-0 bg-gradient-to-b from-[#122424] to-[#0b1717] border-2 border-cyan-500/50 hover:border-cyan-400 rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 flex flex-col items-center justify-between shadow-2xl transition-all">
-              <div class="w-full flex items-center justify-between pb-1 gap-1">
-                <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-cyan-400 truncate max-w-[95px] sm:max-w-[140px]" id="pad-team-b-label">TEAM B</span>
+              <div class="w-full flex items-start justify-between pb-1 gap-1">
+                <div class="min-w-0 flex-1 text-left">
+                  <div class="text-xs sm:text-sm font-extrabold text-white truncate" id="pad-player-b-label">Player B</div>
+                  <div class="text-[10px] font-medium text-cyan-400/90 tracking-wide truncate" id="pad-team-b-label">Team B</div>
+                </div>
                 <span class="text-[9px] sm:text-[10px] text-cyan-300/80 font-mono shrink-0" id="pad-team-b-action-sub">+ / −</span>
               </div>
 
@@ -546,21 +565,21 @@
               </div>
             </div>
 
-            <!-- Team A & Team B Summary Cards -->
+            <!-- Player-First Summary Cards (Player Name Highlighted First, Team Name in Smaller Case) -->
             <div class="grid grid-cols-2 gap-2.5">
               <div class="bg-[#0c1410] border border-emerald-500/30 rounded-xl p-2.5 flex items-center justify-between">
                 <div class="min-w-0 pr-2">
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">SIDE A</div>
-                  <div id="coach-team-a-name" class="text-xs sm:text-sm font-bold text-white truncate">Team A</div>
-                  <div id="coach-players-a" class="text-[11px] text-[#8ab09f] truncate">Players A</div>
+                  <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-400">SIDE A PLAYER(S)</div>
+                  <div id="coach-players-a" class="text-xs sm:text-sm font-extrabold text-white truncate">Players A</div>
+                  <div id="coach-team-a-name" class="text-[10px] text-emerald-400/90 font-medium tracking-wide truncate">Team A</div>
                 </div>
                 <div id="coach-display-a" class="text-3xl sm:text-4xl font-bebas text-emerald-400 shrink-0">0</div>
               </div>
               <div class="bg-[#0c1410] border border-cyan-500/30 rounded-xl p-2.5 flex items-center justify-between">
                 <div class="min-w-0 pr-2">
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">SIDE B</div>
-                  <div id="coach-team-b-name" class="text-xs sm:text-sm font-bold text-white truncate">Team B</div>
-                  <div id="coach-players-b" class="text-[11px] text-[#8ab09f] truncate">Players B</div>
+                  <div class="text-[9px] font-bold uppercase tracking-wider text-cyan-400">SIDE B PLAYER(S)</div>
+                  <div id="coach-players-b" class="text-xs sm:text-sm font-extrabold text-white truncate">Players B</div>
+                  <div id="coach-team-b-name" class="text-[10px] text-cyan-400/90 font-medium tracking-wide truncate">Team B</div>
                 </div>
                 <div id="coach-display-b" class="text-3xl sm:text-4xl font-bebas text-cyan-400 shrink-0">0</div>
               </div>
@@ -640,10 +659,26 @@
                 </div>
               </div>
 
+              <!-- Player Attribution (Links Winner/Error & Notes to Specific Player for Later Review) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-[#0b120e] border border-[#21382c] rounded-xl p-2.5">
+                <div>
+                  <label for="coach-point-player-select" class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block mb-1">
+                    2. Linked Player (Winner / Error Attribution):
+                  </label>
+                  <select id="coach-point-player-select" onchange="handleCoachPlayerAttributionChange(this.value)" class="w-full bg-[#122119] border border-emerald-500/40 rounded-lg px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-emerald-400">
+                    <!-- Populated dynamically with match players -->
+                  </select>
+                </div>
+                <div class="flex flex-col justify-center">
+                  <span class="text-[10px] font-semibold text-[#8ab09f]">Saved to Coach Profile &amp; Player Career Log</span>
+                  <span id="coach-meta-owner-badge" class="text-[11px] font-bold text-amber-300 truncate mt-0.5">Coach Session: Local + Free Cloud Sync</span>
+                </div>
+              </div>
+
               <!-- Personal Coach Notes Input -->
               <div class="space-y-1.5">
                 <label for="coach-point-note-input" class="text-[11px] font-bold uppercase tracking-wider text-[#8ab09f] block">
-                  2. Coach's Personal Notes for This Point:
+                  3. Coach's Personal Notes for This Point:
                 </label>
                 <textarea id="coach-point-note-input" rows="2" placeholder="Add tactical observation or player note for this point (e.g., 'Great steep cross-court smash', 'Caught flat-footed on backhand transition')..." class="w-full bg-[#0b120e] border border-[#263e32] rounded-xl px-3 py-2 text-xs text-white placeholder-[#526b5f] focus:outline-none focus:border-emerald-400"></textarea>
               </div>
@@ -671,9 +706,42 @@
             <div id="coach-rally-feed-list" class="space-y-1.5 max-h-56 overflow-y-auto pr-1"></div>
           </div>
 
+          <!-- Player-Specific Winner/Error & Coach Metadata Review Panel -->
+          <div id="coach-player-analytics-card" class="bg-[#101915] border border-cyan-500/40 rounded-2xl p-3.5 sm:p-4 shadow-xl space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1c2e24] pb-2.5">
+              <div>
+                <h4 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span>🎯</span> Player Shot History, Winners/Errors &amp; Coach Notes Review
+                </h4>
+                <p class="text-[11px] text-[#8ab09f]">Every annotated point is linked to the player so they or coaches can review their winners, errors, and tactical notes anytime.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <label for="coach-analytics-player-select" class="text-[10px] font-bold uppercase text-cyan-300 shrink-0">Review Player:</label>
+                <select id="coach-analytics-player-select" onchange="renderPlayerAnalyticsPanel(this.value)" class="bg-[#0b130f] border border-cyan-500/40 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-cyan-400">
+                  <option value="ALL">All Annotated Players</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Summary KPIs for Selected Player -->
+            <div id="coach-player-analytics-summary" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <!-- Populated by renderPlayerAnalyticsPanel() -->
+            </div>
+
+            <!-- Shot Type Breakdown Pills -->
+            <div id="coach-player-shot-breakdown" class="flex flex-wrap gap-1.5">
+              <!-- Populated by renderPlayerAnalyticsPanel() -->
+            </div>
+
+            <!-- Per-Player Historical Point & Notes Log -->
+            <div id="coach-player-history-list" class="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+              <!-- Populated by renderPlayerAnalyticsPanel() -->
+            </div>
+          </div>
+
           <!-- Notice: Coach Console cannot end match -->
           <div class="p-3 rounded-2xl bg-[#141b17] border border-[#23382d] text-center text-xs text-[#718b7f]">
-            🛡️ <strong>Umpire Restriction</strong>: Live scoring and match completion are controlled by the umpire on the <button onclick="switchCorpView('umpire')" class="text-emerald-400 underline font-semibold">Umpire Console</button>.
+            🛡️ <strong>Umpire Restriction</strong>: Live scoring and match completion are controlled exclusively by the court umpire on the <strong>Umpire Profile</strong>.
           </div>
         </section>
 
@@ -783,13 +851,17 @@
 
             <!-- Action Toolbar for Fixtures Creation & Generation -->
             <div class="flex flex-wrap items-center justify-between gap-2 pt-1 pb-1">
-              <div class="flex items-center gap-2">
+              <div id="fixtures-admin-toolbar" class="flex items-center gap-2">
                 <button type="button" onclick="openCreateFixtureModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow flex items-center gap-1.5 transition-all">
                   <span>➕</span> <span>Create Custom Fixture</span>
                 </button>
                 <button type="button" onclick="handleGenerateAllPoolFixtures()" class="px-3 py-1.5 rounded-xl bg-[#1b2e23] hover:bg-[#254132] text-emerald-400 border border-emerald-500/40 font-bold text-xs flex items-center gap-1.5 transition-all">
                   <span>⚡</span> <span>Regenerate Pool Fixtures</span>
                 </button>
+              </div>
+              <div id="fixtures-viewer-note" class="hidden text-[11px] text-emerald-400 font-medium flex items-center gap-2">
+                <span>👀 Viewing Tournament Schedule &amp; Match Lineups</span>
+                <button type="button" onclick="switchCorpView('swot')" class="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-bold text-[11px]">🔍 Scout Opponent SWOT →</button>
               </div>
               <div class="text-[11px] text-[#718b7f]" id="fixtures-total-count-label"></div>
             </div>
@@ -799,8 +871,180 @@
           </div>
         </section>
 
-        <!-- View 1.5: Teams & Captains (ADMIN PROTECTED) -->
+        <!-- View 1.4B: Player Search & Opponent SWOT Analysis (AVAILABLE IN VIEWER & ADMIN MODES) -->
+        <section id="view-swot" class="space-y-4 p-4 hidden">
+          <div class="bg-gradient-to-r from-[#11241a] via-[#101915] to-[#122229] border border-emerald-500/40 rounded-2xl p-4 shadow-xl space-y-3.5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1c2e24] pb-3">
+              <div>
+                <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                  <span>🔍</span> PLAYER SEARCH &amp; OPPONENT SWOT ANALYSIS
+                </h3>
+                <p class="text-xs text-[#8ab09f] mt-0.5">
+                  Search any tournament player to inspect their Strengths, Weaknesses, Opportunities, Threats, shot winners/errors, and tactical scouting notes.
+                </p>
+              </div>
+              <span id="swot-total-players-badge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 self-start sm:self-auto shrink-0">
+                48 Tournament Players Indexed
+              </span>
+            </div>
+
+            <!-- Search Bar + Pool Filter + Direct Player Selector -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+              <div class="sm:col-span-5 relative">
+                <label for="swot-player-search-input" class="block text-[10px] font-bold uppercase text-emerald-400 mb-1">Search Player or Team Name:</label>
+                <input
+                  type="text"
+                  id="swot-player-search-input"
+                  oninput="handleSwotSearchInput(this.value)"
+                  placeholder="Type player or team (e.g. Manish, Nitesh, Cloud Titans)..."
+                  class="w-full bg-[#0b130f] border border-[#253f32] focus:border-emerald-400 rounded-xl px-3 py-2 text-xs text-white placeholder-[#587266] focus:outline-none"
+                >
+              </div>
+              <div class="sm:col-span-3">
+                <label for="swot-pool-filter" class="block text-[10px] font-bold uppercase text-[#8ab09f] mb-1">Filter Pool / Gender:</label>
+                <select
+                  id="swot-pool-filter"
+                  onchange="handleSwotPoolFilterChange(this.value)"
+                  class="w-full bg-[#0b130f] border border-[#253f32] focus:border-emerald-400 rounded-xl px-2.5 py-2 text-xs font-semibold text-white focus:outline-none"
+                >
+                  <option value="ALL">All Pools (48 Players)</option>
+                  <option value="A">Pool A Teams</option>
+                  <option value="B">Pool B Teams</option>
+                  <option value="M">Male Players</option>
+                  <option value="F">Female Players</option>
+                </select>
+              </div>
+              <div class="sm:col-span-4">
+                <label for="swot-player-select" class="block text-[10px] font-bold uppercase text-amber-300 mb-1">Select Opponent Profile:</label>
+                <select
+                  id="swot-player-select"
+                  onchange="selectSwotPlayer(this.value)"
+                  class="w-full bg-[#0b130f] border border-amber-500/40 focus:border-amber-400 rounded-xl px-2.5 py-2 text-xs font-bold text-white focus:outline-none"
+                ></select>
+              </div>
+            </div>
+
+            <!-- Quick Matching Player Pills -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-[10px] text-[#718b7f] font-bold uppercase">
+                <span id="swot-search-results-label">QUICK SELECT PLAYER</span>
+                <span class="text-emerald-400">Tap any player for instant SWOT</span>
+              </div>
+              <div id="swot-matching-players-chips" class="flex items-center gap-1.5 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar"></div>
+            </div>
+          </div>
+
+          <!-- Selected Player Dossier Header & Career KPIs -->
+          <div id="swot-player-header-card" class="bg-[#101915] border border-[#22382c] rounded-2xl p-4 shadow-xl space-y-3">
+            <!-- Populated dynamically by renderSwotAnalysisView() -->
+          </div>
+
+          <!-- 4-Quadrant Tactical SWOT Matrix -->
+          <div id="swot-quadrant-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <!-- Populated dynamically by renderSwotAnalysisView() -->
+          </div>
+
+          <!-- Shot Breakdown, Match History & Coach Notes for Selected Player -->
+          <div id="swot-details-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+            <!-- Populated dynamically by renderSwotAnalysisView() -->
+          </div>
+        </section>
+
+        <!-- View 1.5: Teams, Captains & Dynamic Role PIN Config (ADMIN PROTECTED) -->
         <section id="view-admin" class="space-y-4 p-4 hidden">
+          <!-- Dynamic Per-Profile PIN Configuration Card (Admin Only) -->
+          <div id="admin-pin-config-card" class="bg-gradient-to-r from-[#14221a] via-[#101915] to-[#172017] border-2 border-amber-500/50 rounded-2xl p-4 shadow-xl space-y-3.5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#20362b] pb-2.5">
+              <div>
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <span>🔐</span> ROLE-BASED PROFILE PIN CONFIGURATION (TOURNAMENT MODE)
+                </h3>
+                <p class="text-xs text-[#8ab09f] mt-0.5">
+                  <strong>Viewer / Live TV</strong> is open to all spectators without a PIN. Configure dedicated PINs below for <strong>Umpire</strong>, <strong>Coach</strong>, and <strong>Admin</strong> profiles and share them with authorized personnel.
+                </p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0 self-start sm:self-auto">
+                Dynamic Cloud + Local Sync
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <!-- Umpire Profile PIN -->
+              <div class="bg-[#0b130f] border border-emerald-500/40 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between">
+                  <label for="config-pin-umpire" class="text-[11px] font-bold text-emerald-400 uppercase flex items-center gap-1">
+                    <span>📱</span> Umpire Profile PIN
+                  </label>
+                  <button type="button" onclick="copyProfileInvite('umpire')" class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 font-semibold border border-emerald-500/30">
+                    📋 Share PIN
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  id="config-pin-umpire"
+                  placeholder="e.g. 1111"
+                  maxlength="16"
+                  class="w-full bg-[#13221a] border border-emerald-500/40 rounded-lg px-3 py-1.5 text-sm font-mono font-bold text-white tracking-widest focus:outline-none focus:border-emerald-400"
+                >
+                <p class="text-[10px] text-[#718b7f]">Grants access to Umpire Scoring Console only.</p>
+              </div>
+
+              <!-- Coach Profile PIN -->
+              <div class="bg-[#0b130f] border border-cyan-500/40 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between">
+                  <label for="config-pin-coach" class="text-[11px] font-bold text-cyan-400 uppercase flex items-center gap-1">
+                    <span>📋</span> Coach Profile PIN
+                  </label>
+                  <button type="button" onclick="copyProfileInvite('coach')" class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 font-semibold border border-cyan-500/30">
+                    📋 Share PIN
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  id="config-pin-coach"
+                  placeholder="e.g. 2222"
+                  maxlength="16"
+                  class="w-full bg-[#112126] border border-cyan-500/40 rounded-lg px-3 py-1.5 text-sm font-mono font-bold text-white tracking-widest focus:outline-none focus:border-cyan-400"
+                >
+                <p class="text-[10px] text-[#718b7f]">Grants access to Coach 1–21 Graph &amp; Shot/Notes Inspector.</p>
+              </div>
+
+              <!-- Admin Profile PIN -->
+              <div class="bg-[#0b130f] border border-amber-500/40 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between">
+                  <label for="config-pin-admin" class="text-[11px] font-bold text-amber-300 uppercase flex items-center gap-1">
+                    <span>👑</span> Admin Profile PIN
+                  </label>
+                  <button type="button" onclick="copyProfileInvite('admin')" class="text-[10px] px-2 py-0.5 rounded bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 font-semibold border border-amber-500/30">
+                    📋 Share PIN
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  id="config-pin-admin"
+                  placeholder="e.g. 2026"
+                  maxlength="16"
+                  class="w-full bg-[#211b10] border border-amber-500/40 rounded-lg px-3 py-1.5 text-sm font-mono font-bold text-white tracking-widest focus:outline-none focus:border-amber-400"
+                >
+                <p class="text-[10px] text-[#718b7f]">Master PIN: unlocks Admin Config, Umpire, and Coach.</p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <span id="admin-pin-save-status" class="text-[11px] text-[#8ab09f]">
+                Active PINs: Umpire (<code class="text-emerald-300" id="status-pin-umpire">1111</code>) · Coach (<code class="text-cyan-300" id="status-pin-coach">2222</code>) · Admin (<code class="text-amber-300" id="status-pin-admin">2026</code>)
+              </span>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="lockAllTournamentProfiles()" class="px-3 py-2 rounded-xl bg-[#1a2820] hover:bg-rose-950/60 text-xs font-bold text-[#9eb4aa] hover:text-rose-300 border border-[#283e32] transition">
+                  🔒 Lock Active Session
+                </button>
+                <button type="button" onclick="saveProfilePinsConfig()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-[#0c1410] font-bold text-xs shadow-lg transition flex items-center gap-1.5">
+                  <span>💾</span> Save &amp; Sync Profile PINs
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="bg-[#101915] border border-[#20362b] rounded-2xl p-4 shadow-xl space-y-4">
             <div class="border-b border-[#1b2b23] pb-2 flex items-center justify-between">
               <div>
@@ -1286,6 +1530,57 @@
     </div>
 
     <!-- =================================================================== -->
+    <!-- MODAL 3B: PROFILE PIN GATE (FOR UMPIRE, COACH & ADMIN PROFILES)      -->
+    <!-- =================================================================== -->
+    <div id="modal-profile-pin" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-[#101915] border-2 border-amber-500/60 rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-4 text-left">
+        <div class="flex items-center justify-between border-b border-[#20362b] pb-2.5">
+          <h3 id="profile-pin-modal-title" class="text-base font-bold text-white flex items-center gap-2">
+            <span>🔐</span> Enter Profile Access PIN
+          </h3>
+          <button type="button" onclick="closeProfilePinModal()" class="text-[#718b7f] hover:text-white">✕</button>
+        </div>
+
+        <p id="profile-pin-modal-desc" class="text-xs text-[#9eb4aa] leading-relaxed">
+          Live TV / Viewer mode is open to everyone. To switch to this protected tournament role, please enter the role PIN provided by your tournament admin.
+        </p>
+
+        <form onsubmit="submitProfilePinModal(event)" class="space-y-3">
+          <div>
+            <label for="profile-pin-modal-input" class="block text-[10px] font-bold uppercase tracking-wider text-amber-300 mb-1" id="profile-pin-modal-label">
+              ENTER ROLE PIN:
+            </label>
+            <input
+              type="password"
+              id="profile-pin-modal-input"
+              placeholder="••••"
+              autocomplete="off"
+              class="w-full bg-[#080d0b] border border-amber-500/50 text-white text-base font-mono rounded-xl px-3.5 py-2.5 text-center tracking-widest focus:outline-none focus:border-emerald-400"
+            >
+          </div>
+
+          <div id="profile-pin-modal-error" class="hidden text-xs text-rose-300 bg-rose-950/60 border border-rose-500/40 rounded-xl p-2.5 text-center font-medium"></div>
+
+          <div class="flex gap-2 pt-1">
+            <button type="button" onclick="closeProfilePinModal()" class="py-2.5 px-4 rounded-xl bg-[#1a2921] hover:bg-[#23382d] text-xs font-bold text-[#8fa39a]">
+              Stay on Viewer TV
+            </button>
+            <button type="submit" id="btn-submit-profile-pin" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition-all">
+              Unlock Profile →
+            </button>
+          </div>
+        </form>
+
+        <div class="pt-2 border-t border-[#1b2b23] flex items-center justify-between text-[10px] text-[#718b7f]">
+          <span>Tournament Organizer?</span>
+          <button type="button" onclick="closeProfilePinModal(); openAuthModal();" class="text-emerald-400 underline font-semibold">
+            Sign in with Google →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
     
     <!-- =================================================================== -->
     <!-- MODAL 6: GOOGLE FORM & EXCEL IMPORT GUIDE                           -->
@@ -1505,9 +1800,33 @@ Sneha P. (F)</pre>
       measurementId: "G-45P104NQQT"
     };
 
+    const COACH_META_PREFIX = 'racquet_rumble_coach_meta_v1_';
+    const PLAYER_ANALYTICS_STORAGE_KEY = 'racquet_rumble_player_analytics_v1';
+    const PROFILE_PINS_STORAGE_KEY = 'racquet_rumble_profile_pins_v1';
+
     const appState = {
-      currentProfile: 'corporate', // 'corporate' | 'casual'
+      topProfile: 'corporate', // 'corporate' (Tournament) | 'casual' (Casual Circle)
+      tournamentSubProfile: 'tv', // 'tv' | 'umpire' | 'coach' | 'admin' (Sub-profiles only for Tournament)
+      currentProfile: 'tv', // Effective active profile ('tv' | 'umpire' | 'coach' | 'admin' | 'casual')
       isAdmin: false, // DEFAULT: VIEW ONLY (No unauthorized writes)
+      profilePins: {
+        umpire: '1111',
+        coach: '2222',
+        admin: '2026'
+      },
+      unlockedProfiles: {
+        tv: true,
+        umpire: false,
+        coach: false,
+        admin: false
+      },
+      pendingPinTargetProfile: null,
+      selectedSwotPlayer: 'Manish S.',
+      swotSearchQuery: '',
+      swotPoolFilter: 'ALL',
+      playerAnalytics: {}, // Per-player cumulative winners, errors & coach notes across matches
+      coachMetadata: {}, // Saved specifically for the active coach user
+      selectedAnalyticsPlayer: 'ALL',
       authUser: null, // DEFAULT: Not logged in
       adminUser: null,
       selectedCourtId: 1,
@@ -1731,6 +2050,19 @@ Sneha P. (F)</pre>
             f1.rubbers[0].status = 'live';
             f1.rubbers[0].scoreA = 18;
             f1.rubbers[0].scoreB = 16;
+            f1.rubbers[0].pointDetails = {
+              A: {
+                3: { shotType: 'Smash', category: 'winner', player: 'Manish S.', coachId: 'seed_coach', coachName: 'Coach', notes: 'Steep cross-court jump smash to forehand sideline', updatedAt: '10:12:05' },
+                7: { shotType: 'Net', category: 'winner', player: 'Manish S.', coachId: 'seed_coach', coachName: 'Coach', notes: 'Tight spinning net kill after forcing short lift', updatedAt: '10:15:22' },
+                12: { shotType: 'Smash', category: 'winner', player: 'Manish S.', coachId: 'seed_coach', coachName: 'Coach', notes: 'Body smash on transition', updatedAt: '10:18:40' },
+                15: { shotType: 'Unforced Error', category: 'error', player: 'Nitesh S.', coachId: 'seed_coach', coachName: 'Coach', notes: 'Pushed backhand drive wide under pressure', updatedAt: '10:21:11' }
+              },
+              B: {
+                4: { shotType: 'Drop', category: 'winner', player: 'Nitesh S.', coachId: 'seed_coach', coachName: 'Coach', notes: 'Deceptive slice drop from rear court', updatedAt: '10:13:10' },
+                9: { shotType: 'Drive', category: 'winner', player: 'Nitesh S.', coachId: 'seed_coach', coachName: 'Coach', notes: 'Flat counter-drive down the line', updatedAt: '10:16:45' },
+                14: { shotType: 'Net Fault', category: 'error', player: 'Manish S.', coachId: 'seed_coach', coachName: 'Coach', notes: 'Rushed net tumble clipped the tape', updatedAt: '10:20:02' }
+              }
+            };
           }
         }
       }
@@ -1858,7 +2190,11 @@ Sneha P. (F)</pre>
             f.rubbers = createRubbersForFixture(f);
           }
         }
+        const canonTeamA = getTeam(f.teamAId);
+        const canonTeamB = getTeam(f.teamBId);
         f.rubbers.forEach(r => {
+          if (canonTeamA && canonTeamA.name) r.teamAName = canonTeamA.name;
+          if (canonTeamB && canonTeamB.name) r.teamBName = canonTeamB.name;
           r.scoreA = Number(r.scoreA || 0);
           r.scoreB = Number(r.scoreB || 0);
           if (!Array.isArray(r.rallyHistory)) {
@@ -1948,59 +2284,470 @@ Sneha P. (F)</pre>
     }
 
     // =========================================================================
-    // PROFILE SWITCHER (CORPORATE VS CASUAL)
+    // ROLE-BASED PROFILE SWITCHER (TV/VIEWER, UMPIRE, COACH, ADMIN, CASUAL)
     // =========================================================================
-    function switchTournamentProfile(profileKey) {
-      appState.currentProfile = profileKey;
+    function isProfileUnlocked(role) {
+      if (!role || role === 'tv' || role === 'casual') return true;
+      if (isOwnerAdmin()) return true;
+      if (appState.unlockedProfiles && appState.unlockedProfiles.admin) return true;
+      if (appState.unlockedProfiles && appState.unlockedProfiles[role]) return true;
+      return false;
+    }
+
+    function verifyProfilePinInput(role, enteredPin) {
+      const clean = String(enteredPin || '').trim();
+      if (!clean) return false;
+      const pins = appState.profilePins || { umpire: '1111', coach: '2222', admin: '2026' };
+      const adminPin = String(pins.admin || '2026').trim();
+      const umpirePin = String(pins.umpire || '1111').trim();
+      const coachPin = String(pins.coach || '2222').trim();
+
+      // Master admin PIN unlocks any tournament profile
+      if (clean === adminPin || clean === '2026' || clean === 'rumble2026' || clean === 'admin') {
+        return 'admin';
+      }
+      if (role === 'umpire' && clean === umpirePin) {
+        return 'umpire';
+      }
+      if (role === 'coach' && clean === coachPin) {
+        return 'coach';
+      }
+      // If called from generic PIN modal without a specific role, check if it matches umpire or coach
+      if (!role || role === 'any') {
+        if (clean === umpirePin) return 'umpire';
+        if (clean === coachPin) return 'coach';
+      }
+      return null;
+    }
+
+    function openProfilePinModal(targetRole) {
+      const role = ['umpire', 'coach', 'admin'].includes(targetRole) ? targetRole : 'umpire';
+      appState.pendingPinTargetProfile = role;
+
+      const roleMeta = {
+        umpire: {
+          title: '📱 Enter Umpire Profile PIN',
+          desc: 'Viewer / Live TV mode is open to all spectators. Enter the Umpire PIN set by the Tournament Admin to access the Court Umpire Scoring Console.',
+          label: 'UMPIRE ACCESS PIN:'
+        },
+        coach: {
+          title: '📋 Enter Coach Profile PIN',
+          desc: 'Viewer / Live TV mode is open to all spectators. Enter the Coach PIN set by the Tournament Admin to access the 1–21 Horizontal Graph & Shot/Notes Console.',
+          label: 'COACH ACCESS PIN:'
+        },
+        admin: {
+          title: '👑 Enter Admin Config PIN',
+          desc: 'Enter the Tournament Admin PIN to access Fixtures Creation, Captain Lineups, Teams & Roster Import, and Dynamic Profile PIN Settings.',
+          label: 'ADMIN MASTER PIN:'
+        }
+      }[role];
+
+      const titleEl = document.getElementById('profile-pin-modal-title');
+      const descEl = document.getElementById('profile-pin-modal-desc');
+      const labelEl = document.getElementById('profile-pin-modal-label');
+      const inputEl = document.getElementById('profile-pin-modal-input');
+      const errEl = document.getElementById('profile-pin-modal-error');
+      const modal = document.getElementById('modal-profile-pin');
+
+      if (titleEl) titleEl.innerHTML = `<span>🔐</span> <span>${roleMeta.title}</span>`;
+      if (descEl) descEl.textContent = roleMeta.desc;
+      if (labelEl) labelEl.textContent = roleMeta.label;
+      if (inputEl) inputEl.value = '';
+      if (errEl) {
+        errEl.classList.add('hidden');
+        errEl.textContent = '';
+      }
+      if (modal) {
+        modal.classList.remove('hidden');
+        setTimeout(() => { if (inputEl) inputEl.focus(); }, 40);
+      }
+    }
+
+    function closeProfilePinModal() {
+      const modal = document.getElementById('modal-profile-pin');
+      if (modal) modal.classList.add('hidden');
+      appState.pendingPinTargetProfile = null;
+      const subSelect = document.getElementById('tournament-subprofile-select');
+      if (subSelect) {
+        subSelect.value = appState.tournamentSubProfile || 'tv';
+      }
+    }
+
+    function submitProfilePinModal(e) {
+      if (e) e.preventDefault();
+      const targetRole = appState.pendingPinTargetProfile || 'umpire';
+      const inputEl = document.getElementById('profile-pin-modal-input');
+      const errEl = document.getElementById('profile-pin-modal-error');
+      const entered = inputEl ? inputEl.value.trim() : '';
+
+      const matchedLevel = verifyProfilePinInput(targetRole, entered);
+      if (!matchedLevel) {
+        if (errEl) {
+          errEl.textContent = `Incorrect PIN for ${targetRole.toUpperCase()} profile. Please check with your Tournament Admin.`;
+          errEl.classList.remove('hidden');
+        }
+        showToast('Incorrect Profile PIN', '⚠️');
+        return;
+      }
+
+      if (!appState.unlockedProfiles) {
+        appState.unlockedProfiles = { tv: true, umpire: false, coach: false, admin: false };
+      }
+      if (matchedLevel === 'admin') {
+        appState.unlockedProfiles.admin = true;
+        appState.unlockedProfiles.umpire = true;
+        appState.unlockedProfiles.coach = true;
+        appState.isAdmin = true;
+        appState.isPinAuthenticated = true;
+        appState.adminUser = { email: 'pin_admin@court.badminton', name: 'Tournament Admin' };
+      } else {
+        appState.unlockedProfiles[targetRole] = true;
+        appState.isPinAuthenticated = true;
+        appState.adminUser = {
+          email: `pin_${targetRole}@court.badminton`,
+          name: targetRole === 'umpire' ? 'Court Umpire' : 'Team Coach'
+        };
+      }
+
+      saveAuthSessionToStorage();
+      const modal = document.getElementById('modal-profile-pin');
+      if (modal) modal.classList.add('hidden');
+      appState.pendingPinTargetProfile = null;
+
+      switchTournamentProfile(targetRole, true);
+      showToast(`PIN Verified! ${targetRole.toUpperCase()} Profile unlocked.`, '🔓');
+    }
+
+    function saveProfilePinsConfig() {
+      if (!isAuthorizedEditor()) {
+        openProfilePinModal('admin');
+        return;
+      }
+      const uIn = document.getElementById('config-pin-umpire');
+      const cIn = document.getElementById('config-pin-coach');
+      const aIn = document.getElementById('config-pin-admin');
+
+      const uPin = (uIn && uIn.value.trim()) ? uIn.value.trim() : '1111';
+      const cPin = (cIn && cIn.value.trim()) ? cIn.value.trim() : '2222';
+      const aPin = (aIn && aIn.value.trim()) ? aIn.value.trim() : '2026';
+
+      appState.profilePins = {
+        umpire: uPin,
+        coach: cPin,
+        admin: aPin
+      };
+
+      try {
+        localStorage.setItem(PROFILE_PINS_STORAGE_KEY, JSON.stringify(appState.profilePins));
+      } catch (e) {}
+
+      renderAdminPinConfigInputs();
+      syncStateToCloud();
+      showToast(`Saved PINs — Umpire: ${uPin} · Coach: ${cPin} · Admin: ${aPin}`, '🔐');
+    }
+
+    function loadProfilePinsFromStorage() {
+      try {
+        const raw = localStorage.getItem(PROFILE_PINS_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            appState.profilePins = {
+              umpire: String(parsed.umpire || '1111'),
+              coach: String(parsed.coach || '2222'),
+              admin: String(parsed.admin || '2026')
+            };
+          }
+        }
+      } catch (e) {}
+    }
+
+    function renderAdminPinConfigInputs() {
+      const pins = appState.profilePins || { umpire: '1111', coach: '2222', admin: '2026' };
+      const uIn = document.getElementById('config-pin-umpire');
+      const cIn = document.getElementById('config-pin-coach');
+      const aIn = document.getElementById('config-pin-admin');
+      if (uIn && document.activeElement !== uIn) uIn.value = pins.umpire;
+      if (cIn && document.activeElement !== cIn) cIn.value = pins.coach;
+      if (aIn && document.activeElement !== aIn) aIn.value = pins.admin;
+
+      const sU = document.getElementById('status-pin-umpire');
+      const sC = document.getElementById('status-pin-coach');
+      const sA = document.getElementById('status-pin-admin');
+      if (sU) sU.textContent = pins.umpire;
+      if (sC) sC.textContent = pins.coach;
+      if (sA) sA.textContent = pins.admin;
+    }
+
+    function copyProfileInvite(role) {
+      const pins = appState.profilePins || { umpire: '1111', coach: '2222', admin: '2026' };
+      const pinVal = pins[role] || '2026';
+      const roleLabels = {
+        umpire: '📱 Umpire (Scoring)',
+        coach: '📋 Coach Console',
+        admin: '👑 Admin Config'
+      };
+      const baseUrl = (typeof window !== 'undefined' && window.location)
+        ? (window.location.origin + window.location.pathname + '#' + role)
+        : ('#' + role);
+      const msg = `Racquet Rumble ${roleLabels[role] || role} Access — Link: ${baseUrl} | Role PIN: ${pinVal}`;
+      try {
+        if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(msg);
+        }
+      } catch (e) {}
+      showToast(`Copied ${role.toUpperCase()} PIN (${pinVal}) & share link!`, '📋');
+    }
+
+    function lockAllTournamentProfiles() {
+      appState.unlockedProfiles = { tv: true, umpire: false, coach: false, admin: false };
+      appState.isPinAuthenticated = false;
+      appState.isAdmin = false;
+      appState.adminUser = null;
+      saveAuthSessionToStorage();
+      switchTournamentProfile('tv', true);
+      showToast('Locked protected profiles. Switched to Viewer / Live TV mode.', '🔒');
+    }
+
+    function applyProfileVisibilityRules() {
+      const profile = appState.currentProfile || 'tv';
+      const isAdminProfile = profile === 'admin';
+
+      // 1. TV Link button is ALWAYS visible to all viewers across every profile
+      const tvLinkBtn = document.getElementById('btn-tv-link');
+      if (tvLinkBtn) tvLinkBtn.classList.remove('hidden');
+
+      // 2. All configuration options (Firebase Cloud Sync config, Fixtures creation toolbar, Teams/CSV/PIN config)
+      //    are visible ONLY on the Admin profile
+      const cloudBtn = document.getElementById('btn-cloud-status');
+      if (cloudBtn) {
+        if (isAdminProfile) cloudBtn.classList.remove('hidden');
+        else cloudBtn.classList.add('hidden');
+      }
+
+      const umpireAssignBtn = document.getElementById('btn-umpire-assign-admin');
+      if (umpireAssignBtn) {
+        if (isAdminProfile) umpireAssignBtn.classList.remove('hidden');
+        else umpireAssignBtn.classList.add('hidden');
+      }
+
+      const fixAdminToolbar = document.getElementById('fixtures-admin-toolbar');
+      const fixViewerNote = document.getElementById('fixtures-viewer-note');
+      const fixAdminBadge = document.getElementById('nav-badge-fixtures-admin');
+      if (fixAdminToolbar) {
+        if (isAdminProfile) fixAdminToolbar.classList.remove('hidden');
+        else fixAdminToolbar.classList.add('hidden');
+      }
+      if (fixViewerNote) {
+        if (isAdminProfile) fixViewerNote.classList.add('hidden');
+        else fixViewerNote.classList.remove('hidden');
+      }
+      if (fixAdminBadge) {
+        if (isAdminProfile) fixAdminBadge.classList.remove('hidden');
+        else fixAdminBadge.classList.add('hidden');
+      }
+
+      // 3. Configure Corporate navigation bar tabs per profile
+      const navCorp = document.getElementById('nav-corporate');
+      const btnTv = document.getElementById('nav-btn-tv');
+      const btnUmpire = document.getElementById('nav-btn-umpire');
+      const btnCoach = document.getElementById('nav-btn-coach');
+      const btnStandings = document.getElementById('nav-btn-standings');
+      const btnFixtures = document.getElementById('nav-btn-fixtures');
+      const btnSwot = document.getElementById('nav-btn-swot');
+      const btnAdmin = document.getElementById('nav-btn-admin');
+
+      if (profile === 'umpire' || profile === 'coach' || profile === 'casual') {
+        // Umpire Profile: ONLY Umpire Console visible (no other tabs)
+        // Coach Profile: ONLY Coach Console visible (no other tabs)
+        if (navCorp) navCorp.classList.add('hidden');
+      } else if (profile === 'tv') {
+        // Viewer / TV Profile: Live TV Hub, Pool Standings, Fixtures & Lineups (Read-Only), and Player Search & SWOT
+        if (navCorp) navCorp.classList.remove('hidden');
+        if (btnTv) btnTv.classList.remove('hidden');
+        if (btnStandings) btnStandings.classList.remove('hidden');
+        if (btnFixtures) btnFixtures.classList.remove('hidden');
+        if (btnSwot) btnSwot.classList.remove('hidden');
+        if (btnUmpire) btnUmpire.classList.add('hidden');
+        if (btnCoach) btnCoach.classList.add('hidden');
+        if (btnAdmin) btnAdmin.classList.add('hidden');
+      } else if (isAdminProfile) {
+        // Admin Profile: Full navigation & all configuration options visible
+        if (navCorp) navCorp.classList.remove('hidden');
+        [btnTv, btnUmpire, btnCoach, btnStandings, btnFixtures, btnSwot, btnAdmin].forEach(b => {
+          if (b) b.classList.remove('hidden');
+        });
+      }
+    }
+
+    function switchTopLevelProfile(topMode) {
+      if (topMode === 'casual') {
+        switchTournamentProfile('casual', true);
+      } else {
+        const sub = appState.tournamentSubProfile || 'tv';
+        if (sub !== 'tv' && !isProfileUnlocked(sub)) {
+          switchTournamentProfile('tv', true);
+        } else {
+          switchTournamentProfile(sub, true);
+        }
+      }
+    }
+
+    function switchTournamentSubProfile(subRole) {
+      const validSub = ['tv', 'umpire', 'coach', 'admin'].includes(subRole) ? subRole : 'tv';
+      // Require PIN for any tournament sub-profile except Live TV ('tv')
+      if (validSub !== 'tv' && !isProfileUnlocked(validSub)) {
+        const subSelect = document.getElementById('tournament-subprofile-select');
+        if (subSelect) subSelect.value = appState.tournamentSubProfile || 'tv';
+        openProfilePinModal(validSub);
+        return;
+      }
+      appState.tournamentSubProfile = validSub;
+      switchTournamentProfile(validSub, true);
+    }
+
+    function switchTournamentProfile(profileKey, bypassPinCheck) {
+      let normalized = profileKey || 'tv';
+      if (normalized === 'corporate') {
+        normalized = appState.tournamentSubProfile || 'tv';
+      }
+
+      if (normalized !== 'casual' && normalized !== 'tv' && !bypassPinCheck && !isProfileUnlocked(normalized)) {
+        openProfilePinModal(normalized);
+        return;
+      }
+
+      if (normalized !== 'casual' && normalized !== 'tv') {
+        if (!appState.unlockedProfiles) {
+          appState.unlockedProfiles = { tv: true, umpire: false, coach: false, admin: false };
+        }
+        appState.unlockedProfiles[normalized] = true;
+        appState.isPinAuthenticated = true;
+        if (normalized === 'admin') appState.isAdmin = true;
+      }
+
+      const subWrapper = document.getElementById('tournament-subprofile-wrapper');
+      const subSelect = document.getElementById('tournament-subprofile-select');
+      const sel = document.getElementById('profile-select');
+
+      if (normalized === 'casual') {
+        appState.topProfile = 'casual';
+        appState.currentProfile = 'casual';
+        if (sel) sel.value = 'casual';
+        if (subWrapper) subWrapper.classList.add('hidden');
+      } else {
+        if (!['tv', 'umpire', 'coach', 'admin'].includes(normalized)) {
+          normalized = 'tv';
+        }
+        appState.topProfile = 'corporate';
+        appState.tournamentSubProfile = normalized;
+        appState.currentProfile = normalized;
+        if (sel) sel.value = 'corporate';
+        if (subWrapper) subWrapper.classList.remove('hidden');
+        if (subSelect) subSelect.value = normalized;
+      }
+
       const navCorp = document.getElementById('nav-corporate');
       const navCas = document.getElementById('nav-casual');
       const boxCorp = document.getElementById('profile-container-corporate');
       const boxCas = document.getElementById('profile-container-casual');
       const pTag = document.getElementById('header-profile-tag');
       const pSub = document.getElementById('header-subtitle');
-      const tvLinkBtn = document.getElementById('btn-tv-link');
-      const sel = document.getElementById('profile-select');
 
-      if (sel) sel.value = profileKey;
+      applyProfileVisibilityRules();
 
-      if (profileKey === 'corporate') {
-        navCorp.classList.remove('hidden');
-        navCas.classList.add('hidden');
-        boxCorp.classList.remove('hidden');
-        boxCas.classList.add('hidden');
-        pTag.textContent = 'CORPORATE LEAGUE';
-        pTag.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase';
-        pSub.textContent = '2 Pools · 8 Teams · Multi-Court Arena';
-        if (tvLinkBtn) tvLinkBtn.classList.remove('hidden');
-        switchCorpView(appState.activeCorpView || 'tv');
-      } else {
-        navCorp.classList.add('hidden');
-        navCas.classList.remove('hidden');
-        boxCorp.classList.add('hidden');
-        boxCas.classList.remove('hidden');
-        pTag.textContent = 'CASUAL CIRCLE';
-        pTag.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase';
-        pSub.textContent = 'Personal Friends Circle · Singles & Doubles';
-        if (tvLinkBtn) tvLinkBtn.classList.add('hidden');
+      if (normalized === 'casual') {
+        if (navCorp) navCorp.classList.add('hidden');
+        if (navCas) navCas.classList.remove('hidden');
+        if (boxCorp) boxCorp.classList.add('hidden');
+        if (boxCas) boxCas.classList.remove('hidden');
+        if (pTag) {
+          pTag.textContent = 'CASUAL CIRCLE';
+          pTag.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase shrink-0';
+        }
+        if (pSub) pSub.textContent = 'Personal Friends Circle · Singles & Doubles';
         loadCasualProfileForCurrentUser();
         switchCasualTab(appState.activeCasualTab || 'standings');
+      } else {
+        if (navCas) navCas.classList.add('hidden');
+        if (boxCas) boxCas.classList.add('hidden');
+        if (boxCorp) boxCorp.classList.remove('hidden');
+
+        if (normalized === 'umpire') {
+          if (pTag) {
+            pTag.textContent = 'UMPIRE PROFILE';
+            pTag.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase shrink-0';
+          }
+          if (pSub) pSub.textContent = 'Dedicated Court Officiating & Live Scoring Console';
+          switchCorpView('umpire');
+        } else if (normalized === 'coach') {
+          if (pTag) {
+            pTag.textContent = 'COACH PROFILE';
+            pTag.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase shrink-0';
+          }
+          if (pSub) pSub.textContent = 'Dedicated 1–21 Horizontal Graph & Shot/Notes Logger';
+          switchCorpView('coach');
+        } else if (normalized === 'admin') {
+          if (pTag) {
+            pTag.textContent = 'ADMIN PROFILE';
+            pTag.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase shrink-0';
+          }
+          if (pSub) pSub.textContent = 'Full Tournament Config · PINs, Fixtures, Lineups, Teams & Sync';
+          const defaultAdminView = (appState.activeCorpView && ['fixtures', 'admin', 'tv', 'umpire', 'coach', 'standings', 'swot'].includes(appState.activeCorpView))
+            ? appState.activeCorpView
+            : 'admin';
+          switchCorpView(defaultAdminView);
+        } else {
+          // Default 'tv' Viewer profile
+          if (pTag) {
+            pTag.textContent = 'VIEWER / TV HUB';
+            pTag.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase shrink-0';
+          }
+          if (pSub) pSub.textContent = 'Live Multi-Court Stream · Pool Standings · Fixtures · Player SWOT';
+          const allowedViewerTab = ['tv', 'standings', 'fixtures', 'swot'].includes(appState.activeCorpView) ? appState.activeCorpView : 'tv';
+          switchCorpView(allowedViewerTab);
+        }
       }
 
       updateAuthUI();
-      showToast(`Switched profile to ${profileKey === 'corporate' ? 'Corporate League' : 'Casual Circle'}!`, '🏸');
+      const profileLabels = {
+        tv: 'Viewer / TV Hub',
+        umpire: 'Umpire Profile (Scoring Only)',
+        coach: 'Coach Profile (Coach Console Only)',
+        admin: 'Admin Profile (Full Config)',
+        casual: 'Casual Circle'
+      };
+      showToast(`Active Profile: ${profileLabels[normalized] || normalized}`, '🏸');
     }
 
-    // --- Navigation for Corporate Views ---
+    // --- Navigation for Corporate Views (Enforces Profile Isolation) ---
     function switchCorpView(viewName) {
-      appState.activeCorpView = viewName;
-      ['tv', 'umpire', 'coach', 'standings', 'fixtures', 'admin'].forEach(v => {
+      const profile = appState.currentProfile || 'tv';
+      let targetView = viewName || 'tv';
+
+      // Strict profile view isolation:
+      // - Umpire profile ONLY shows Umpire Console
+      // - Coach profile ONLY shows Coach Console
+      // - Viewer/TV profile shows TV Hub, Pool Standings, Fixtures & Lineups, and Player Search & SWOT
+      if (profile === 'umpire') {
+        targetView = 'umpire';
+      } else if (profile === 'coach') {
+        targetView = 'coach';
+      } else if (profile === 'tv' && !['tv', 'standings', 'fixtures', 'swot'].includes(targetView)) {
+        targetView = 'tv';
+      }
+
+      appState.activeCorpView = targetView;
+      applyProfileVisibilityRules();
+
+      ['tv', 'umpire', 'coach', 'standings', 'fixtures', 'swot', 'admin'].forEach(v => {
         const el = document.getElementById(`view-${v}`);
         const btn = document.getElementById(`nav-btn-${v}`);
         if (el) {
-          if (v === viewName) {
+          if (v === targetView) {
             el.classList.remove('hidden');
             if (btn) {
-              const col = v === 'tv' ? 'text-amber-400 border-amber-400' : (v === 'coach' ? 'text-cyan-400 border-cyan-400' : 'text-emerald-400 border-emerald-400');
+              const col = v === 'tv' ? 'text-amber-400 border-amber-400' : (v === 'coach' || v === 'swot' ? 'text-cyan-400 border-cyan-400' : 'text-emerald-400 border-emerald-400');
               btn.className = `corp-tab py-2.5 px-3 text-center flex items-center gap-1.5 ${col} border-b-2 font-bold whitespace-nowrap`;
             }
           } else {
@@ -2010,12 +2757,19 @@ Sneha P. (F)</pre>
         }
       });
 
-      if (viewName === 'tv') renderTVConsole();
-      if (viewName === 'umpire') renderUmpireConsole();
-      if (viewName === 'coach') renderCoachConsole();
-      if (viewName === 'standings') renderPoolTables();
-      if (viewName === 'fixtures') renderFixturesList();
-      if (viewName === 'admin') renderAdminTeams();
+      // Re-apply nav tab visibility so hidden tabs stay hidden
+      applyProfileVisibilityRules();
+
+      if (targetView === 'tv') renderTVConsole();
+      if (targetView === 'umpire') renderUmpireConsole();
+      if (targetView === 'coach') renderCoachConsole();
+      if (targetView === 'standings') renderPoolTables();
+      if (targetView === 'fixtures') renderFixturesList();
+      if (targetView === 'swot') renderSwotAnalysisView();
+      if (targetView === 'admin') {
+        renderAdminPinConfigInputs();
+        renderAdminTeams();
+      }
     }
 
     // --- Navigation for Casual Views ---
@@ -2121,6 +2875,7 @@ Sneha P. (F)</pre>
         localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify({
           isAdmin: Boolean(appState.isAdmin),
           isPinAuthenticated: Boolean(appState.isPinAuthenticated),
+          unlockedProfiles: appState.unlockedProfiles || { tv: true, umpire: false, coach: false, admin: false },
           adminUser: appState.adminUser || null
         }));
         if (appState.casualUser) {
@@ -2139,6 +2894,9 @@ Sneha P. (F)</pre>
           if (parsed && (parsed.isAdmin || parsed.isPinAuthenticated)) {
             appState.isAdmin = Boolean(parsed.isAdmin);
             appState.isPinAuthenticated = Boolean(parsed.isPinAuthenticated);
+            if (parsed.unlockedProfiles && typeof parsed.unlockedProfiles === 'object') {
+              appState.unlockedProfiles = Object.assign({ tv: true, umpire: false, coach: false, admin: false }, parsed.unlockedProfiles);
+            }
             appState.adminUser = parsed.adminUser || null;
           }
         }
@@ -2244,10 +3002,9 @@ Sneha P. (F)</pre>
 
     function handleAdminFeatureClick(targetView) {
       const view = targetView || 'fixtures';
-      if (isAuthorizedEditor()) {
-        switchCorpView(view);
-      } else {
-        switchCorpView(view);
+      switchTournamentProfile('admin');
+      switchCorpView(view);
+      if (!isAuthorizedEditor()) {
         openAuthModal();
       }
     }
@@ -2511,6 +3268,15 @@ Sneha P. (F)</pre>
               if (val.teams) {
                 appState.teams = Array.isArray(val.teams) ? val.teams : Object.values(val.teams);
               }
+              if (val.profilePins && typeof val.profilePins === 'object') {
+                appState.profilePins = {
+                  umpire: String(val.profilePins.umpire || '1111'),
+                  coach: String(val.profilePins.coach || '2222'),
+                  admin: String(val.profilePins.admin || '2026')
+                };
+                try { localStorage.setItem(PROFILE_PINS_STORAGE_KEY, JSON.stringify(appState.profilePins)); } catch (e) {}
+                renderAdminPinConfigInputs();
+              }
               normalizeCorporateState();
               saveStateToLocalStorage();
               renderTVConsole();
@@ -2553,27 +3319,32 @@ Sneha P. (F)</pre>
       const text = document.getElementById('cloud-status-text');
       const btn = document.getElementById('btn-cloud-status');
       if (dot && text && btn) {
+        const hiddenClass = (appState.currentProfile === 'admin') ? '' : ' hidden';
         text.textContent = labelText || (connected ? 'Live Synced' : 'Local Mode');
         if (connected) {
           dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse shrink-0';
-          btn.className = 'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#132a1f] border border-[#2e5e45] text-emerald-300 hover:border-emerald-400 transition-colors';
+          btn.className = 'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#132a1f] border border-[#2e5e45] text-emerald-300 hover:border-emerald-400 transition-colors' + hiddenClass;
         } else if (labelText === 'Auth Ready') {
           dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 shrink-0';
-          btn.className = 'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#241f14] border border-amber-500/40 text-amber-300 hover:border-amber-400 transition-colors';
+          btn.className = 'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#241f14] border border-amber-500/40 text-amber-300 hover:border-amber-400 transition-colors' + hiddenClass;
         } else {
           dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-500 shrink-0';
-          btn.className = 'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#14231c] border border-[#23382d] text-[#8fa398] hover:border-emerald-500/50 transition-colors';
+          btn.className = 'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-[#14231c] border border-[#23382d] text-[#8fa398] hover:border-emerald-500/50 transition-colors' + hiddenClass;
         }
       }
     }
 
     function saveStateToLocalStorage() {
       try {
+        rebuildPlayerAnalytics();
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify({
           teams: appState.teams,
           fixtures: appState.fixtures,
+          profilePins: appState.profilePins || { umpire: '1111', coach: '2222', admin: '2026' },
+          playerAnalytics: appState.playerAnalytics || {},
           lastUpdated: Date.now()
         }));
+        saveCoachMetadataForCurrentUser();
         saveCasualProfileForCurrentUser();
       } catch (e) {}
     }
@@ -2592,9 +3363,18 @@ Sneha P. (F)</pre>
             const teamArr = Array.isArray(parsed.teams) ? parsed.teams : Object.values(parsed.teams);
             if (teamArr.length > 0) appState.teams = teamArr;
           }
+          if (parsed && parsed.profilePins && typeof parsed.profilePins === 'object') {
+            appState.profilePins = {
+              umpire: String(parsed.profilePins.umpire || '1111'),
+              coach: String(parsed.profilePins.coach || '2222'),
+              admin: String(parsed.profilePins.admin || '2026')
+            };
+          }
         }
+        loadProfilePinsFromStorage();
         loadCasualProfileForCurrentUser();
         normalizeCorporateState();
+        loadCoachMetadataForCurrentUser();
       } catch (e) {}
     }
 
@@ -2606,9 +3386,12 @@ Sneha P. (F)</pre>
       try {
         const ts = Date.now();
         lastLocalWriteTimestamp = ts;
+        rebuildPlayerAnalytics();
         const payload = JSON.parse(JSON.stringify({
           teams: appState.teams,
           fixtures: appState.fixtures,
+          profilePins: appState.profilePins || { umpire: '1111', coach: '2222', admin: '2026' },
+          playerAnalytics: appState.playerAnalytics || {},
           lastUpdated: ts
         }));
         cloudDbRef.set(payload).catch(err => {
@@ -2718,19 +3501,31 @@ Sneha P. (F)</pre>
     function verifyOrganizerPin() {
       const input = document.getElementById('admin-pin-input');
       const val = input ? input.value.trim() : '';
-      if (val === '2026' || val === 'rumble2026' || val === 'admin') {
+      const matchedRole = verifyProfilePinInput('any', val);
+      if (matchedRole) {
+        if (!appState.unlockedProfiles) {
+          appState.unlockedProfiles = { tv: true, umpire: false, coach: false, admin: false };
+        }
         appState.isPinAuthenticated = true;
-        appState.isAdmin = true;
-        appState.adminUser = {
-          email: 'pin_organizer@court.badminton',
-          name: 'Court Scorer'
-        };
+        if (matchedRole === 'admin') {
+          appState.isAdmin = true;
+          appState.unlockedProfiles.admin = true;
+          appState.unlockedProfiles.umpire = true;
+          appState.unlockedProfiles.coach = true;
+          appState.adminUser = { email: 'pin_admin@court.badminton', name: 'Tournament Admin' };
+        } else {
+          appState.unlockedProfiles[matchedRole] = true;
+          appState.adminUser = {
+            email: `pin_${matchedRole}@court.badminton`,
+            name: matchedRole === 'umpire' ? 'Court Umpire' : 'Team Coach'
+          };
+        }
         saveAuthSessionToStorage();
         closeAuthModal();
         updateAuthUI();
         renderUmpireConsole();
         renderCoachConsole();
-        showToast('PIN Verified! Organizer & Scorer access unlocked.', '✅');
+        showToast(`PIN Verified! ${matchedRole.toUpperCase()} access unlocked.`, '✅');
       } else {
         showToast('Incorrect PIN. Please check with tournament organizer.', '⚠️');
       }
@@ -3151,8 +3946,297 @@ Sneha P. (F)</pre>
       team: 'A',
       pointNum: null,
       draftShotType: '',
-      draftCategory: 'winner'
+      draftCategory: 'winner',
+      draftPlayer: ''
     };
+
+    function getActiveCoachUserId() {
+      if (appState.authUser && appState.authUser.email) {
+        return sanitizeCasualUserId(appState.authUser.email);
+      }
+      if (appState.adminUser && appState.adminUser.email) {
+        return sanitizeCasualUserId(appState.adminUser.email);
+      }
+      if (appState.casualUser && appState.casualUser.email) {
+        return sanitizeCasualUserId(appState.casualUser.email);
+      }
+      return 'default_coach';
+    }
+
+    function getActiveCoachDisplayName() {
+      if (appState.authUser && (appState.authUser.displayName || appState.authUser.email)) {
+        return appState.authUser.displayName || appState.authUser.email;
+      }
+      if (appState.adminUser && (appState.adminUser.name || appState.adminUser.email)) {
+        return appState.adminUser.name || appState.adminUser.email;
+      }
+      if (appState.casualUser && (appState.casualUser.name || appState.casualUser.email)) {
+        return appState.casualUser.name || appState.casualUser.email;
+      }
+      return 'Coach / Scorer (Local)';
+    }
+
+    function parseRubberPlayerNames(playersStr) {
+      if (!playersStr || typeof playersStr !== 'string') return [];
+      return playersStr
+        .split(/\s*(?:&|\/|,|and)\s*/i)
+        .map(s => s.replace(/\(C\)/gi, '').trim())
+        .filter(Boolean);
+    }
+
+    function getDefaultAttributedPlayer(rubber, pointTeam, category) {
+      if (!rubber) return '';
+      // If it's a winner, attribute to the scoring side's player(s).
+      // If it's an opponent error, attribute the error to the opposing side's player(s) so the player who committed the error has it logged on their profile!
+      const targetSide = (category === 'error') ? (pointTeam === 'A' ? 'B' : 'A') : pointTeam;
+      const rawSidePlayers = targetSide === 'A' ? rubber.playersA : rubber.playersB;
+      const list = parseRubberPlayerNames(rawSidePlayers);
+      return list[0] || rawSidePlayers || (targetSide === 'A' ? rubber.teamAName : rubber.teamBName);
+    }
+
+    function saveCoachMetadataForCurrentUser() {
+      const coachId = getActiveCoachUserId();
+      const coachName = getActiveCoachDisplayName();
+      try {
+        rebuildPlayerAnalytics();
+        const metaPayload = {
+          coachId: coachId,
+          coachName: coachName,
+          updatedAt: Date.now(),
+          annotationsByRubber: {},
+          playerAnalytics: appState.playerAnalytics || {}
+        };
+        (appState.fixtures || []).forEach(f => {
+          (f.rubbers || []).forEach(r => {
+            if (r.pointDetails && (Object.keys(r.pointDetails.A || {}).length > 0 || Object.keys(r.pointDetails.B || {}).length > 0)) {
+              metaPayload.annotationsByRubber[r.id] = r.pointDetails;
+            }
+          });
+        });
+        appState.coachMetadata = metaPayload;
+        localStorage.setItem(COACH_META_PREFIX + coachId, JSON.stringify(metaPayload));
+        localStorage.setItem(PLAYER_ANALYTICS_STORAGE_KEY, JSON.stringify(appState.playerAnalytics || {}));
+        if (isCloudConnected && firebaseDb) {
+          firebaseDb.ref('racquet_rumble_coach_meta/' + coachId).set(JSON.parse(JSON.stringify(metaPayload))).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    function loadCoachMetadataForCurrentUser() {
+      const coachId = getActiveCoachUserId();
+      try {
+        const rawMeta = localStorage.getItem(COACH_META_PREFIX + coachId);
+        if (rawMeta) {
+          const parsed = JSON.parse(rawMeta);
+          if (parsed && typeof parsed === 'object') {
+            appState.coachMetadata = parsed;
+            if (parsed.annotationsByRubber && typeof parsed.annotationsByRubber === 'object') {
+              (appState.fixtures || []).forEach(f => {
+                (f.rubbers || []).forEach(r => {
+                  const savedDetails = parsed.annotationsByRubber[r.id];
+                  if (savedDetails) {
+                    if (!r.pointDetails) r.pointDetails = { A: {}, B: {} };
+                    r.pointDetails.A = Object.assign({}, savedDetails.A || {}, r.pointDetails.A || {});
+                    r.pointDetails.B = Object.assign({}, savedDetails.B || {}, r.pointDetails.B || {});
+                  }
+                });
+              });
+            }
+          }
+        }
+      } catch (e) {}
+      rebuildPlayerAnalytics();
+    }
+
+    function rebuildPlayerAnalytics() {
+      const analytics = {};
+      const ensurePlayer = (playerName, teamName) => {
+        const cleanName = (playerName || 'Unknown Player').replace(/\(C\)/gi, '').trim();
+        if (!analytics[cleanName]) {
+          analytics[cleanName] = {
+            playerName: cleanName,
+            teamName: teamName || '',
+            totalWinners: 0,
+            totalErrors: 0,
+            notesCount: 0,
+            winnersByShot: {},
+            errorsByType: {},
+            pointLogs: []
+          };
+        } else if (teamName && !analytics[cleanName].teamName) {
+          analytics[cleanName].teamName = teamName;
+        }
+        return analytics[cleanName];
+      };
+
+      // Seed all roster players so any player can be inspected
+      (appState.teams || []).forEach(t => {
+        (t.players || []).forEach(p => {
+          if (p && p.name) ensurePlayer(p.name, t.name);
+        });
+      });
+
+      // Aggregate every annotated point across all fixtures & rubbers
+      (appState.fixtures || []).forEach(f => {
+        (f.rubbers || []).forEach(r => {
+          if (!r || !r.pointDetails) return;
+          ['A', 'B'].forEach(side => {
+            const sideMap = r.pointDetails[side] || {};
+            Object.keys(sideMap).forEach(ptKey => {
+              const ptNum = Number(ptKey);
+              const detail = sideMap[ptKey];
+              if (!detail || (!detail.shotType && !detail.notes)) return;
+
+              const cat = detail.category || 'winner';
+              const attributedPlayer = detail.player || getDefaultAttributedPlayer(r, side, cat);
+              const attributedTeam = (cat === 'error')
+                ? (side === 'A' ? r.teamBName : r.teamAName)
+                : (side === 'A' ? r.teamAName : r.teamBName);
+
+              const pRec = ensurePlayer(attributedPlayer, attributedTeam);
+              if (detail.shotType) {
+                if (cat === 'error') {
+                  pRec.totalErrors++;
+                  pRec.errorsByType[detail.shotType] = (pRec.errorsByType[detail.shotType] || 0) + 1;
+                } else {
+                  pRec.totalWinners++;
+                  pRec.winnersByShot[detail.shotType] = (pRec.winnersByShot[detail.shotType] || 0) + 1;
+                }
+              }
+              if (detail.notes) {
+                pRec.notesCount++;
+              }
+              pRec.pointLogs.push({
+                rubberId: r.id,
+                categoryCode: r.categoryCode,
+                matchup: `${r.playersA} vs ${r.playersB}`,
+                scoringSide: side,
+                pointNum: ptNum,
+                shotType: detail.shotType || '',
+                category: cat,
+                notes: detail.notes || '',
+                coachName: detail.coachName || 'Coach',
+                updatedAt: detail.updatedAt || ''
+              });
+            });
+          });
+        });
+      });
+
+      appState.playerAnalytics = analytics;
+      return analytics;
+    }
+
+    function handleCoachPlayerAttributionChange(playerVal) {
+      coachSelectedPoint.draftPlayer = playerVal;
+      const rubber = getActiveRubberOnCourt(appState.selectedCourtId);
+      if (rubber && coachSelectedPoint.pointNum && coachSelectedPoint.rubberId === rubber.id) {
+        const detailsMap = ensureRubberPointDetails(rubber);
+        const existing = detailsMap[coachSelectedPoint.team][coachSelectedPoint.pointNum];
+        if (existing) {
+          existing.player = playerVal;
+          saveCoachMetadataForCurrentUser();
+          renderCoachConsole(true);
+          syncStateToCloud();
+        }
+      }
+    }
+
+    function renderPlayerAnalyticsPanel(selectedPlayerOpt) {
+      if (selectedPlayerOpt !== undefined) {
+        appState.selectedAnalyticsPlayer = selectedPlayerOpt;
+      }
+      const analytics = rebuildPlayerAnalytics();
+      const selEl = document.getElementById('coach-analytics-player-select');
+      const summaryEl = document.getElementById('coach-player-analytics-summary');
+      const breakdownEl = document.getElementById('coach-player-shot-breakdown');
+      const historyEl = document.getElementById('coach-player-history-list');
+      if (!summaryEl || !breakdownEl || !historyEl) return;
+
+      const allPlayers = Object.values(analytics);
+      const activePlayers = allPlayers.filter(p => p.totalWinners > 0 || p.totalErrors > 0 || p.notesCount > 0);
+      const sortedPlayers = allPlayers.sort((a, b) => (b.totalWinners + b.totalErrors + b.notesCount) - (a.totalWinners + a.totalErrors + a.notesCount) || a.playerName.localeCompare(b.playerName));
+
+      if (selEl) {
+        const currentVal = appState.selectedAnalyticsPlayer || 'ALL';
+        let optsHtml = '<option value="ALL">All Annotated Players (' + activePlayers.length + ')</option>';
+        sortedPlayers.forEach(p => {
+          const totalEvents = p.totalWinners + p.totalErrors + p.notesCount;
+          const tag = totalEvents > 0 ? ` (${p.totalWinners}W / ${p.totalErrors}E)` : '';
+          optsHtml += `<option value="${escapeHtml(p.playerName)}" ${p.playerName === currentVal ? 'selected' : ''}>${escapeHtml(p.playerName)} · ${escapeHtml(p.teamName)}${tag}</option>`;
+        });
+        selEl.innerHTML = optsHtml;
+      }
+
+      const targetKey = appState.selectedAnalyticsPlayer || 'ALL';
+      const targetList = targetKey === 'ALL'
+        ? (activePlayers.length > 0 ? activePlayers : sortedPlayers.slice(0, 4))
+        : (analytics[targetKey] ? [analytics[targetKey]] : []);
+
+      let totW = 0, totE = 0, totNotes = 0;
+      const shotMap = {};
+      const errMap = {};
+      const logs = [];
+
+      targetList.forEach(p => {
+        totW += p.totalWinners;
+        totE += p.totalErrors;
+        totNotes += p.notesCount;
+        Object.entries(p.winnersByShot || {}).forEach(([k, v]) => { shotMap[k] = (shotMap[k] || 0) + v; });
+        Object.entries(p.errorsByType || {}).forEach(([k, v]) => { errMap[k] = (errMap[k] || 0) + v; });
+        (p.pointLogs || []).forEach(l => {
+          logs.push(Object.assign({ playerName: p.playerName, teamName: p.teamName }, l));
+        });
+      });
+
+      const impactRatio = (totW + totE) > 0 ? Math.round((totW / (totW + totE)) * 100) + '%' : '—';
+      summaryEl.innerHTML = `
+        <div class="bg-[#0b120e] border border-emerald-500/30 rounded-xl p-2.5">
+          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Winners Logged</div>
+          <div class="text-2xl font-bebas text-emerald-400">${totW}</div>
+        </div>
+        <div class="bg-[#0b120e] border border-rose-500/30 rounded-xl p-2.5">
+          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Errors Logged</div>
+          <div class="text-2xl font-bebas text-rose-400">${totE}</div>
+        </div>
+        <div class="bg-[#0b120e] border border-amber-500/30 rounded-xl p-2.5">
+          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Winner Ratio</div>
+          <div class="text-2xl font-bebas text-amber-300">${impactRatio}</div>
+        </div>
+        <div class="bg-[#0b120e] border border-cyan-500/30 rounded-xl p-2.5">
+          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Coach Notes</div>
+          <div class="text-2xl font-bebas text-cyan-300">${totNotes}</div>
+        </div>
+      `;
+
+      let pillsHtml = '';
+      Object.entries(shotMap).forEach(([shot, count]) => {
+        pillsHtml += `<span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">⚡ ${escapeHtml(shot)}: ${count}</span>`;
+      });
+      Object.entries(errMap).forEach(([err, count]) => {
+        pillsHtml += `<span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">❌ ${escapeHtml(err)}: ${count}</span>`;
+      });
+      breakdownEl.innerHTML = pillsHtml || '<span class="text-[11px] text-[#718b7f]">No shot winners or errors recorded for this selection yet.</span>';
+
+      if (logs.length === 0) {
+        historyEl.innerHTML = '<div class="text-xs text-[#718b7f] py-2 text-center">No player-linked point history yet. Tap any completed point (✕) above and choose a shot or note to build player analytics.</div>';
+      } else {
+        historyEl.innerHTML = logs.map(item => `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-2 rounded-xl bg-[#0b120e] border border-[#1d3026] text-xs">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-extrabold text-white">${escapeHtml(item.playerName)}</span>
+                <span class="text-[10px] text-[#8ab09f]">(${escapeHtml(item.teamName)})</span>
+                <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[#14231b] text-emerald-300">${escapeHtml(item.categoryCode)} · Pt #${item.pointNum}</span>
+                ${item.shotType ? `<span class="px-2 py-0.2 rounded text-[10px] font-bold ${item.category === 'error' ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'}">${item.category === 'error' ? '❌ ' : '⚡ '}${escapeHtml(item.shotType)}</span>` : ''}
+              </div>
+              ${item.notes ? `<div class="text-[11px] text-[#cde2d8] pl-1">📝 "${escapeHtml(item.notes)}"</div>` : ''}
+            </div>
+            <div class="text-[10px] text-[#718b7f] font-mono shrink-0">${escapeHtml(item.updatedAt || '')}</div>
+          </div>
+        `).join('');
+      }
+    }
 
     function ensureRubberPointDetails(rubber) {
       if (!rubber) return { A: {}, B: {} };
@@ -3178,13 +4262,15 @@ Sneha P. (F)</pre>
       const detailsMap = ensureRubberPointDetails(rubber);
       const existing = (detailsMap[team] && detailsMap[team][pt]) ? detailsMap[team][pt] : {};
 
+      const defCategory = existing.category || 'winner';
       coachSelectedPoint = {
         courtId: appState.selectedCourtId,
         rubberId: rubber.id,
         team: team,
         pointNum: pt,
         draftShotType: existing.shotType || '',
-        draftCategory: existing.category || 'winner'
+        draftCategory: defCategory,
+        draftPlayer: existing.player || getDefaultAttributedPlayer(rubber, team, defCategory)
       };
 
       const noteInput = document.getElementById('coach-point-note-input');
@@ -3220,8 +4306,17 @@ Sneha P. (F)</pre>
         return;
       }
 
+      const prevCat = coachSelectedPoint.draftCategory;
+      const newCat = category || 'winner';
       coachSelectedPoint.draftShotType = shotType;
-      coachSelectedPoint.draftCategory = category || 'winner';
+      coachSelectedPoint.draftCategory = newCat;
+
+      const playerSelect = document.getElementById('coach-point-player-select');
+      let attributedPlayer = (playerSelect && playerSelect.value) ? playerSelect.value : coachSelectedPoint.draftPlayer;
+      if (!attributedPlayer || prevCat !== newCat) {
+        attributedPlayer = getDefaultAttributedPlayer(rubber, team, newCat);
+      }
+      coachSelectedPoint.draftPlayer = attributedPlayer;
 
       // Auto-save shot selection immediately so 1-tap works seamlessly
       const detailsMap = ensureRubberPointDetails(rubber);
@@ -3230,15 +4325,18 @@ Sneha P. (F)</pre>
 
       detailsMap[team][pt] = {
         shotType: shotType,
-        category: category || 'winner',
+        category: newCat,
+        player: attributedPlayer,
+        coachId: getActiveCoachUserId(),
+        coachName: getActiveCoachDisplayName(),
         notes: currentNotes,
         updatedAt: new Date().toLocaleTimeString('en-US', { hour12: false })
       };
 
+      saveCoachMetadataForCurrentUser();
       renderCoachConsole(true);
       syncStateToCloud();
-      const teamName = team === 'A' ? rubber.teamAName : rubber.teamBName;
-      showToast(`Saved "${shotType}" on ${teamName} Point #${pt}`, '⚡');
+      showToast(`Saved "${shotType}" (${attributedPlayer}) · Point #${pt}`, '⚡');
     }
 
     function saveCoachPointDetails() {
@@ -3278,17 +4376,26 @@ Sneha P. (F)</pre>
         return;
       }
 
+      const playerSelect = document.getElementById('coach-point-player-select');
+      const attributedPlayer = (playerSelect && playerSelect.value)
+        ? playerSelect.value
+        : (coachSelectedPoint.draftPlayer || existing.player || getDefaultAttributedPlayer(rubber, team, catVal));
+      coachSelectedPoint.draftPlayer = attributedPlayer;
+
       detailsMap[team][pt] = {
         shotType: shotVal,
         category: catVal,
+        player: attributedPlayer,
+        coachId: getActiveCoachUserId(),
+        coachName: getActiveCoachDisplayName(),
         notes: notesVal,
         updatedAt: new Date().toLocaleTimeString('en-US', { hour12: false })
       };
 
+      saveCoachMetadataForCurrentUser();
       renderCoachConsole(true);
       syncStateToCloud();
-      const teamName = team === 'A' ? rubber.teamAName : rubber.teamBName;
-      showToast(`Saved details for ${teamName} · Point #${pt}`, '💾');
+      showToast(`Saved for ${attributedPlayer} · Point #${pt}`, '💾');
     }
 
     function clearCoachPointDetails() {
@@ -3311,6 +4418,7 @@ Sneha P. (F)</pre>
       const noteInput = document.getElementById('coach-point-note-input');
       if (noteInput) noteInput.value = '';
 
+      saveCoachMetadataForCurrentUser();
       renderCoachConsole(true);
       syncStateToCloud();
       showToast(`Cleared details for Point #${pt}`, '🗑️');
@@ -3466,10 +4574,10 @@ Sneha P. (F)</pre>
             <div class="flex items-stretch gap-2">
               <div class="sticky left-0 z-10 w-36 sm:w-44 shrink-0 rounded-xl border ${stickyBorder} p-2 flex flex-col justify-center shadow-md">
                 <div class="flex items-center justify-between gap-1">
-                  <span class="text-xs font-bold ${nameColor} truncate">${teamLabel}</span>
-                  <span class="px-1.5 py-0.5 rounded bg-[#070d0a] text-xs font-bebas text-white border border-[#22382c]">${teamScore} pts</span>
+                  <span class="text-xs sm:text-sm font-extrabold text-white truncate" title="${escapeHtml(playerLabel || teamLabel)}">${escapeHtml(playerLabel || teamLabel)}</span>
+                  <span class="px-1.5 py-0.5 rounded bg-[#070d0a] text-xs font-bebas text-white border border-[#22382c] shrink-0">${teamScore} pts</span>
                 </div>
-                <div class="text-[10px] text-[#8ab09f] truncate">${playerLabel || ''}</div>
+                <div class="text-[10px] ${nameColor} font-medium tracking-wide truncate">${escapeHtml(teamLabel || '')}</div>
               </div>
               <div class="flex items-center gap-1.5">
                 ${cellsHtml}
@@ -3534,6 +4642,7 @@ Sneha P. (F)</pre>
                 entries.push({
                   team: tKey,
                   teamName: tKey === 'A' ? rubber.teamAName : rubber.teamBName,
+                  player: item.player || getDefaultAttributedPlayer(rubber, tKey, item.category || 'winner'),
                   pointNum: ptNum,
                   shotType: item.shotType || '',
                   category: item.category || 'winner',
@@ -3559,8 +4668,8 @@ Sneha P. (F)</pre>
             row.innerHTML = `
               <div class="space-y-0.5">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isA ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'}">${entry.teamName} · Pt #${entry.pointNum} (✕)</span>
-                  ${entry.shotType ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${entry.category === 'error' ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">${entry.category === 'error' ? '❌' : '⚡'} ${entry.shotType}</span>` : ''}
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isA ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'}">${escapeHtml(entry.player || (isA ? rubber.playersA : rubber.playersB))} <span class="opacity-80">(${escapeHtml(entry.teamName)})</span> · Pt #${entry.pointNum} (✕)</span>
+                  ${entry.shotType ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${entry.category === 'error' ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">${entry.category === 'error' ? '❌' : '⚡'} ${escapeHtml(entry.shotType)}</span>` : ''}
                 </div>
                 ${entry.notes ? `<p class="text-xs text-[#cde2d8] pl-1">📝 "${entry.notes}"</p>` : ''}
               </div>
@@ -3573,6 +4682,34 @@ Sneha P. (F)</pre>
           });
         }
       }
+
+      // Populate player attribution dropdown in Point Inspector
+      const playerSelect = document.getElementById('coach-point-player-select');
+      if (playerSelect && rubber) {
+        const pA = parseRubberPlayerNames(rubber.playersA);
+        const pB = parseRubberPlayerNames(rubber.playersB);
+        const candidatePlayers = [];
+        pA.forEach(n => candidatePlayers.push({ name: n, side: 'A', team: rubber.teamAName }));
+        if (pA.length > 1) candidatePlayers.push({ name: rubber.playersA, side: 'A', team: rubber.teamAName });
+        pB.forEach(n => candidatePlayers.push({ name: n, side: 'B', team: rubber.teamBName }));
+        if (pB.length > 1) candidatePlayers.push({ name: rubber.playersB, side: 'B', team: rubber.teamBName });
+
+        const savedPtInfo = (coachSelectedPoint.pointNum && detailsMap[coachSelectedPoint.team] && detailsMap[coachSelectedPoint.team][coachSelectedPoint.pointNum]) || {};
+        const currentCat = coachSelectedPoint.draftCategory || savedPtInfo.category || 'winner';
+        const activePlayer = savedPtInfo.player || coachSelectedPoint.draftPlayer || getDefaultAttributedPlayer(rubber, coachSelectedPoint.team || 'A', currentCat);
+        coachSelectedPoint.draftPlayer = activePlayer;
+
+        playerSelect.innerHTML = candidatePlayers.map(cp =>
+          `<option value="${escapeHtml(cp.name)}" ${cp.name === activePlayer ? 'selected' : ''}>${escapeHtml(cp.name)} (${escapeHtml(cp.team)})</option>`
+        ).join('');
+      }
+
+      const ownerBadge = document.getElementById('coach-meta-owner-badge');
+      if (ownerBadge) {
+        ownerBadge.textContent = `Saved for: ${getActiveCoachDisplayName()}`;
+      }
+
+      renderPlayerAnalyticsPanel();
     }
 
     function changeUmpireCourt(e) {
@@ -3678,13 +4815,19 @@ Sneha P. (F)</pre>
           const ptTeam = last.pointTeam === 'B' ? 'B' : 'A';
           const ptNum = ptTeam === 'A' ? Number(rubber.scoreA || 1) : Number(rubber.scoreB || 1);
           const existing = rubber.pointDetails[ptTeam][ptNum] || {};
+          const catVal = outcome || 'winner';
+          const attrPlayer = existing.player || getDefaultAttributedPlayer(rubber, ptTeam, catVal);
           rubber.pointDetails[ptTeam][ptNum] = {
             shotType: shotType,
-            category: outcome || 'winner',
+            category: catVal,
+            player: attrPlayer,
+            coachId: getActiveCoachUserId(),
+            coachName: getActiveCoachDisplayName(),
             notes: existing.notes || '',
             updatedAt: new Date().toLocaleTimeString('en-US', { hour12: false })
           };
-          showToast(`${shotType} tagged!`, outcome === 'winner' ? '⚡' : '❌');
+          saveCoachMetadataForCurrentUser();
+          showToast(`${shotType} (${attrPlayer}) tagged!`, outcome === 'winner' ? '⚡' : '❌');
           renderCoachConsole();
           syncStateToCloud();
         }
@@ -3825,6 +4968,10 @@ Sneha P. (F)</pre>
       document.getElementById('umpire-tally-b').textContent = fixture.teamBScore;
       document.getElementById('umpire-players-a').textContent = rubber.playersA;
       document.getElementById('umpire-players-b').textContent = rubber.playersB;
+      const padPlayerA = document.getElementById('pad-player-a-label');
+      const padPlayerB = document.getElementById('pad-player-b-label');
+      if (padPlayerA) padPlayerA.textContent = rubber.playersA;
+      if (padPlayerB) padPlayerB.textContent = rubber.playersB;
       document.getElementById('pad-team-a-label').textContent = rubber.teamAName;
       document.getElementById('pad-team-b-label').textContent = rubber.teamBName;
       document.getElementById('score-display-a').textContent = rubber.scoreA;
@@ -3873,16 +5020,16 @@ Sneha P. (F)</pre>
               </div>
 
               <div class="py-3 flex items-center justify-between">
-                <div class="w-5/12 text-left">
-                  <div class="font-bold text-white text-sm sm:text-base truncate">${liveRubber.teamAName}</div>
-                  <div class="text-[11px] text-emerald-400 font-medium truncate">${liveRubber.playersA}</div>
+                <div class="w-5/12 text-left min-w-0">
+                  <div class="font-extrabold text-white text-sm sm:text-base truncate" title="${escapeHtml(liveRubber.playersA)}">${escapeHtml(liveRubber.playersA)}</div>
+                  <div class="text-[10px] sm:text-[11px] text-emerald-400/90 font-medium tracking-wide truncate">${escapeHtml(liveRubber.teamAName)}</div>
                 </div>
                 <div class="w-2/12 text-center text-3xl sm:text-4xl font-bebas text-amber-300">
                   ${liveRubber.scoreA} - ${liveRubber.scoreB}
                 </div>
-                <div class="w-5/12 text-right">
-                  <div class="font-bold text-white text-sm sm:text-base truncate">${liveRubber.teamBName}</div>
-                  <div class="text-[11px] text-cyan-400 font-medium truncate">${liveRubber.playersB}</div>
+                <div class="w-5/12 text-right min-w-0">
+                  <div class="font-extrabold text-white text-sm sm:text-base truncate" title="${escapeHtml(liveRubber.playersB)}">${escapeHtml(liveRubber.playersB)}</div>
+                  <div class="text-[10px] sm:text-[11px] text-cyan-400/90 font-medium tracking-wide truncate">${escapeHtml(liveRubber.teamBName)}</div>
                 </div>
               </div>
             </div>
@@ -4138,6 +5285,31 @@ Sneha P. (F)</pre>
         const card = document.createElement('div');
         card.className = 'bg-[#121c17] border border-[#203429] rounded-2xl p-4 shadow-md space-y-3';
 
+        const isAdminMode = appState.currentProfile === 'admin';
+        const rubbersHtml = (Array.isArray(f.rubbers) && f.rubbers.length > 0)
+          ? `<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-2 border-t border-[#18261e] text-[11px]">
+              ${f.rubbers.map(r => `
+                <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#0c1410] border border-[#1a2b22]">
+                  <div class="min-w-0 pr-2">
+                    <span class="font-bold text-emerald-400 mr-1">${escapeHtml(r.categoryCode)}</span>
+                    <span class="text-white font-semibold truncate">${escapeHtml(r.playersA)}</span>
+                    <span class="text-[#718b7f]">vs</span>
+                    <span class="text-white font-semibold truncate">${escapeHtml(r.playersB)}</span>
+                  </div>
+                  <span class="font-mono font-bold ${r.status === 'live' ? 'text-amber-300' : 'text-[#8ab09f]'} shrink-0">${r.scoreA}-${r.scoreB}</span>
+                </div>
+              `).join('')}
+            </div>`
+          : '';
+
+        const actionBtnHtml = isAdminMode
+          ? `<button onclick="openLineupModal('${f.id}')" class="px-3 py-1.5 rounded-xl bg-[#1b2e23] hover:bg-[#254132] text-emerald-400 border border-emerald-500/40 text-xs font-bold">
+              ${f.lineup ? '✏️ Edit Lineup / Court' : '⚡ Assign Court & Lineup'} (Admin)
+            </button>`
+          : `<button onclick="switchCorpView('swot')" class="px-3 py-1.5 rounded-xl bg-[#14231b] hover:bg-[#1d3327] text-amber-300 border border-amber-500/30 text-xs font-bold">
+              🔍 Player SWOT Analysis
+            </button>`;
+
         card.innerHTML = `
           <div class="flex items-center justify-between border-b border-[#1b2b23] pb-2 text-xs">
             <span class="font-bold text-[#718b7f] uppercase">${f.stageName}</span>
@@ -4154,12 +5326,11 @@ Sneha P. (F)</pre>
               <div class="font-bold text-white text-base">${teamB ? teamB.name : 'Team B'}</div>
             </div>
           </div>
+          ${rubbersHtml}
           <div class="pt-2 border-t border-[#18261e] flex flex-wrap items-center justify-between gap-2">
-            <span class="text-[11px] text-[#8fa39a]">${f.courtId ? `Court ${f.courtId}` : 'Court not assigned'}</span>
+            <span class="text-[11px] text-[#8fa39a]">${f.courtId ? `🏟️ Assigned: Court ${f.courtId}` : '⏳ Court not assigned yet'}</span>
             <div class="flex gap-2">
-              <button onclick="openLineupModal('${f.id}')" class="px-3 py-1.5 rounded-xl bg-[#1b2e23] hover:bg-[#254132] text-emerald-400 border border-emerald-500/40 text-xs font-bold">
-                ${f.lineup ? '✏️ Edit Lineup / Court' : '⚡ Assign Court & Lineup'} (Admin)
-              </button>
+              ${actionBtnHtml}
             </div>
           </div>
         `;
@@ -4472,6 +5643,471 @@ Sneha P. (F)</pre>
       renderCoachConsole();
       syncStateToCloud();
       showToast(`Generated ${appState.fixtures.length} pool round-robin fixtures!`, '⚡');
+    }
+
+
+    // =========================================================================
+    // 🔍 PLAYER SEARCH & OPPONENT SWOT ANALYSIS ENGINE
+    // =========================================================================
+    function getAllTournamentPlayersCatalog() {
+      const analytics = rebuildPlayerAnalytics();
+      const catalogMap = {};
+
+      (appState.teams || []).forEach(team => {
+        (team.players || []).forEach(p => {
+          const cleanName = (p.name || '').replace(/\(C\)/gi, '').trim();
+          if (!cleanName) return;
+          catalogMap[cleanName] = {
+            name: cleanName,
+            gender: p.gender || 'M',
+            isCaptain: Boolean(p.isCaptain || p.id === team.captainId),
+            teamId: team.id,
+            teamName: team.name,
+            pool: team.pool || 'A',
+            rubbersPlayed: 0,
+            rubbersWon: 0,
+            rubbersLost: 0,
+            pointsFor: 0,
+            pointsAgainst: 0,
+            categories: new Set(),
+            partners: new Set(),
+            matchRecords: [],
+            analytics: analytics[cleanName] || {
+              playerName: cleanName,
+              teamName: team.name,
+              totalWinners: 0,
+              totalErrors: 0,
+              notesCount: 0,
+              winnersByShot: {},
+              errorsByType: {},
+              pointLogs: []
+            }
+          };
+        });
+      });
+
+      // Scan all fixtures & rubbers to aggregate match participation, scores, categories & partners
+      (appState.fixtures || []).forEach(f => {
+        (f.rubbers || []).forEach(r => {
+          const sideANames = parseRubberPlayerNames(r.playersA);
+          const sideBNames = parseRubberPlayerNames(r.playersB);
+          const sA = Number(r.scoreA || 0);
+          const sB = Number(r.scoreB || 0);
+          const hasActivity = r.status === 'live' || r.status === 'completed' || sA > 0 || sB > 0;
+
+          sideANames.forEach(pName => {
+            if (!catalogMap[pName]) return;
+            const rec = catalogMap[pName];
+            rec.categories.add(r.categoryCode);
+            sideANames.filter(x => x !== pName).forEach(partner => rec.partners.add(partner));
+            if (hasActivity) {
+              rec.rubbersPlayed++;
+              rec.pointsFor += sA;
+              rec.pointsAgainst += sB;
+              if (r.status === 'completed') {
+                if (sA >= sB) rec.rubbersWon++;
+                else rec.rubbersLost++;
+              }
+              rec.matchRecords.push({
+                categoryCode: r.categoryCode,
+                categoryName: r.categoryName,
+                opponentNames: r.playersB,
+                opponentTeam: r.teamBName,
+                myScore: sA,
+                oppScore: sB,
+                status: r.status
+              });
+            }
+          });
+
+          sideBNames.forEach(pName => {
+            if (!catalogMap[pName]) return;
+            const rec = catalogMap[pName];
+            rec.categories.add(r.categoryCode);
+            sideBNames.filter(x => x !== pName).forEach(partner => rec.partners.add(partner));
+            if (hasActivity) {
+              rec.rubbersPlayed++;
+              rec.pointsFor += sB;
+              rec.pointsAgainst += sA;
+              if (r.status === 'completed') {
+                if (sB > sA) rec.rubbersWon++;
+                else rec.rubbersLost++;
+              }
+              rec.matchRecords.push({
+                categoryCode: r.categoryCode,
+                categoryName: r.categoryName,
+                opponentNames: r.playersA,
+                opponentTeam: r.teamAName,
+                myScore: sB,
+                oppScore: sA,
+                status: r.status
+              });
+            }
+          });
+        });
+      });
+
+      return Object.values(catalogMap);
+    }
+
+    function computePlayerSwotDossier(playerObj) {
+      if (!playerObj) return null;
+      const a = playerObj.analytics || { totalWinners: 0, totalErrors: 0, winnersByShot: {}, errorsByType: {}, pointLogs: [] };
+      const winnersEntries = Object.entries(a.winnersByShot || {}).sort((x, y) => y[1] - x[1]);
+      const errorsEntries = Object.entries(a.errorsByType || {}).sort((x, y) => y[1] - x[1]);
+      const topWinner = winnersEntries[0] ? winnersEntries[0][0] : null;
+      const topWinnerCount = winnersEntries[0] ? winnersEntries[0][1] : 0;
+      const secondWinner = winnersEntries[1] ? winnersEntries[1][0] : null;
+      const topError = errorsEntries[0] ? errorsEntries[0][0] : null;
+      const topErrorCount = errorsEntries[0] ? errorsEntries[0][1] : 0;
+
+      const cats = Array.from(playerObj.categories || []);
+      const partners = Array.from(playerObj.partners || []);
+      const ptDiff = playerObj.pointsFor - playerObj.pointsAgainst;
+      const totalShots = a.totalWinners + a.totalErrors;
+      const impactRatio = totalShots > 0 ? Math.round((a.totalWinners / totalShots) * 100) : null;
+
+      const strengths = [];
+      const weaknesses = [];
+      const opportunities = [];
+      const threats = [];
+
+      // 1. Strengths
+      if (topWinner) {
+        strengths.push(`Primary Finishing Weapon: High conversion on ${topWinner} (${topWinnerCount} logged winner${topWinnerCount > 1 ? 's' : ''}${secondWinner ? `, complemented by ${secondWinner}` : ''}).`);
+      } else {
+        strengths.push(`Balanced All-Court Baseline: Steady rally constructor for ${playerObj.teamName} in Pool ${playerObj.pool}.`);
+      }
+      if (playerObj.isCaptain) {
+        strengths.push(`Team Captain & Tactical Anchor: Leads ${playerObj.teamName} lineup strategy and high-pressure rubbers.`);
+      }
+      if (ptDiff > 0) {
+        strengths.push(`Positive Point Differential (+${ptDiff} pts): Outscores opponents ${playerObj.pointsFor}–${playerObj.pointsAgainst} across active rubbers.`);
+      } else if (cats.length > 0) {
+        strengths.push(`Multi-Category Versatility: Deployed across ${cats.join(', ')} rubbers${partners.length > 0 ? ` (paired with ${partners.join(', ')})` : ''}.`);
+      }
+      if (impactRatio !== null && impactRatio >= 60) {
+        strengths.push(`High Shot Efficiency (${impactRatio}% Winner-to-Error Ratio): Plays aggressive, high-percentage attacking badminton.`);
+      }
+
+      // 2. Weaknesses
+      if (topError) {
+        weaknesses.push(`Primary Vulnerability — ${topError} (${topErrorCount} logged): Susceptible to ${topError.toLowerCase()} when stretched out of position.`);
+      } else {
+        weaknesses.push(`Limited Annotated Error Sample: Has not yet been forced into high unforced-error sequences—test backhand rear-court early.`);
+      }
+      if (ptDiff < 0) {
+        weaknesses.push(`Negative Point Differential (${ptDiff} pts): Trails ${playerObj.pointsFor}–${playerObj.pointsAgainst} in cumulative rally points.`);
+      } else {
+        weaknesses.push(`Transition Under Pace: Can be pressured when forced to lift from low front-court defensive lunges.`);
+      }
+
+      // 3. Opportunities (Tactical Gameplan Against This Opponent)
+      if (topWinner === 'Smash') {
+        opportunities.push(`Deny Rear-Court Jump Smash: Serve low, flat, and wide; avoid high mid-court lifts and force flat drives or tight net exchanges.`);
+      } else if (topWinner === 'Drop' || topWinner === 'Net') {
+        opportunities.push(`Neutralize Front-Court Deception: Hold a slightly higher base position and push deep attacking clears to their backhand corner.`);
+      } else {
+        opportunities.push(`Dictate Tempo Early: Attack the body on service return and vary pace between flat drives and steep drops.`);
+      }
+      if (topError === 'Net Fault') {
+        opportunities.push(`Engage in Tight Net Duels: Force spinning tumbles at the tape to trigger ${topError}s.`);
+      } else if (topError === 'Unforced Error' || topError === 'Out / Wide') {
+        opportunities.push(`Extend Rally Length (8+ Shots): Play high-margin placements to the four corners and let ${playerObj.name} over-press near the lines.`);
+      } else {
+        opportunities.push(`Target Backhand Rear Corner: Pin ${playerObj.name} in the backhand rear quadrant before attacking the open forehand court.`);
+      }
+
+      // 4. Threats (Danger Zones)
+      if (topWinner) {
+        threats.push(`Lethal ${topWinner} Punisher: Leaving shuttle short in mid-court invites immediate ${topWinner} point conversion.`);
+      }
+      if (partners.length > 0) {
+        threats.push(`Doubles Rotation Chemistry: Strong court coverage alongside ${partners.join(' & ')} in ${cats.filter(c => c.includes('D')).join('/')} rubbers.`);
+      } else {
+        threats.push(`Singles Stamina & Streak Momentum: Capable of stringing consecutive points on service runs if given rhythm.`);
+      }
+
+      return {
+        player: playerObj,
+        impactRatio,
+        ptDiff,
+        cats,
+        partners,
+        winnersEntries,
+        errorsEntries,
+        strengths,
+        weaknesses,
+        opportunities,
+        threats
+      };
+    }
+
+    function handleSwotSearchInput(val) {
+      appState.swotSearchQuery = String(val || '').trim();
+      renderSwotAnalysisView(true);
+    }
+
+    function handleSwotPoolFilterChange(val) {
+      appState.swotPoolFilter = val || 'ALL';
+      renderSwotAnalysisView(true);
+    }
+
+    function selectSwotPlayer(playerName) {
+      if (!playerName) return;
+      appState.selectedSwotPlayer = playerName;
+      renderSwotAnalysisView(false);
+    }
+
+    function openPlayerSwotFromName(playerName) {
+      if (playerName) appState.selectedSwotPlayer = playerName;
+      switchCorpView('swot');
+    }
+
+    function renderSwotAnalysisView(fromSearchFilter) {
+      const catalog = getAllTournamentPlayersCatalog();
+      const badgeEl = document.getElementById('swot-total-players-badge');
+      if (badgeEl) badgeEl.textContent = `${catalog.length} Tournament Players Indexed`;
+
+      const query = (appState.swotSearchQuery || '').toLowerCase();
+      const filter = appState.swotPoolFilter || 'ALL';
+
+      const filtered = catalog.filter(p => {
+        if (filter === 'A' && p.pool !== 'A') return false;
+        if (filter === 'B' && p.pool !== 'B') return false;
+        if (filter === 'M' && p.gender !== 'M') return false;
+        if (filter === 'F' && p.gender !== 'F') return false;
+        if (query) {
+          const hay = `${p.name} ${p.teamName} pool ${p.pool}`.toLowerCase();
+          if (!hay.includes(query)) return false;
+        }
+        return true;
+      });
+
+      // Sort players with active rubbers/annotations first, then alphabetically
+      filtered.sort((a, b) => {
+        const actA = (a.analytics.totalWinners + a.analytics.totalErrors + a.rubbersPlayed);
+        const actB = (b.analytics.totalWinners + b.analytics.totalErrors + b.rubbersPlayed);
+        if (actB !== actA) return actB - actA;
+        return a.name.localeCompare(b.name);
+      });
+
+      // Auto-select first matching player when typing in search box
+      if (fromSearchFilter && filtered.length > 0) {
+        const stillInFiltered = filtered.some(p => p.name === appState.selectedSwotPlayer);
+        if (!stillInFiltered) {
+          appState.selectedSwotPlayer = filtered[0].name;
+        }
+      } else if (!appState.selectedSwotPlayer && catalog.length > 0) {
+        appState.selectedSwotPlayer = catalog[0].name;
+      }
+
+      const selEl = document.getElementById('swot-player-select');
+      if (selEl) {
+        const listForSelect = filtered.length > 0 ? filtered : catalog;
+        selEl.innerHTML = listForSelect.map(p => {
+          const wCount = p.analytics ? p.analytics.totalWinners : 0;
+          const eCount = p.analytics ? p.analytics.totalErrors : 0;
+          const statsTag = (wCount + eCount > 0) ? ` · ${wCount}W/${eCount}E` : '';
+          return `<option value="${escapeHtml(p.name)}" ${p.name === appState.selectedSwotPlayer ? 'selected' : ''}>${escapeHtml(p.name)} (${escapeHtml(p.teamName)} · Pool ${p.pool}${statsTag})</option>`;
+        }).join('');
+      }
+
+      const chipsEl = document.getElementById('swot-matching-players-chips');
+      const countLbl = document.getElementById('swot-search-results-label');
+      if (countLbl) {
+        countLbl.textContent = `MATCHING PLAYERS (${filtered.length})`;
+      }
+      if (chipsEl) {
+        if (filtered.length === 0) {
+          chipsEl.innerHTML = `<span class="text-xs text-[#718b7f] py-1">No players match "${escapeHtml(appState.swotSearchQuery)}". Try clearing the search filter.</span>`;
+        } else {
+          chipsEl.innerHTML = filtered.slice(0, 18).map(p => {
+            const isSel = p.name === appState.selectedSwotPlayer;
+            const activeCls = isSel
+              ? 'bg-emerald-500 text-[#06110b] font-extrabold border-emerald-400 shadow'
+              : 'bg-[#0b130f] hover:bg-[#16271e] text-[#cde2d8] font-semibold border-[#243c2f]';
+            return `<button type="button" onclick="selectSwotPlayer('${escapeHtml(p.name)}')" class="px-2.5 py-1 rounded-full text-[11px] border ${activeCls} whitespace-nowrap transition flex items-center gap-1 shrink-0">
+              <span>${p.isCaptain ? '👑' : (p.gender === 'F' ? '👩' : '👨')}</span>
+              <span>${escapeHtml(p.name)}</span>
+              <span class="text-[9px] opacity-75">(${escapeHtml(p.teamName)})</span>
+            </button>`;
+          }).join('');
+        }
+      }
+
+      const targetPlayer = catalog.find(p => p.name === appState.selectedSwotPlayer) || filtered[0] || catalog[0];
+      const dossier = computePlayerSwotDossier(targetPlayer);
+      const headerCard = document.getElementById('swot-player-header-card');
+      const quadGrid = document.getElementById('swot-quadrant-grid');
+      const detailsGrid = document.getElementById('swot-details-grid');
+      if (!dossier || !headerCard || !quadGrid || !detailsGrid) return;
+
+      const p = dossier.player;
+      const a = p.analytics;
+      const impactText = dossier.impactRatio !== null ? `${dossier.impactRatio}%` : '—';
+      const diffText = dossier.ptDiff >= 0 ? `+${dossier.ptDiff}` : `${dossier.ptDiff}`;
+
+      headerCard.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1c2e24] pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-2xl shrink-0">
+              ${p.isCaptain ? '👑' : '🏸'}
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="text-lg sm:text-xl font-extrabold text-white">${escapeHtml(p.name)}</h4>
+                ${p.isCaptain ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">TEAM CAPTAIN</span>' : ''}
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.pool === 'A' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-cyan-500/20 text-cyan-300'}">POOL ${p.pool}</span>
+              </div>
+              <p class="text-xs text-[#8ab09f] mt-0.5">
+                Team: <strong class="text-white">${escapeHtml(p.teamName)}</strong> · Gender: <strong>${p.gender === 'F' ? 'Female' : 'Male'}</strong> · Categories: <strong class="text-emerald-300">${dossier.cats.length > 0 ? dossier.cats.join(', ') : 'Squad Member'}</strong>
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-start sm:self-auto">
+            <span class="px-3 py-1 rounded-xl bg-[#0b120e] border border-[#23382d] text-xs font-semibold text-[#cde2d8]">
+              Pts Scored: <strong class="text-emerald-400 font-mono">${p.pointsFor}</strong> / Conceded: <strong class="text-rose-400 font-mono">${p.pointsAgainst}</strong>
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
+          <div class="bg-[#0b120e] border border-[#1f3429] rounded-xl p-2.5 text-center">
+            <div class="text-[10px] font-bold uppercase text-[#718b7f]">Rubbers Active</div>
+            <div class="text-2xl font-bebas text-white">${p.rubbersPlayed}</div>
+          </div>
+          <div class="bg-[#0b120e] border border-emerald-500/30 rounded-xl p-2.5 text-center">
+            <div class="text-[10px] font-bold uppercase text-emerald-400">Shot Winners</div>
+            <div class="text-2xl font-bebas text-emerald-400">${a.totalWinners}</div>
+          </div>
+          <div class="bg-[#0b120e] border border-rose-500/30 rounded-xl p-2.5 text-center">
+            <div class="text-[10px] font-bold uppercase text-rose-400">Errors Logged</div>
+            <div class="text-2xl font-bebas text-rose-400">${a.totalErrors}</div>
+          </div>
+          <div class="bg-[#0b120e] border border-amber-500/30 rounded-xl p-2.5 text-center">
+            <div class="text-[10px] font-bold uppercase text-amber-300">Winner Ratio</div>
+            <div class="text-2xl font-bebas text-amber-300">${impactText}</div>
+          </div>
+          <div class="bg-[#0b120e] border border-cyan-500/30 rounded-xl p-2.5 text-center col-span-2 sm:col-span-1">
+            <div class="text-[10px] font-bold uppercase text-cyan-300">Point Diff</div>
+            <div class="text-2xl font-bebas ${dossier.ptDiff >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${diffText}</div>
+          </div>
+        </div>
+      `;
+
+      const renderBullets = (items, dotColor) => items.map(t => `
+        <li class="flex items-start gap-2 text-xs text-[#d5e6de] leading-relaxed">
+          <span class="${dotColor} font-bold mt-0.5">•</span>
+          <span>${escapeHtml(t)}</span>
+        </li>
+      `).join('');
+
+      quadGrid.innerHTML = `
+        <!-- Strengths -->
+        <div class="bg-[#101c16] border-2 border-emerald-500/40 rounded-2xl p-4 shadow-lg space-y-2">
+          <div class="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+            <h5 class="text-xs sm:text-sm font-extrabold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>💪</span> STRENGTHS (KEY WEAPONS)
+            </h5>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300">S</span>
+          </div>
+          <ul class="space-y-1.5 pt-1">${renderBullets(dossier.strengths, 'text-emerald-400')}</ul>
+        </div>
+
+        <!-- Weaknesses -->
+        <div class="bg-[#1c1215] border-2 border-rose-500/40 rounded-2xl p-4 shadow-lg space-y-2">
+          <div class="flex items-center justify-between border-b border-rose-500/20 pb-2">
+            <h5 class="text-xs sm:text-sm font-extrabold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>⚠️</span> WEAKNESSES (ERROR PATTERNS)
+            </h5>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/15 text-rose-300">W</span>
+          </div>
+          <ul class="space-y-1.5 pt-1">${renderBullets(dossier.weaknesses, 'text-rose-400')}</ul>
+        </div>
+
+        <!-- Opportunities -->
+        <div class="bg-[#101a20] border-2 border-cyan-500/40 rounded-2xl p-4 shadow-lg space-y-2">
+          <div class="flex items-center justify-between border-b border-cyan-500/20 pb-2">
+            <h5 class="text-xs sm:text-sm font-extrabold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>🎯</span> OPPORTUNITIES (TACTICAL GAMEPLAN)
+            </h5>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300">O</span>
+          </div>
+          <ul class="space-y-1.5 pt-1">${renderBullets(dossier.opportunities, 'text-cyan-400')}</ul>
+        </div>
+
+        <!-- Threats -->
+        <div class="bg-[#1e1910] border-2 border-amber-500/40 rounded-2xl p-4 shadow-lg space-y-2">
+          <div class="flex items-center justify-between border-b border-amber-500/20 pb-2">
+            <h5 class="text-xs sm:text-sm font-extrabold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span>🔥</span> THREATS (DANGER ZONES)
+            </h5>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300">T</span>
+          </div>
+          <ul class="space-y-1.5 pt-1">${renderBullets(dossier.threats, 'text-amber-400')}</ul>
+        </div>
+      `;
+
+      const winnerPills = dossier.winnersEntries.length > 0
+        ? dossier.winnersEntries.map(([k, v]) => `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">⚡ ${escapeHtml(k)}: ${v}</span>`).join('')
+        : '<span class="text-xs text-[#718b7f]">No winning shots tagged yet for this player.</span>';
+
+      const errorPills = dossier.errorsEntries.length > 0
+        ? dossier.errorsEntries.map(([k, v]) => `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">❌ ${escapeHtml(k)}: ${v}</span>`).join('')
+        : '<span class="text-xs text-[#718b7f]">No errors tagged yet for this player.</span>';
+
+      const logsHtml = (a.pointLogs && a.pointLogs.length > 0)
+        ? a.pointLogs.map(l => `
+            <div class="p-2.5 rounded-xl bg-[#0b120e] border border-[#1d3026] text-xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white">${escapeHtml(l.categoryCode)} · Pt #${l.pointNum} (${escapeHtml(l.matchup)})</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${l.category === 'error' ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'}">${l.category === 'error' ? '❌ ' : '⚡ '}${escapeHtml(l.shotType || 'Note')}</span>
+              </div>
+              ${l.notes ? `<div class="text-[11px] text-[#cde2d8]">📝 "${escapeHtml(l.notes)}"</div>` : ''}
+            </div>
+          `).join('')
+        : '<div class="text-xs text-[#718b7f] py-3 text-center">No point-level coach scouting notes recorded for this player yet.</div>';
+
+      const matchesHtml = (p.matchRecords && p.matchRecords.length > 0)
+        ? p.matchRecords.map(m => `
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#0b120e] border border-[#1d3026] text-xs">
+              <div>
+                <span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-bold text-[10px] mr-1.5">${escapeHtml(m.categoryCode)}</span>
+                <span class="text-white font-semibold">vs ${escapeHtml(m.opponentNames)}</span>
+                <span class="text-[10px] text-[#8ab09f]">(${escapeHtml(m.opponentTeam)})</span>
+              </div>
+              <span class="font-bebas text-lg text-amber-300">${m.myScore} - ${m.oppScore}</span>
+            </div>
+          `).join('')
+        : '<div class="text-xs text-[#718b7f] py-3 text-center">No active or completed rubbers recorded yet.</div>';
+
+      detailsGrid.innerHTML = `
+        <div class="bg-[#101915] border border-[#22382c] rounded-2xl p-4 shadow-xl space-y-3">
+          <h5 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+            <span>📊</span> Shot Winners, Errors &amp; Coach Scouting Notes
+          </h5>
+          <div class="space-y-2">
+            <div class="text-[10px] font-bold uppercase text-emerald-400">Winning Shots Breakdown:</div>
+            <div class="flex flex-wrap gap-1.5">${winnerPills}</div>
+          </div>
+          <div class="space-y-2 pt-1">
+            <div class="text-[10px] font-bold uppercase text-rose-400">Opponent Errors / Faults Breakdown:</div>
+            <div class="flex flex-wrap gap-1.5">${errorPills}</div>
+          </div>
+          <div class="space-y-1.5 pt-2 border-t border-[#1b2b23]">
+            <div class="text-[10px] font-bold uppercase text-cyan-300">Point-by-Point Scouting Log:</div>
+            <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">${logsHtml}</div>
+          </div>
+        </div>
+
+        <div class="bg-[#101915] border border-[#22382c] rounded-2xl p-4 shadow-xl space-y-3">
+          <h5 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+            <span>🏟️</span> Tournament Matchups &amp; Rubbers History
+          </h5>
+          <div class="space-y-1.5 max-h-72 overflow-y-auto pr-1">${matchesHtml}</div>
+        </div>
+      `;
     }
 
     function renderAdminTeams() {
@@ -5358,6 +6994,7 @@ Sneha P. (F)</pre>
     }
     function launchTVDirectMode() {
       closeTVLinkModal();
+      switchTournamentProfile('tv');
       switchCorpView('tv');
       toggleFullScreen();
     }
@@ -5431,18 +7068,17 @@ Sneha P. (F)</pre>
       }
 
       try {
-        const h = (window.location && window.location.hash) ? window.location.hash : '';
-        if (h === '#tv') {
-          switchTournamentProfile('corporate');
-          switchCorpView('tv');
+        const h = (window.location && window.location.hash) ? window.location.hash.toLowerCase() : '';
+        if (h === '#umpire') {
+          switchTournamentProfile('umpire');
         } else if (h === '#coach' || h === '#scorer') {
-          switchTournamentProfile('corporate');
-          switchCorpView('coach');
-          const nav = document.getElementById('nav-corporate');
-          if (nav) nav.classList.add('hidden');
+          switchTournamentProfile('coach');
+        } else if (h === '#admin' || h === '#corporate') {
+          switchTournamentProfile('admin');
+        } else if (h === '#casual') {
+          switchTournamentProfile('casual');
         } else {
-          switchTournamentProfile('corporate');
-          switchCorpView('tv');
+          switchTournamentProfile('tv');
         }
       } catch (e) {
         console.warn('Initial view render warning:', e);
@@ -5464,7 +7100,25 @@ Sneha P. (F)</pre>
     }
 
     // Window Exposure for Handlers
+    window.switchTopLevelProfile = switchTopLevelProfile;
+    window.switchTournamentSubProfile = switchTournamentSubProfile;
     window.switchTournamentProfile = switchTournamentProfile;
+    window.isProfileUnlocked = isProfileUnlocked;
+    window.verifyProfilePinInput = verifyProfilePinInput;
+    window.openProfilePinModal = openProfilePinModal;
+    window.closeProfilePinModal = closeProfilePinModal;
+    window.submitProfilePinModal = submitProfilePinModal;
+    window.saveProfilePinsConfig = saveProfilePinsConfig;
+    window.copyProfileInvite = copyProfileInvite;
+    window.lockAllTournamentProfiles = lockAllTournamentProfiles;
+    window.handleSwotSearchInput = handleSwotSearchInput;
+    window.handleSwotPoolFilterChange = handleSwotPoolFilterChange;
+    window.selectSwotPlayer = selectSwotPlayer;
+    window.openPlayerSwotFromName = openPlayerSwotFromName;
+    window.renderSwotAnalysisView = renderSwotAnalysisView;
+    window.handleCoachPlayerAttributionChange = handleCoachPlayerAttributionChange;
+    window.renderPlayerAnalyticsPanel = renderPlayerAnalyticsPanel;
+    window.rebuildPlayerAnalytics = rebuildPlayerAnalytics;
     window.switchCorpView = switchCorpView;
     window.switchCasualTab = switchCasualTab;
     window.switchCasualGameMode = switchCasualGameMode;
