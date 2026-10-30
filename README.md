@@ -1,92 +1,55 @@
-# Racquet Rumble & Badminton 101 - Dual-Profile Badminton Suite
+# Racquet Rumble & Badminton 101 - Triple-Mode Badminton Suite
 
-A mobile-responsive Progressive Web App (PWA) and arena display engine for corporate badminton tournaments and casual weekend friend circles.
+A mobile-responsive Progressive Web App (PWA) and arena display engine for corporate pool leagues, open knockout tournaments, and casual weekend friend circles.
 
-## 📱 Mobile-First Responsive Layout
-- **Full Viewport Auto-Fit**: Optimized for all smartphone displays (360px–430px widths including iPhone SE, iPhone 14/15/16 Pro, Samsung Galaxy, and Google Pixel) without horizontal scrolling, clipping, or auto-zoom.
-- **Auto-Fit Touchpads & Steppers**: Responsive score typography with dedicated `+` and `−` steppers right on the touchpads for instantaneous score adjustment and accidental tap undo.
-- **Dedicated Scorer / Coach Console**: Rapid 1-tap shot classification (Smash, Drop, Drive, Net Kill, Ace, Unforced Error) designed for mobile courtside scorers.
+## 🚀 Instant Deployment (Zero Build Steps Required)
+- **Direct Launch**: The repository already includes pre-built, production-minified `index.html` (and standalone `badminton-tracker.html`). You can commit directly to GitHub and enable **GitHub Pages** (or drag & drop to Netlify / Vercel) with **zero server setup, zero dependencies, and zero build commands**.
+- **Developer Pipeline**: If you edit source code in the future, run `python3 build.py` to re-minify and generate `smashheroes.html` / `index.html`.
 
 ---
 
-## 🌟 Two Profiles in One App
+## 🌟 Three Modes in One App
 
-Toggle between profiles seamlessly from the top header dropdown:
-
-1. **🏢 Corporate League (Racquet Rumble)**
+1. **🏢 Corporate League (Pool Mode)**
    - **8 Teams across 2 Pools** (Pool A & Pool B) with 6 players each (4 Male, 2 Female) and 1 designated Captain.
    - **6-Category Fixtures**: MS, MD, WS, XD, RMS, and RMD (single set of 21 points each).
    - **Mandatory Participation Rule**: Validates that all 6 roster players participate in at least one category.
-   - **Single-Court Assignment**: The entire fixture runs sequentially on its assigned court console.
-   - **Umpire Console**: Dual split touch pads, haptic feedback, audio whistle, and a rapid 2.5-second sliding shot-tagging drawer.
-   - **Pool Table Standings**: Standings update only when all 6 rubbers in a fixture finish (winner awarded 2 pts). Includes an interactive **🔍 H2H Breakdown** showing match-by-match results against the other 3 pool teams.
-   - **Office TV Live Hub**: 16:9 arena stream displaying all active courts and live standings ticker. Append `#tv` to the URL for clean TV mode.
+   - **Pool Table Standings**: Standings update once all 6 rubbers in a fixture finish, breaking ties via head-to-head.
 
-2. **🏸 Casual Circle (Badminton 101)**
-   - Tracks 3–8 friends in Singles (1v1) and Doubles (2v2) matches.
-   - Monthly period filtering (October 2026, September 2026, All Time).
-   - Standings table with wins, losses, win percentage, and total points won.
-   - **👑 Adjudge Winner**: Confetti celebration for crowning the monthly champion.
+2. **⚡ Knockout Tournament (Elimination Bracket Mode - NEW)**
+   - **Registration Form Dump**: Organisers can dump registration form data (Google Form responses, Excel CSV, or a list of player/team names).
+   - **Randomised Draw & Nearest 2^n Sizing**: Rounds up entrant count to the nearest power of 2 (4, 8, 16, 32, 64) and automatically assigns standard tournament Byes.
+   - **Bye Auto-Advancement**: Bye recipients advance automatically to Round 2 without playing Round 1.
+   - **Next Set of Fixtures (Court Queue)**: Replaces pool tables with a live Next Set of Fixtures queue (live courts + up next in line) and an interactive visual Knockout Bracket tree.
+   - **Seamless Scoring**: Umpire and Coach consoles score and track knockout matches on Courts 1-4 with identical steppers and shot logs, auto-advancing winners to the next round.
+   - **Championship Crowning**: Winner of the Grand Final is crowned Tournament Champion with confetti celebration.
+
+3. **🏸 Casual Circle (Badminton 101)**
+   - Tracks friends in Singles (1v1) and Doubles (2v2) matches.
+   - **8-Game Win% Rule**: Players with 8+ matches in a month qualify for win percentage ranking; otherwise ranks by wins then points.
+   - **👑 Adjudge Winner**: Crowning celebration for the monthly champion.
    - **Head to Head & Partner Chemistry**: Direct 1v1 matchup breakdown and win rates when two players partner on the same team.
-   - Quick badminton scoring presets (21-19, 21-15, 22-20, etc.).
 
 ---
 
-## 🔒 View Only by Default & Role-Based Permissions
-
-- **Default State (View Only)**:
-  - Anyone can open the app and view live court scoreboards, pool standings, head-to-head records, and the Office TV Hub.
-  - Scoring touchpads, court scheduling, lineup assignment, and match logging are locked to prevent accidental or unauthorized score edits.
-- **Authorized Admin & Volunteer Access**:
-  - **Admin Account**: `Manish.shreedhar@gmail.com` (authenticated via Google Sign-In with full access to assign courts, create fixtures, and manage lineups).
-  - **Volunteer / Umpire Scoring Access**: Volunteers and court umpires unlock scoring access using the organizer PIN (shared offline by the tournament director).
-
----
-
-## ☁️ Firebase Realtime Database & Authentication Setup
-
-To sync scores in real-time across multiple court umpires, players, and office TV displays:
-
-1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com/).
-2. Enable **Authentication**:
-   - Go to **Build** → **Authentication** → **Sign-in method**.
-   - Enable **Google** provider.
-   - Under **Authorized domains**, add your GitHub Pages domain (`<username>.github.io`) and `localhost`.
-3. Enable **Realtime Database**:
-   - Go to **Build** → **Realtime Database** → **Create Database**.
-   - Start in test mode or add the following security rules:
-     ```json
-     {
-       "rules": {
-         "racquet_rumble_shared_data": {
-           ".read": true,
-           ".write": "auth != null"
-         }
-       }
-     }
-     ```
-4. Copy your Firebase Config:
-   - In Project Settings (General), copy the Web app config snippet.
-   - Paste it into the app via the **☁️ Cloud Sync** modal in the top header, or paste it directly into `EMBEDDED_FIREBASE_CONFIG` in `index.html`.
-
----
-
-## 🚀 Live TV Display URL
-
-To display the live multi-court arena stream on Smart TVs or projectors:
-`https://<your-username>.github.io/<repo-name>/#tv`
+## 🔒 Role-Based Profiles & Dynamic PINs
+- `Viewer / Live TV`: Open to all viewers without a PIN. TV Hub, Next Fixtures Queue, Bracket Tree, and Player SWOT.
+- `Umpire Profile`: Secured via dynamic PIN. Court officiating console with `+` and `−` steppers, deuce sudden-death logic, and rapid shot drawer.
+- `Coach Profile`: Secured via dynamic PIN. 1-21 horizontal point graph, shot/notes logging, and historic match archive browser.
+- `Admin Profile`: Secured via master PIN. Full tournament config, registration dump, randomised draw generator, and PIN manager.
 
 ---
 
 ## 🧪 Automated Test Suite (`test_engine.js`)
-
-A zero-dependency test runner verifies all tournament mathematics and BWF edge cases:
+34 zero-dependency unit and regression tests verify all tournament mathematics:
 - Single set of 21, 20–20 deuce lead requirements, and sudden-death cap at 30–29.
 - 2-point pool award strictly upon completion of all 6 rubbers in a fixture.
 - 6-player roster participation validator.
-- Pool standings ranking engine (Pool Points → Rubbers Won → Points Won).
+- 8-game threshold Win% standings comparator engine.
+- Nearest power of 2 bracket sizing and standard bye distribution.
+- Winner progression and championship crowning in Knockout tournaments.
 - Dedicated `+` and `−` stepper undo logic.
-- Google Form / Excel roster import parsing.
+- Dynamic present-day local date synchronization.
 
 Run tests locally:
 ```bash

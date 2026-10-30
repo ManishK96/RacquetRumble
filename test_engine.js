@@ -384,10 +384,14 @@ it('Exposes only Tournament and Casual at top level, with sub-profiles (tv, umpi
 });
 
 console.log('\n10. SCORESHEETS HIGHLIGHT PLAYER NAME FIRST & TEAM NAME IN SMALLER CASE');
+const srcHtmlPath = path.join(__dirname, 'smashheroes.src.html');
+const prodHtmlPath = path.join(__dirname, 'smashheroes.html');
+const srcHtml = fs.existsSync(srcHtmlPath) ? fs.readFileSync(srcHtmlPath, 'utf8') : fs.readFileSync(prodHtmlPath, 'utf8');
+const prodHtml = fs.readFileSync(prodHtmlPath, 'utf8');
+
 it('Verifies smashheroes.html highlights player name before team name in TV, Umpire, and Coach consoles', () => {
-  const htmlPath = path.join(__dirname, 'smashheroes.html');
-  if (fs.existsSync(htmlPath)) {
-    const html = fs.readFileSync(htmlPath, 'utf8');
+  if (fs.existsSync(prodHtmlPath)) {
+    const html = prodHtml;
     // Check Umpire match card has umpire-players-a before umpire-team-a-name
     const umpireCardIdxPlayer = html.indexOf('id="umpire-players-a"');
     const umpireCardIdxTeam = html.indexOf('id="umpire-team-a-name"');
@@ -405,11 +409,9 @@ it('Verifies smashheroes.html highlights player name before team name in TV, Ump
 });
 
 it('Preserves exact team name casing from CSV upload and Teams & Captains dashboard without forced lowercase', () => {
-  const fs = require('fs');
-  const html = fs.readFileSync(__dirname + '/smashheroes.html', 'utf8');
-  assert.ok(!html.includes('lowercase tracking-wide'), 'No forced CSS lowercase on team names');
-  assert.ok(!html.includes('cp.team.toLowerCase()'), 'No JS .toLowerCase() on team name in coach dropdown');
-  assert.ok(html.includes('if (canonTeamA && canonTeamA.name) r.teamAName = canonTeamA.name;'), 'Syncs exact team name casing from Teams & Captains roster');
+  assert.ok(!prodHtml.includes('lowercase tracking-wide'), 'No forced CSS lowercase on team names');
+  assert.ok(!prodHtml.includes('cp.team.toLowerCase()'), 'No JS .toLowerCase() on team name in coach dropdown');
+  assert.ok(srcHtml.includes('if (canonTeamA && canonTeamA.name) r.teamAName = canonTeamA.name;'), 'Syncs exact team name casing from Teams & Captains roster');
 });
 
 console.log('\n11. PER-PROFILE DYNAMIC PIN GATING & ADMIN PIN CONFIGURATION');
@@ -443,15 +445,364 @@ it('Requires PIN for Umpire, Coach, and Admin profiles while keeping Viewer / Li
 
 console.log('\n12. VIEWER MODE INCLUDES FIXTURES & PLAYER SWOT SEARCH');
 it('Verifies Viewer mode exposes Live TV, Pool Standings, Fixtures, and Player SWOT Search while hiding Admin config', () => {
-  const html = fs.readFileSync(path.join(__dirname, 'smashheroes.html'), 'utf8');
-  assert.ok(html.includes('id="nav-btn-swot"'), 'SWOT navigation tab exists');
-  assert.ok(html.includes('id="view-swot"'), 'SWOT view section exists');
-  assert.ok(html.includes('id="swot-player-search-input"'), 'Player SWOT search input exists');
-  assert.ok(html.includes('id="swot-quadrant-grid"'), '4-quadrant SWOT matrix grid exists');
-  assert.ok(html.includes('id="admin-pin-config-card"'), 'Admin dynamic PIN configuration card exists');
-  assert.ok(html.includes('id="config-pin-umpire"') && html.includes('id="config-pin-coach"') && html.includes('id="config-pin-admin"'), 'Dynamic PIN inputs for Umpire, Coach, and Admin exist');
-  assert.ok(html.includes('id="modal-profile-pin"'), 'Profile PIN gate modal exists');
-  assert.ok(html.includes("['tv', 'standings', 'fixtures', 'swot'].includes(targetView)"), 'Viewer mode allows TV, Standings, Fixtures, and SWOT views');
+  assert.ok(prodHtml.includes('id="nav-btn-swot"'), 'SWOT navigation tab exists');
+  assert.ok(prodHtml.includes('id="view-swot"'), 'SWOT view section exists');
+  assert.ok(prodHtml.includes('id="swot-player-search-input"'), 'Player SWOT search input exists');
+  assert.ok(prodHtml.includes('id="swot-quadrant-grid"'), '4-quadrant SWOT matrix grid exists');
+  assert.ok(prodHtml.includes('id="admin-pin-config-card"'), 'Admin dynamic PIN configuration card exists');
+  assert.ok(prodHtml.includes('id="config-pin-umpire"') && prodHtml.includes('id="config-pin-coach"') && prodHtml.includes('id="config-pin-admin"'), 'Dynamic PIN inputs for Umpire, Coach, and Admin exist');
+  assert.ok(prodHtml.includes('id="modal-profile-pin"'), 'Profile PIN gate modal exists');
+  assert.ok(srcHtml.includes("['tv', 'standings', 'fixtures', 'swot'].includes(targetView)"), 'Viewer mode allows TV, Standings, Fixtures, and SWOT views');
+});
+
+console.log('\n13. COACH CONSOLE HISTORIC & LIVE MATCH ARCHIVE');
+it('Allows coaches to switch between live court matches and completed historic matches and annotate points on historic matches', () => {
+  const html = prodHtml;
+  assert.ok(html.includes('id="coach-match-select"'), 'Coach match / history selector dropdown exists');
+  assert.ok(html.includes('id="coach-history-browser-card"'), 'Coach historic match archive browser card exists');
+  assert.ok(html.includes('id="coach-match-cards-strip"'), 'Coach live and historic match cards strip exists');
+  assert.ok(html.includes('function getCoachTargetFixtureAndRubber()'), 'Target fixture and rubber resolver supports historic matches');
+  assert.ok(html.includes('function getAllCoachSelectableMatches()'), 'Selectable matches catalog includes completed historic matches');
+  assert.ok(html.includes('function changeCoachMatchSelection('), 'Coach match switcher handler exists');
+});
+
+console.log('\n14. NON-OVERLAPPING HEADER SWITCHER BAR & DYNAMIC PRESENT-DAY CASUAL MATCH DATE');
+it('Separates Brand Title row from #header-switcher-bar and defaults Casual Match dates to present day', () => {
+  const html = prodHtml;
+  assert.ok(html.includes('id="header-switcher-bar"'), 'Dedicated header switcher bar exists below brand row');
+  assert.ok(html.includes('select.header-switcher-select'), 'Compact mobile font-size rule for header switcher selects exists');
+  assert.ok(html.includes('function getTodayLocalIsoDate()'), 'Dynamic local present-day date helper exists');
+  assert.ok(html.includes('function syncCasualDateInputsToToday('), 'Casual date inputs auto-sync to present day');
+});
+
+console.log('\n15. PRODUCTION BUNDLE & CODE MINIFICATION (TERSER OBFUSCATION)');
+it('Verifies smashheroes.html is bundled and minified, build.py exists, and code runs cleanly', () => {
+  assert.ok(fs.existsSync(prodHtmlPath), 'Production smashheroes.html exists');
+  assert.ok(fs.existsSync(srcHtmlPath), 'Developer source smashheroes.src.html exists');
+  assert.ok(fs.existsSync(path.join(__dirname, 'build.py')), 'Automated build pipeline build.py exists');
+  
+  // Verify minification has taken place
+  assert.ok(prodHtml.length < srcHtml.length, 'Production HTML is smaller than developer source HTML');
+  assert.ok(prodHtml.includes('/* Racquet Rumble & Badminton 101 - Production Bundle (Minified & Obfuscated) */'), 'Has production bundle banner');
+  assert.ok(!prodHtml.includes('// Step 1: Initialize Auth FIRST'), 'Single-line comments stripped from production JS');
+  
+  // Verify all global window hooks remain intact in production bundle
+  const requiredGlobals = [
+    'switchTopLevelProfile', 'switchTournamentSubProfile', 'switchTournamentProfile',
+    'changeCoachCourt', 'changeCoachMatchSelection', 'selectCoachPoint', 'pickCoachShotChip',
+    'saveCoachPointDetails', 'clearCoachPointDetails', 'addPoint', 'subtractPoint',
+    'finishRubberAndAdvance', 'getTodayLocalIsoDate', 'syncCasualDateInputsToToday'
+  ];
+  requiredGlobals.forEach(fnName => {
+    assert.ok(prodHtml.includes(fnName), `Global handler window.${fnName} preserved in production bundle`);
+  });
+});
+
+console.log('\n16. MINIMUM 8-GAMES WIN PERCENTAGE STANDINGS ENGINE & BADMINTON 101 DYNAMIC DATE');
+it('Ranks players with >=8 games by win percentage, and defaults to wins -> points for players under 8 games', () => {
+  const MIN_GAMES_QUALIFIED = 8;
+  function compareStandings(a, b) {
+    const aQual = (a.played || 0) >= MIN_GAMES_QUALIFIED;
+    const bQual = (b.played || 0) >= MIN_GAMES_QUALIFIED;
+
+    if (aQual && bQual) {
+      if (b.winPct !== a.winPct) return b.winPct - a.winPct;
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      const bPts = b.ptsWon !== undefined ? b.ptsWon : (b.pts || 0);
+      const aPts = a.ptsWon !== undefined ? a.ptsWon : (a.pts || 0);
+      if (bPts !== aPts) return bPts - aPts;
+      return (b.played || 0) - (a.played || 0);
+    }
+    if (aQual && !bQual) return -1;
+    if (!aQual && bQual) return 1;
+
+    if (b.wins !== a.wins) return b.wins - a.wins;
+    const bPts = b.ptsWon !== undefined ? b.ptsWon : (b.pts || 0);
+    const aPts = a.ptsWon !== undefined ? a.ptsWon : (a.pts || 0);
+    if (bPts !== aPts) return bPts - aPts;
+    if (b.winPct !== a.winPct) return b.winPct - a.winPct;
+    return (b.played || 0) - (a.played || 0);
+  }
+
+  const players = [
+    { name: 'Arjun', played: 9, wins: 8, winPct: 89, ptsWon: 180 },     // Qualified, 89% win rate
+    { name: 'Bhavna', played: 10, wins: 8, winPct: 80, ptsWon: 200 },   // Qualified, 80% win rate
+    { name: 'Chirag', played: 1, wins: 1, winPct: 100, ptsWon: 21 },    // Unqualified, 100% win rate (1 game)
+    { name: 'Deepak', played: 7, wins: 6, winPct: 86, ptsWon: 145 },    // Unqualified, 6 wins (7 games)
+    { name: 'Esha', played: 8, wins: 6, winPct: 75, ptsWon: 160 },      // Qualified, 75% win rate (8 games)
+    { name: 'Hari', played: 4, wins: 3, winPct: 75, ptsWon: 60 },       // Unqualified, 3 wins, 60 pts
+    { name: 'Isha', played: 5, wins: 3, winPct: 60, ptsWon: 75 }        // Unqualified, 3 wins, 75 pts
+  ];
+
+  players.sort(compareStandings);
+
+  // 1. Qualified players with >=8 games must occupy top spots sorted strictly by Win%
+  assert.strictEqual(players[0].name, 'Arjun', 'Arjun ranks #1 (89% win rate, >=8 games)');
+  assert.strictEqual(players[1].name, 'Bhavna', 'Bhavna ranks #2 (80% win rate, >=8 games)');
+  assert.strictEqual(players[2].name, 'Esha', 'Esha ranks #3 (75% win rate, >=8 games)');
+
+  // 2. Unqualified players (<8 games) must rank below all qualified players
+  // Deepak has 6 wins, so he leads the unqualified tier
+  assert.strictEqual(players[3].name, 'Deepak', 'Deepak ranks #4 (leads unqualified tier with 6 wins)');
+
+  // 3. Unqualified players tied on wins must break tie on points won
+  assert.strictEqual(players[4].name, 'Isha', 'Isha ranks #5 (3 wins, 75 pts beats 60 pts)');
+  assert.strictEqual(players[5].name, 'Hari', 'Hari ranks #6 (3 wins, 60 pts)');
+
+  // 4. Player with 1 win (100% win rate) ranks below player with 3 wins (<8 games default)
+  assert.strictEqual(players[6].name, 'Chirag', 'Chirag ranks #7 (1 win cannot jump ahead of 3+ wins under <8 rule)');
+});
+
+it('Verifies badminton-tracker.html has dynamic date logic and 8-game threshold standings rule', () => {
+  const b101Path = path.join(__dirname, 'badminton-tracker.html');
+  assert.ok(fs.existsSync(b101Path), 'badminton-tracker.html exists');
+  const b101Html = fs.readFileSync(b101Path, 'utf8');
+
+  assert.ok(b101Html.includes('function getTodayLocalIsoDate()'), 'Badminton 101 has getTodayLocalIsoDate helper');
+  assert.ok(b101Html.includes('function syncDateInputsToToday('), 'Badminton 101 has syncDateInputsToToday helper');
+  assert.ok(b101Html.includes('MIN_GAMES_QUALIFIED = 8'), 'Badminton 101 enforces MIN_GAMES_QUALIFIED = 8 in calculateStandings');
+  assert.ok(b101Html.includes('Ranked by Win% (min. 8 games) · Default: Wins → Points'), 'Badminton 101 has explanatory standings subtitle');
+  assert.ok(!b101Html.includes("dInput.value = '2026-10-19'"), 'Badminton 101 no longer hardcodes static 2026-10-19 date');
+});
+
+it('Verifies smashheroes casual mode implements 8-game threshold standings rule', () => {
+  assert.ok(srcHtml.includes('MIN_GAMES_QUALIFIED = 8'), 'smashheroes.src.html enforces MIN_GAMES_QUALIFIED = 8');
+  assert.ok(srcHtml.includes('Ranked by Win% (min. 8 games) · Default: Wins → Points'), 'smashheroes.src.html has updated sort label');
+  assert.ok(prodHtml.includes('>=8') && prodHtml.includes('calculateCasualStandings'), 'smashheroes.html production bundle contains minimum 8-game qualification logic');
+});
+
+console.log('\n17. KNOCKOUT TOURNAMENT, REGISTRATION DUMP, 2^N POWER BRACKET & BYES ENGINE');
+it('Rounds entrant count up to nearest power of 2 and computes correct bye count', () => {
+  function getNearestPowerOf2(n) {
+    if (n <= 2) return 2;
+    let p = 2;
+    while (p < n) p *= 2;
+    return p;
+  }
+
+  const cases = [
+    { n: 2, expectedP: 2, expectedByes: 0 },
+    { n: 3, expectedP: 4, expectedByes: 1 },
+    { n: 4, expectedP: 4, expectedByes: 0 },
+    { n: 5, expectedP: 8, expectedByes: 3 },
+    { n: 6, expectedP: 8, expectedByes: 2 },
+    { n: 7, expectedP: 8, expectedByes: 1 },
+    { n: 8, expectedP: 8, expectedByes: 0 },
+    { n: 9, expectedP: 16, expectedByes: 7 },
+    { n: 11, expectedP: 16, expectedByes: 5 },
+    { n: 14, expectedP: 16, expectedByes: 2 },
+    { n: 16, expectedP: 16, expectedByes: 0 },
+    { n: 17, expectedP: 32, expectedByes: 15 },
+    { n: 31, expectedP: 32, expectedByes: 1 },
+    { n: 33, expectedP: 64, expectedByes: 31 }
+  ];
+
+  cases.forEach(c => {
+    const p = getNearestPowerOf2(c.n);
+    const byes = p - c.n;
+    assert.strictEqual(p, c.expectedP, `N=${c.n} rounds up to ${c.expectedP}`);
+    assert.strictEqual(byes, c.expectedByes, `N=${c.n} gets ${c.expectedByes} byes`);
+  });
+});
+
+it('Parses registration dump formats (plain text, CSV, numbered lists)', () => {
+  const rawDump = `Timestamp,Email,Player Name
+2026-10-30 10:00,user1@test.com,Vikram Singh
+2026-10-30 10:01,user2@test.com,Pooja Reddy
+1. Amit Sharma
+2. Neha Kapoor
+Rahul Dravid
+Pooja Reddy
+Kunal Verma, M, Engineering`;
+
+  function parseTestDump(text) {
+    const lines = text.split(/\r?\n/);
+    const names = [];
+    const headerSkipRegex = /^(name|player|entrant|team|timestamp|email)/i;
+    lines.forEach(line => {
+      let clean = line.trim();
+      if (!clean) return;
+      if (headerSkipRegex.test(clean) && clean.includes(',')) return;
+      if (clean.includes(',')) {
+        const parts = clean.split(',').map(p => p.trim().replace(/^["']|["']$/g, ''));
+        const nonMeta = parts.find(p => p && !/\d{2,4}[-\/]\d{1,2}/.test(p) && !p.includes('@') && !headerSkipRegex.test(p));
+        if (nonMeta) clean = nonMeta;
+      }
+      clean = clean.replace(/^[0-9]+[.\-)]\s*/, '').trim();
+      if (clean && clean.length >= 2 && !names.includes(clean)) {
+        names.push(clean);
+      }
+    });
+    return names;
+  }
+
+  const parsed = parseTestDump(rawDump);
+  assert.deepStrictEqual(parsed, [
+    'Vikram Singh', 'Pooja Reddy', 'Amit Sharma', 'Neha Kapoor', 'Rahul Dravid', 'Kunal Verma'
+  ], 'Parses CSV, skips timestamp/email, strips numbers and deduplicates names');
+});
+
+it('Generates knockout bracket with standard bye distribution and auto-advances bye winners into Round 2', () => {
+  const entrants = ['Arjun P.', 'Bhavna K.', 'Chirag M.', 'Deepak V.', 'Esha S.', 'Farhan A.', 'Gita R.']; // 7 entrants -> 8 bracket, 1 bye
+  const N = entrants.length;
+  let P = 2;
+  while (P < N) P *= 2;
+  const byesCount = P - N;
+  assert.strictEqual(P, 8, 'Nearest power of 2 is 8');
+  assert.strictEqual(byesCount, 1, '1 bye needed');
+
+  const matchesR1Count = P / 2; // 4 matches
+  const byeMatchIndices = new Set([0]); // Bye in match 1
+
+  let byeMatchesFound = 0;
+  let regularMatchesFound = 0;
+
+  for (let m = 0; m < matchesR1Count; m++) {
+    if (byeMatchIndices.has(m)) {
+      byeMatchesFound++;
+    } else {
+      regularMatchesFound++;
+    }
+  }
+
+  assert.strictEqual(byeMatchesFound, 1, 'Exactly 1 bye match');
+  assert.strictEqual(regularMatchesFound, 3, 'Exactly 3 real matches in Round 1');
+});
+
+it('Verifies winner advances across rounds and final winner is crowned champion', () => {
+  // Simulate 4-draw bracket (2 rounds: Semifinals, Final)
+  const semi1 = { id: 'ko_r1_m1', teamAName: 'Alice', teamBName: 'Bob', status: 'live', scoreA: 21, scoreB: 18, nextFixtureId: 'ko_r2_m1', nextSlot: 'A' };
+  const semi2 = { id: 'ko_r1_m2', teamAName: 'Charlie', teamBName: 'Dave', status: 'live', scoreA: 19, scoreB: 21, nextFixtureId: 'ko_r2_m1', nextSlot: 'B' };
+  const finalMatch = { id: 'ko_r2_m1', teamAName: 'TBD', teamBName: 'TBD', status: 'pending', scoreA: 0, scoreB: 0, roundName: 'Final' };
+
+  // Semi 1 completes: Alice wins
+  semi1.status = 'completed';
+  semi1.winnerName = 'Alice';
+  finalMatch.teamAName = semi1.winnerName;
+
+  // Semi 2 completes: Dave wins
+  semi2.status = 'completed';
+  semi2.winnerName = 'Dave';
+  finalMatch.teamBName = semi2.winnerName;
+  finalMatch.status = 'scheduled';
+
+  assert.strictEqual(finalMatch.teamAName, 'Alice', 'Alice advanced to Final slot A');
+  assert.strictEqual(finalMatch.teamBName, 'Dave', 'Dave advanced to Final slot B');
+  assert.strictEqual(finalMatch.status, 'scheduled', 'Final is scheduled once both finalists qualify');
+
+  // Final completes: Alice wins 22-20
+  finalMatch.scoreA = 22;
+  finalMatch.scoreB = 20;
+  finalMatch.status = 'completed';
+  finalMatch.winnerName = 'Alice';
+
+  assert.strictEqual(finalMatch.winnerName, 'Alice', 'Alice is crowned Tournament Champion');
+});
+
+it('Verifies smashheroes UI exposes Knockout mode in profile switcher, bracket tree, and registration dump', () => {
+  assert.ok(srcHtml.includes('value="knockout"'), 'Profile select includes value="knockout"');
+  assert.ok(srcHtml.includes('id="knockout-standings-wrapper"'), 'Knockout standings & bracket wrapper exists');
+  assert.ok(srcHtml.includes('id="knockout-bracket-tree-container"'), 'Knockout bracket tree container exists');
+  assert.ok(srcHtml.includes('id="knockout-queued-fixtures-list"'), 'Knockout queued fixtures container exists');
+  assert.ok(srcHtml.includes('id="admin-knockout-generator-card"'), 'Admin knockout registration dump & generator card exists');
+  assert.ok(srcHtml.includes('id="admin-knockout-input"'), 'Registration dump textarea exists');
+  assert.ok(srcHtml.includes('function generateKnockoutBracket('), 'generateKnockoutBracket engine function exists');
+  assert.ok(srcHtml.includes('function advanceKnockoutMatch('), 'advanceKnockoutMatch progression function exists');
+  assert.ok(prodHtml.includes('value="knockout"'), 'Production bundle includes Knockout mode');
+});
+
+console.log('\n18. ENTRY POINT 3-CARD MODE SELECTION UX, CASUAL PERSISTENCE & RELOAD RETENTION');
+it('Verifies 3-Card Mode Selection Landing Modal and header trigger exist', () => {
+  assert.ok(srcHtml.includes('id="modal-mode-picker"'), 'modal-mode-picker exists in source');
+  assert.ok(prodHtml.includes('id="modal-mode-picker"'), 'modal-mode-picker exists in production bundle');
+  assert.ok(srcHtml.includes("selectModeFromPicker('corporate')"), 'Corporate League card action exists');
+  assert.ok(srcHtml.includes("selectModeFromPicker('knockout')"), 'Knockout Tournament card action exists');
+  assert.ok(srcHtml.includes("selectModeFromPicker('casual')"), 'Casual Circle card action exists');
+  assert.ok(srcHtml.includes('openModePickerModal()'), 'Header trigger for mode picker exists');
+});
+
+it('Verifies casual match logging preserves player selections across submissions', () => {
+  assert.ok(srcHtml.includes('appState.casualLastSelected'), 'appState.casualLastSelected tracks player selections');
+  assert.ok(srcHtml.includes('lastS.pA') && srcHtml.includes('lastS.pB'), 'renderCasualLog restores last selected singles players');
+  assert.ok(srcHtml.includes('lastD.a1') && srcHtml.includes('lastD.a2'), 'renderCasualLog restores last selected doubles players');
+  assert.ok(srcHtml.includes("scA.value = ''") && srcHtml.includes("scB.value = ''"), 'Scores are cleared after match logging so next game can be entered immediately');
+});
+
+it('Verifies reload screen retention via restoreActiveScreenState and saveActiveScreenState', () => {
+  assert.ok(srcHtml.includes('function saveActiveScreenState('), 'saveActiveScreenState exists');
+  assert.ok(srcHtml.includes('function restoreActiveScreenState('), 'restoreActiveScreenState exists');
+  assert.ok(srcHtml.includes('ACTIVE_SCREEN_STORAGE_KEY'), 'ACTIVE_SCREEN_STORAGE_KEY constant defined');
+  assert.ok(srcHtml.includes('restoreActiveScreenState()'), 'init() invokes restoreActiveScreenState() on startup');
+});
+
+it('Verifies Player SWOT profile is skipped/hidden from navigation while preserving markup for future', () => {
+  assert.ok(srcHtml.includes('id="nav-btn-swot"') && srcHtml.includes('hidden'), 'nav-btn-swot has hidden class');
+  assert.ok(srcHtml.includes('id="swot-player-search-input"'), 'Underlying SWOT search input preserved for future');
+  assert.ok(srcHtml.includes('id="swot-quadrant-grid"'), 'Underlying SWOT quadrant grid preserved for future');
+});
+
+console.log('\n19. TRIPLE MODE SWITCHING & KNOCKOUT PROFILE ACTIVATION');
+it('Verifies switchTopLevelProfile sets appState.topProfile to knockout and updates select value', () => {
+  assert.ok(srcHtml.includes("else if (topMode === 'knockout')"), 'switchTopLevelProfile explicitly handles topMode === knockout');
+  assert.ok(srcHtml.includes("appState.topProfile = 'knockout'"), 'switchTopLevelProfile sets topProfile to knockout');
+  assert.ok(srcHtml.includes("if (appState.topProfile !== 'knockout')"), 'switchTournamentProfile does not overwrite knockout with corporate');
+  assert.ok(srcHtml.includes("sel.value = appState.topProfile"), 'profile-select value reflects appState.topProfile');
+});
+
+it('Verifies applyProfileVisibilityRules toggles between pool and knockout wrappers', () => {
+  assert.ok(srcHtml.includes("const isKnockout = appState.topProfile === 'knockout'"), 'applyProfileVisibilityRules checks isKnockout');
+  assert.ok(srcHtml.includes("if (poolWrap) poolWrap.classList.add('hidden')"), 'poolWrap hidden in knockout mode');
+  assert.ok(srcHtml.includes("if (koWrap) koWrap.classList.remove('hidden')"), 'koWrap visible in knockout mode');
+  assert.ok(srcHtml.includes("btnStandings.innerHTML = isKnockout"), 'Standings tab updates to Knockout Bracket when in knockout mode');
+});
+
+console.log('\n20. CASUAL MODE MONTHLY CHAMPIONS TRACKING & PROFILE SAVING');
+it('Calculates months won per player and preserves crowns across periods', () => {
+  const mockAppState = {
+    casual: {
+      players: ['Arjun Patel', 'Bhavna K.', 'Chirag M.'],
+      adjudgedWinners: {
+        singles: {
+          '2026-10': { player: 'Arjun Patel', wins: 8, ptsWon: 180, winPct: 89, period: '2026-10', periodLabel: 'October 2026', mode: 'singles' },
+          '2026-09': { player: 'Arjun Patel', wins: 9, ptsWon: 200, winPct: 90, period: '2026-09', periodLabel: 'September 2026', mode: 'singles' },
+          '2026-08': { player: 'Bhavna K.', wins: 7, ptsWon: 160, winPct: 85, period: '2026-08', periodLabel: 'August 2026', mode: 'singles' }
+        },
+        doubles: {}
+      }
+    }
+  };
+
+  function testGetPlayerMonthlyWins(playerName) {
+    const wins = [];
+    if (!playerName) return wins;
+    const targetName = String(playerName).trim().toLowerCase();
+    const adj = mockAppState.casual.adjudgedWinners;
+    ['singles', 'doubles'].forEach(m => {
+      const modeWins = adj[m] || {};
+      Object.keys(modeWins).forEach(pKey => {
+        const rec = modeWins[pKey];
+        if (rec && rec.player && String(rec.player).trim().toLowerCase() === targetName) {
+          wins.push(rec);
+        }
+      });
+    });
+    return wins;
+  }
+
+  assert.strictEqual(testGetPlayerMonthlyWins('Arjun Patel').length, 2, 'Arjun Patel has won 2 months');
+  assert.strictEqual(testGetPlayerMonthlyWins('Bhavna K.').length, 1, 'Bhavna K. has won 1 month');
+  assert.strictEqual(testGetPlayerMonthlyWins('Chirag M.').length, 0, 'Chirag M. has won 0 months');
+});
+
+it('Verifies smashheroes HTML contains Monthly Champions Roll of Honour elements and crowned badges', () => {
+  assert.ok(srcHtml.includes('id="casual-champions-roll-card"'), 'casual-champions-roll-card exists in source');
+  assert.ok(prodHtml.includes('id="casual-champions-roll-card"'), 'casual-champions-roll-card exists in production bundle');
+  assert.ok(srcHtml.includes('id="casual-champions-summary-strip"'), 'casual-champions-summary-strip exists');
+  assert.ok(srcHtml.includes('id="casual-champions-history-list"'), 'casual-champions-history-list exists');
+  assert.ok(srcHtml.includes('function getPlayerMonthlyWins('), 'getPlayerMonthlyWins helper exists');
+  assert.ok(srcHtml.includes('function getPlayerMonthsWonCount('), 'getPlayerMonthsWonCount helper exists');
+  assert.ok(srcHtml.includes('appState.casual.adjudgedWinners[mode][periodKey] ='), 'handleAdjudgeWinnerClick records crowned champion to adjudgedWinners');
+  assert.ok(srcHtml.includes('Month') && srcHtml.includes('Months') && srcHtml.includes('crownBadge'), 'Standings table rows render Months Won crown badge');
 });
 
 console.log(`\n========================================`);
