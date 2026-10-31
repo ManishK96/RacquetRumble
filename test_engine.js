@@ -805,6 +805,92 @@ it('Verifies smashheroes HTML contains Monthly Champions Roll of Honour elements
   assert.ok(srcHtml.includes('Month') && srcHtml.includes('Months') && srcHtml.includes('crownBadge'), 'Standings table rows render Months Won crown badge');
 });
 
+console.log('\n21. MULTI-CIRCLE CREATION & CROSS-USER SHARED CASUAL TOURNAMENTS');
+it('Supports creating multiple circles and discovers shared circles when a user is added as a player', () => {
+  const circlesStore = {};
+
+  function testCreateCircle(creatorUser, name, initialPlayers) {
+    const id = 'circle_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    const pList = [creatorUser.name];
+    (initialPlayers || []).forEach(p => {
+      if (!pList.includes(p)) pList.push(p);
+    });
+    const circle = {
+      id,
+      name,
+      creatorId: creatorUser.id,
+      creatorEmail: creatorUser.email,
+      creatorName: creatorUser.name,
+      players: pList,
+      matches: [],
+      doublesMatches: [],
+      adjudgedWinners: { singles: {}, doubles: {} }
+    };
+    circlesStore[id] = circle;
+    return circle;
+  }
+
+  function testIsUserMatchingPlayer(playerName, user) {
+    if (!user || !playerName) return false;
+    const p = String(playerName).trim().toLowerCase();
+    const uName = String(user.name || '').trim().toLowerCase();
+    const uEmail = String(user.email || '').trim().toLowerCase();
+    const uHandle = uEmail ? uEmail.split('@')[0].toLowerCase() : '';
+    if (p === uName || p === uEmail || (uHandle && p === uHandle)) return true;
+    if (uName && (uName.startsWith(p + ' ') || p.startsWith(uName + ' '))) return true;
+    return false;
+  }
+
+  function testGetAccessible(user) {
+    const myCircles = [];
+    const sharedCircles = [];
+    Object.values(circlesStore).forEach(c => {
+      const isCreator = (c.creatorId === user.id) || (c.creatorEmail && c.creatorEmail.toLowerCase() === user.email.toLowerCase());
+      const isMember = c.players.some(p => testIsUserMatchingPlayer(p, user));
+      if (isCreator) myCircles.push(c);
+      else if (isMember) sharedCircles.push(c);
+    });
+    return { myCircles, sharedCircles };
+  }
+
+  // 1. Manish creates 'Weekend Smashers' and adds 'Nitesh'
+  const manish = { id: 'manish_1', name: 'Manish', email: 'manish.shreedhar@gmail.com' };
+  const c1 = testCreateCircle(manish, 'Weekend Smashers', ['Nitesh', 'Pranav']);
+  assert.ok(c1.players.includes('Nitesh'), 'Nitesh added to Weekend Smashers');
+
+  // 2. Nitesh signs in: discovers 'Weekend Smashers' in sharedCircles
+  const nitesh = { id: 'nitesh_2', name: 'Nitesh Kumar', email: 'nitesh@gmail.com' };
+  const niteshCircles1 = testGetAccessible(nitesh);
+  assert.strictEqual(niteshCircles1.myCircles.length, 0, 'Nitesh has created 0 circles initially');
+  assert.strictEqual(niteshCircles1.sharedCircles.length, 1, 'Nitesh sees 1 shared circle');
+  assert.strictEqual(niteshCircles1.sharedCircles[0].name, 'Weekend Smashers', 'Nitesh sees Weekend Smashers created by Manish');
+
+  // 3. Nitesh creates his own tournament 'Apartment Club'
+  const c2 = testCreateCircle(nitesh, 'Apartment Club', ['Kavita', 'Suresh']);
+  const niteshCircles2 = testGetAccessible(nitesh);
+  assert.strictEqual(niteshCircles2.myCircles.length, 1, 'Nitesh sees Apartment Club in myCircles');
+  assert.strictEqual(niteshCircles2.sharedCircles.length, 1, 'Nitesh still sees Weekend Smashers in sharedCircles');
+
+  // 4. Suresh signs in: sees 'Apartment Club' (where Nitesh added him), but does NOT see 'Weekend Smashers'
+  const suresh = { id: 'suresh_3', name: 'Suresh', email: 'suresh@corp.com' };
+  const sureshCircles = testGetAccessible(suresh);
+  assert.strictEqual(sureshCircles.sharedCircles.length, 1, 'Suresh sees 1 shared circle');
+  assert.strictEqual(sureshCircles.sharedCircles[0].name, 'Apartment Club', 'Suresh only sees Apartment Club');
+});
+
+it('Verifies smashheroes HTML contains Multi-Circle selector and New Circle modal elements', () => {
+  assert.ok(srcHtml.includes('id="casual-circle-select"'), 'casual-circle-select dropdown exists in source');
+  assert.ok(prodHtml.includes('id="casual-circle-select"'), 'casual-circle-select dropdown exists in production bundle');
+  assert.ok(srcHtml.includes('id="modal-create-circle"'), 'modal-create-circle exists in source');
+  assert.ok(prodHtml.includes('id="modal-create-circle"'), 'modal-create-circle exists in production bundle');
+  assert.ok(srcHtml.includes('id="new-circle-name-input"'), 'new-circle-name-input exists');
+  assert.ok(srcHtml.includes('id="new-circle-players-input"'), 'new-circle-players-input exists');
+  assert.ok(srcHtml.includes('function switchActiveCasualCircle('), 'switchActiveCasualCircle exists');
+  assert.ok(srcHtml.includes('function createCasualCircleObj('), 'createCasualCircleObj exists');
+  assert.ok(srcHtml.includes('function getUserAccessibleCircles('), 'getUserAccessibleCircles exists');
+  assert.ok(srcHtml.includes('SHARED_CIRCLES_STORAGE_KEY'), 'SHARED_CIRCLES_STORAGE_KEY constant exists');
+});
+
 console.log(`\n========================================`);
 console.log(`Summary: ${passed} of ${total} tests passed.`);
 console.log(`========================================\n`);
