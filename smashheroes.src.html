@@ -280,14 +280,14 @@
             <!-- Dynamically populated via renderTVConsole() -->
           </div>
 
-          <!-- Pool Standings Snapshot Ticker (Corporate League) -->
-          <div id="tv-pool-ticker-container" class="bg-[#0f1712] border border-[#1c2c23] rounded-2xl p-3.5 space-y-2">
+          <!-- Pool Standings Snapshot Ticker -->
+          <div class="bg-[#0f1712] border border-[#1c2c23] rounded-2xl p-3.5 space-y-2">
             <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#718b7f] uppercase tracking-wider">
               <span>TOURNAMENT POOL STANDINGS SNAPSHOT</span>
               <div class="flex flex-wrap items-center gap-3">
-                <button onclick="switchCorpView('standings')" class="text-emerald-400 underline font-semibold">View Full Pool Tables &amp; H2H →</button>
+                <button onclick="switchCorpView('standings')" class="text-emerald-400 underline font-semibold">View Full Pool Tables & H2H →</button>
                 <button onclick="switchCorpView('fixtures')" class="text-cyan-400 underline font-semibold normal-case">📋 Fixtures &amp; Lineups →</button>
-                <button onclick="switchCorpView('swot')" class="text-amber-300 underline font-semibold normal-case hidden">🔍 Player SWOT Search →</button>
+                <button onclick="switchCorpView('swot')" class="text-amber-300 underline font-semibold normal-case">🔍 Player SWOT Search →</button>
               </div>
             </div>
             
@@ -308,17 +308,6 @@
                 <div id="tv-pool-b-pills" class="space-y-1 pt-1.5"></div>
               </div>
             </div>
-          </div>
-
-          <!-- Knockout Tournament Snapshot Ticker (Knockout Mode) -->
-          <div id="tv-knockout-ticker-container" class="bg-[#0f1712] border border-cyan-500/30 rounded-2xl p-3.5 space-y-2 hidden">
-            <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider">
-              <span>⚡ KNOCKOUT TOURNAMENT LIVE DRAW SNAPSHOT</span>
-              <div class="flex flex-wrap items-center gap-3">
-                <button onclick="switchCorpView('standings')" class="text-cyan-300 underline font-semibold">View Bracket &amp; Court Queue →</button>
-              </div>
-            </div>
-            <div id="tv-knockout-ticker-pills" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1"></div>
           </div>
         </section>
 
@@ -965,30 +954,7 @@
 
         <!-- View 1.4: Corporate Fixtures & Lineups (ADMIN PROTECTED) -->
         <section id="view-fixtures" class="space-y-4 p-4 hidden">
-          <!-- KNOCKOUT FIXTURES QUEUE WRAPPER -->
-          <div id="knockout-fixtures-view-wrapper" class="space-y-4 hidden">
-            <div class="bg-[#101915] border border-[#20362b] rounded-2xl p-4 shadow-xl space-y-3.5">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1b2b23] pb-3">
-                <div>
-                  <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                    <span>⚡</span> KNOCKOUT FIXTURES &amp; COURT QUEUE
-                  </h3>
-                  <p class="text-xs text-[#718b7f] mt-0.5">
-                    Live matches on court &amp; up next matches queued in the knockout draw. Winners automatically advance.
-                  </p>
-                </div>
-                <button type="button" onclick="switchCorpView('standings')" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold underline">
-                  View Full Bracket Tree →
-                </button>
-              </div>
-
-              <!-- Queued Next Up Fixtures in Fixtures Tab -->
-              <div id="knockout-fixtures-tab-queue" class="space-y-2"></div>
-            </div>
-          </div>
-
-          <!-- CORPORATE POOL FIXTURES WRAPPER -->
-          <div id="pool-fixtures-view-wrapper" class="bg-[#101915] border border-[#20362b] rounded-2xl p-4 shadow-xl space-y-3">
+          <div class="bg-[#101915] border border-[#20362b] rounded-2xl p-4 shadow-xl space-y-3">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#1b2b23] pb-2">
               <div>
                 <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -1027,7 +993,6 @@
 
             <!-- Fixtures List Cards -->
             <div id="fixtures-list-container" class="space-y-3"></div>
-          </div>
           </div>
         </section>
 
@@ -1332,27 +1297,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Circle / Tournament Selector Bar (Supports Multiple Tournaments & Cross-User Sharing) -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-[#1a2d22]">
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-              <label for="casual-circle-select" class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
-                <span>🏸</span> <span class="hidden sm:inline">ACTIVE</span> <span>CIRCLE:</span>
-              </label>
-              <select id="casual-circle-select" onchange="switchActiveCasualCircle(this.value)" class="bg-[#14231b] border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-400 cursor-pointer flex-1 min-w-0 truncate">
-                <!-- Dynamically populated with Tournaments You Started & Tournaments You're In -->
-              </select>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span id="casual-circle-role-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#14231b] text-emerald-300 border border-[#23382d]">
-                👑 Organizer
-              </span>
-              <button type="button" onclick="openCreateCircleModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow flex items-center gap-1 transition cursor-pointer">
-                <span>➕</span> <span>New Circle</span>
-              </button>
-            </div>
-          </div>
-          <p id="casual-circle-meta-label" class="text-[11px] text-[#8fa39a] italic"></p>
 
           <!-- Singles vs Doubles Mode Toggle -->
           <div class="flex items-center p-1 bg-[#09110d] border border-[#1b2b23] rounded-xl text-xs font-semibold">
@@ -1792,117 +1736,123 @@
     </div>
 
 
-
     <!-- ======================================================================= -->
-    <!-- MODAL: CREATE NEW CASUAL TOURNAMENT / CIRCLE                             -->
+    <!-- 3-CARD MODE SELECTION ENTRY POINT MODAL                                 -->
     <!-- ======================================================================= -->
-    <div id="modal-create-circle" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto hidden">
-      <div class="bg-gradient-to-b from-[#13221a] via-[#0d1612] to-[#070b09] border-2 border-emerald-500/50 rounded-2xl max-w-md w-full p-5 shadow-2xl relative space-y-4 my-auto">
+    <div id="modal-mode-picker" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto hidden">
+      <div class="bg-gradient-to-b from-[#13221a] via-[#0d1612] to-[#070b09] border-2 border-emerald-500/50 rounded-3xl max-w-4xl w-full p-4 sm:p-7 shadow-2xl relative space-y-5 my-auto">
         
         <!-- Modal Header -->
-        <div class="flex items-center justify-between border-b border-[#1b2f24] pb-2.5">
+        <div class="flex items-start justify-between gap-3 border-b border-[#1b2f24] pb-4">
           <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">🏸 CASUAL TOURNAMENTS &amp; CIRCLES</span>
-            <h2 class="text-xl font-bebas text-white tracking-wide">CREATE NEW CIRCLE</h2>
-          </div>
-          <button type="button" onclick="closeCreateCircleModal()" class="w-7 h-7 rounded-full bg-[#182820] hover:bg-[#253d30] text-[#718b7f] hover:text-white flex items-center justify-center text-xs font-bold transition shrink-0 cursor-pointer">
-            ✕
-          </button>
-        </div>
-
-        <p class="text-xs text-[#8fa39a]">
-          Create a new circle for your office group, weekend friends, or apartment community. Players you add will automatically see this tournament when they sign in!
-        </p>
-
-        <form onsubmit="handleCreateCircleSubmit(event)" class="space-y-3">
-          <div>
-            <label for="new-circle-name-input" class="block text-[11px] font-bold uppercase text-[#8fa39a] mb-1">
-              Tournament / Circle Name:
-            </label>
-            <input
-              type="text"
-              id="new-circle-name-input"
-              required
-              placeholder="e.g. Weekend Smashers, Office Friday Club"
-              class="w-full bg-[#0c1410] border border-emerald-500/40 text-white text-xs rounded-xl px-3.5 py-2.5 focus:border-emerald-400 focus:outline-none"
-            >
-          </div>
-
-          <div>
-            <label for="new-circle-players-input" class="block text-[11px] font-bold uppercase text-[#8fa39a] mb-1">
-              Friends / Players in this Circle:
-            </label>
-            <input
-              type="text"
-              id="new-circle-players-input"
-              placeholder="e.g. Nitesh, Pranav, Sampreeth, Manish"
-              class="w-full bg-[#0c1410] border border-[#243c2f] text-white text-xs rounded-xl px-3.5 py-2.5 focus:border-emerald-400 focus:outline-none"
-            >
-            <p class="text-[10px] text-[#718b7f] mt-1">
-              Separate names with commas. You are automatically included. When your friends sign in with their name or email, this tournament will appear in their list!
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              🏸 BADMINTON SUITE · SELECT YOUR ARENA
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-bebas text-white tracking-wide mt-1">
+              CHOOSE YOUR TOURNAMENT OR CIRCLE FORMAT
+            </h2>
+            <p class="text-xs sm:text-sm text-[#8fa39a]">
+              Select your preferred mode below to get started. You can switch formats anytime from the top header switcher.
             </p>
           </div>
-
-          <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#1b2f24]">
-            <button type="button" onclick="closeCreateCircleModal()" class="px-3.5 py-2 rounded-xl bg-[#14231b] hover:bg-[#1a2d22] text-[#8fa39a] text-xs font-semibold">
-              Cancel
-            </button>
-            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg transition">
-              Create &amp; Switch →
-            </button>
-          </div>
-        </form>
-
-      </div>
-    </div>
-
-    <!-- ======================================================================= -->
-    <!-- 3-CARD MODE SELECTION ENTRY POINT MODAL (MINIMAL & MOBILE-FIRST)        -->
-    <!-- ======================================================================= -->
-    <div id="modal-mode-picker" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto hidden">
-      <div class="bg-gradient-to-b from-[#13221a] via-[#0d1612] to-[#070b09] border-2 border-emerald-500/50 rounded-2xl max-w-sm w-full p-4 sm:p-5 shadow-2xl relative space-y-4 my-auto">
-        
-        <!-- Minimal Modal Header -->
-        <div class="flex items-center justify-between border-b border-[#1b2f24] pb-2.5">
-          <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">🏸 BADMINTON SUITE</span>
-            <h2 class="text-xl font-bebas text-white tracking-wide">CHOOSE MODE</h2>
-          </div>
-          <button type="button" onclick="closeModePickerModal()" class="w-7 h-7 rounded-full bg-[#182820] hover:bg-[#253d30] text-[#718b7f] hover:text-white flex items-center justify-center text-xs font-bold transition shrink-0 cursor-pointer">
+          <button type="button" onclick="closeModePickerModal()" class="w-8 h-8 rounded-full bg-[#182820] hover:bg-[#253d30] text-[#718b7f] hover:text-white flex items-center justify-center text-sm font-bold transition shrink-0 cursor-pointer">
             ✕
           </button>
         </div>
 
-        <!-- Minimal Mode Buttons Lined Up One Below the Other -->
-        <div class="flex flex-col gap-2.5 w-full">
+        <!-- 3 Stylish Mode Selection Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
           
           <!-- Card 1: Corporate League (Pools) -->
-          <button type="button" onclick="selectModeFromPicker('corporate')" class="w-full p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-[#11241a] to-[#0b1610] hover:from-[#173022] hover:to-[#0f2017] border border-emerald-500/40 hover:border-emerald-400 text-left transition-all shadow-md flex items-center justify-between group cursor-pointer">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl p-2 rounded-xl bg-[#14261d] border border-[#213a2c]">🏆</span>
-              <span class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">Corporate League (Pools)</span>
+          <div onclick="selectModeFromPicker('corporate')" class="group relative rounded-2xl bg-gradient-to-b from-[#11241a] to-[#09130e] border-2 border-emerald-500/40 hover:border-emerald-400 p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-xl hover:shadow-emerald-500/20 hover:scale-[1.02] transition-all cursor-pointer">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-3xl sm:text-4xl p-2 rounded-2xl bg-[#14261d] border border-[#213a2c]">🏆</span>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Pool League
+                </span>
+              </div>
+              <div>
+                <h3 class="text-lg font-bebas text-white tracking-wide group-hover:text-emerald-300 transition-colors">
+                  CORPORATE LEAGUE
+                </h3>
+                <p class="text-xs text-[#8fa39a] leading-relaxed mt-1">
+                  Multi-team arena tournament with Pool A &amp; B round-robin ties, 6-rubber categories (MS, MD, WS, XD, RMS, RMD), mandatory player participation, and live pool leaderboards.
+                </p>
+              </div>
+              <ul class="text-[11px] text-[#718b7f] space-y-1 pt-1 border-t border-[#192b21]">
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400 font-bold">✓</span> 8 Teams · 2 Pools · Captain Rosters</li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400 font-bold">✓</span> 6-Rubber Ties · Pool Points (+2 PTS)</li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400 font-bold">✓</span> Live TV Arena &amp; Umpire Split Pads</li>
+              </ul>
             </div>
-            <span class="text-emerald-400 font-bold text-base group-hover:translate-x-1 transition-transform">→</span>
-          </button>
+            <button type="button" class="w-full py-2.5 rounded-xl bg-emerald-600 group-hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition flex items-center justify-center gap-1.5">
+              <span>Launch Corporate League</span> <span>→</span>
+            </button>
+          </div>
 
           <!-- Card 2: Knockout Tournament -->
-          <button type="button" onclick="selectModeFromPicker('knockout')" class="w-full p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-[#13232c] to-[#0b151b] hover:from-[#1a303d] hover:to-[#0f1e27] border border-cyan-500/40 hover:border-cyan-400 text-left transition-all shadow-md flex items-center justify-between group cursor-pointer">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl p-2 rounded-xl bg-[#142631] border border-[#1f3747]">⚡</span>
-              <span class="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">Knockout Tournament</span>
+          <div onclick="selectModeFromPicker('knockout')" class="group relative rounded-2xl bg-gradient-to-b from-[#13232c] to-[#091217] border-2 border-cyan-500/40 hover:border-cyan-400 p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-xl hover:shadow-cyan-500/20 hover:scale-[1.02] transition-all cursor-pointer">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-3xl sm:text-4xl p-2 rounded-2xl bg-[#142631] border border-[#1f3747]">⚡</span>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                  Single Elimination
+                </span>
+              </div>
+              <div>
+                <h3 class="text-lg font-bebas text-white tracking-wide group-hover:text-cyan-300 transition-colors">
+                  KNOCKOUT TOURNAMENT
+                </h3>
+                <p class="text-xs text-[#8fa39a] leading-relaxed mt-1">
+                  Open registration tournament. Dump names from Google Form / Excel, automatically calculate the nearest power of 2 (4, 8, 16, 32), assign standard byes, and run the live court queue.
+                </p>
+              </div>
+              <ul class="text-[11px] text-[#718b7f] space-y-1 pt-1 border-t border-[#182933]">
+                <li class="flex items-center gap-1.5"><span class="text-cyan-400 font-bold">✓</span> Registration Dump &amp; Randomise Draw</li>
+                <li class="flex items-center gap-1.5"><span class="text-cyan-400 font-bold">✓</span> Nearest 2^n Sizing with Standard Byes</li>
+                <li class="flex items-center gap-1.5"><span class="text-cyan-400 font-bold">✓</span> Next Fixtures Queue &amp; Bracket Tree</li>
+              </ul>
             </div>
-            <span class="text-cyan-400 font-bold text-base group-hover:translate-x-1 transition-transform">→</span>
-          </button>
+            <button type="button" class="w-full py-2.5 rounded-xl bg-cyan-600 group-hover:bg-cyan-500 text-white font-bold text-xs shadow-lg transition flex items-center justify-center gap-1.5">
+              <span>Launch Knockout Draw</span> <span>→</span>
+            </button>
+          </div>
 
-          <!-- Card 3: Casual Circle -->
-          <button type="button" onclick="selectModeFromPicker('casual')" class="w-full p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-[#241c10] to-[#141009] hover:from-[#312516] hover:to-[#1b150c] border border-amber-500/40 hover:border-amber-400 text-left transition-all shadow-md flex items-center justify-between group cursor-pointer">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl p-2 rounded-xl bg-[#2a2012] border border-[#3f301b]">🏸</span>
-              <span class="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">Casual Circle</span>
+          <!-- Card 3: Casual Circle (Badminton 101) -->
+          <div onclick="selectModeFromPicker('casual')" class="group relative rounded-2xl bg-gradient-to-b from-[#241c10] to-[#110e07] border-2 border-amber-500/40 hover:border-amber-400 p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-xl hover:shadow-amber-500/20 hover:scale-[1.02] transition-all cursor-pointer">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-3xl sm:text-4xl p-2 rounded-2xl bg-[#2a2012] border border-[#3f301b]">🏸</span>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  Badminton 101
+                </span>
+              </div>
+              <div>
+                <h3 class="text-lg font-bebas text-white tracking-wide group-hover:text-amber-300 transition-colors">
+                  CASUAL CIRCLE
+                </h3>
+                <p class="text-xs text-[#8fa39a] leading-relaxed mt-1">
+                  Your personal friend circle leaderboard. Track friendly 1v1 Singles &amp; 2v2 Doubles, rank players by monthly Win% (8-game qualification rule), and compare Head to Head stats.
+                </p>
+              </div>
+              <ul class="text-[11px] text-[#718b7f] space-y-1 pt-1 border-t border-[#312516]">
+                <li class="flex items-center gap-1.5"><span class="text-amber-400 font-bold">✓</span> 8-Game Win% Qualification Engine</li>
+                <li class="flex items-center gap-1.5"><span class="text-amber-400 font-bold">✓</span> Singles &amp; Doubles Match Logging</li>
+                <li class="flex items-center gap-1.5"><span class="text-amber-400 font-bold">✓</span> 👑 Monthly Champion Crowning</li>
+              </ul>
             </div>
-            <span class="text-amber-400 font-bold text-base group-hover:translate-x-1 transition-transform">→</span>
-          </button>
+            <button type="button" class="w-full py-2.5 rounded-xl bg-amber-600 group-hover:bg-amber-500 text-[#0c1410] font-bold text-xs shadow-lg transition flex items-center justify-center gap-1.5">
+              <span>Launch Casual Circle</span> <span>→</span>
+            </button>
+          </div>
 
+        </div>
+
+        <div class="text-center pt-2 border-t border-[#1a2d22]">
+          <p class="text-[11px] text-[#718b7f]">
+            🔒 <strong>Free to host &amp; run:</strong> 100% static client-side bundle with offline-first local storage and optional real-time cloud sync.
+          </p>
         </div>
 
       </div>
@@ -3005,65 +2955,30 @@ Sneha P. (F)</pre>
       const profile = appState.currentProfile || 'tv';
       const isAdminProfile = profile === 'admin';
       const isKnockout = appState.topProfile === 'knockout';
-      const isCasual = appState.topProfile === 'casual' || profile === 'casual';
 
       // 1. TV Link button is ALWAYS visible to all viewers across every profile
       const tvLinkBtn = document.getElementById('btn-tv-link');
       if (tvLinkBtn) tvLinkBtn.classList.remove('hidden');
 
-      // 2. Profile main container toggling (Corporate/Knockout vs Casual)
-      const boxCorp = document.getElementById('profile-container-corporate');
-      const boxCas = document.getElementById('profile-container-casual');
-      const navCorp = document.getElementById('nav-corporate');
-      const navCas = document.getElementById('nav-casual');
-
-      if (isCasual) {
-        if (boxCorp) boxCorp.classList.add('hidden');
-        if (boxCas) boxCas.classList.remove('hidden');
-        if (navCorp) navCorp.classList.add('hidden');
-        if (navCas) navCas.classList.remove('hidden');
-      } else {
-        if (boxCas) boxCas.classList.add('hidden');
-        if (boxCorp) boxCorp.classList.remove('hidden');
-        if (navCas) navCas.classList.add('hidden');
-        if (profile === 'umpire' || profile === 'coach') {
-          if (navCorp) navCorp.classList.add('hidden');
-        } else {
-          if (navCorp) navCorp.classList.remove('hidden');
-        }
-      }
-
-      // 3. Toggle between Pool Standings/Fixtures/TV and Knockout Standings/Fixtures/TV
+      // 2. Toggle between Pool Standings and Knockout Fixtures & Bracket Tree
       const poolWrap = document.getElementById('pool-standings-wrapper');
       const koWrap = document.getElementById('knockout-standings-wrapper');
-      const poolFixtures = document.getElementById('pool-fixtures-view-wrapper');
-      const koFixtures = document.getElementById('knockout-fixtures-view-wrapper');
-      const tvPoolTicker = document.getElementById('tv-pool-ticker-container');
-      const tvKoTicker = document.getElementById('tv-knockout-ticker-container');
       const koGenCard = document.getElementById('admin-knockout-generator-card');
       const corpTeamsCard = document.getElementById('admin-teams-grid')?.parentElement;
 
       if (isKnockout) {
         if (poolWrap) poolWrap.classList.add('hidden');
         if (koWrap) koWrap.classList.remove('hidden');
-        if (poolFixtures) poolFixtures.classList.add('hidden');
-        if (koFixtures) koFixtures.classList.remove('hidden');
-        if (tvPoolTicker) tvPoolTicker.classList.add('hidden');
-        if (tvKoTicker) tvKoTicker.classList.remove('hidden');
         if (koGenCard) koGenCard.classList.remove('hidden');
         if (corpTeamsCard && !isAdminProfile) corpTeamsCard.classList.add('hidden');
       } else {
         if (poolWrap) poolWrap.classList.remove('hidden');
         if (koWrap) koWrap.classList.add('hidden');
-        if (poolFixtures) poolFixtures.classList.remove('hidden');
-        if (koFixtures) koFixtures.classList.add('hidden');
-        if (tvPoolTicker) tvPoolTicker.classList.remove('hidden');
-        if (tvKoTicker) tvKoTicker.classList.add('hidden');
         if (koGenCard) koGenCard.classList.add('hidden');
         if (corpTeamsCard) corpTeamsCard.classList.remove('hidden');
       }
 
-      // 4. Admin configuration options
+      // 3. Admin configuration options
       const cloudBtn = document.getElementById('btn-cloud-status');
       if (cloudBtn) {
         if (isAdminProfile) cloudBtn.classList.remove('hidden');
@@ -3092,7 +3007,8 @@ Sneha P. (F)</pre>
         else fixAdminBadge.classList.add('hidden');
       }
 
-      // 5. Configure Navigation bar tabs
+      // 4. Configure Navigation bar tabs
+      const navCorp = document.getElementById('nav-corporate');
       const btnTv = document.getElementById('nav-btn-tv');
       const btnUmpire = document.getElementById('nav-btn-umpire');
       const btnCoach = document.getElementById('nav-btn-coach');
@@ -3114,14 +3030,18 @@ Sneha P. (F)</pre>
           : '<span>📋</span> <span>Fixtures &amp; Lineups</span> <span id="nav-badge-fixtures-admin" class="hidden text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">Admin</span>';
       }
 
-      if (profile === 'tv' && !isCasual) {
+      if (profile === 'umpire' || profile === 'coach' || profile === 'casual') {
+        if (navCorp) navCorp.classList.add('hidden');
+      } else if (profile === 'tv') {
+        if (navCorp) navCorp.classList.remove('hidden');
         if (btnTv) btnTv.classList.remove('hidden');
         if (btnStandings) btnStandings.classList.remove('hidden');
         if (btnFixtures) btnFixtures.classList.remove('hidden');
         if (btnUmpire) btnUmpire.classList.add('hidden');
         if (btnCoach) btnCoach.classList.add('hidden');
         if (btnAdmin) btnAdmin.classList.add('hidden');
-      } else if (isAdminProfile && !isCasual) {
+      } else if (isAdminProfile) {
+        if (navCorp) navCorp.classList.remove('hidden');
         [btnTv, btnUmpire, btnCoach, btnStandings, btnFixtures, btnAdmin].forEach(b => {
           if (b) b.classList.remove('hidden');
         });
@@ -3131,21 +3051,23 @@ Sneha P. (F)</pre>
     function switchTopLevelProfile(topMode) {
       if (topMode === 'casual') {
         appState.topProfile = 'casual';
-        appState.currentProfile = 'casual';
         switchTournamentProfile('casual', true);
-        switchCasualTab(appState.activeCasualTab || 'standings');
       } else if (topMode === 'knockout') {
         appState.topProfile = 'knockout';
         const sub = appState.tournamentSubProfile || 'tv';
-        switchTournamentProfile(sub, true);
-        // In Knockout mode, immediately activate the Knockout Bracket & Next Fixtures view
-        switchCorpView('standings');
+        if (sub !== 'tv' && !isProfileUnlocked(sub)) {
+          switchTournamentProfile('tv', true);
+        } else {
+          switchTournamentProfile(sub, true);
+        }
       } else {
         appState.topProfile = 'corporate';
         const sub = appState.tournamentSubProfile || 'tv';
-        switchTournamentProfile(sub, true);
-        // In Corporate League, immediately activate Corporate TV or Pool Standings
-        switchCorpView('tv');
+        if (sub !== 'tv' && !isProfileUnlocked(sub)) {
+          switchTournamentProfile('tv', true);
+        } else {
+          switchTournamentProfile(sub, true);
+        }
       }
       saveActiveScreenState();
     }
@@ -3836,11 +3758,9 @@ Sneha P. (F)</pre>
         });
       }
 
-      // 2. Render Queued Next Up Fixtures in Standings & Fixtures tabs
+      // 2. Render Queued Next Up Fixtures
       const queueList = document.getElementById('knockout-queued-fixtures-list');
-      const queueTabList = document.getElementById('knockout-fixtures-tab-queue');
-      const queueTargets = [queueList, queueTabList].filter(Boolean);
-      if (queueTargets.length > 0) {
+      if (queueList) {
         const queued = ko.fixtures.filter(f => f.status === 'scheduled' && !f.courtId);
         const upcomingPending = ko.fixtures.filter(f => f.status === 'pending');
 
@@ -3874,7 +3794,7 @@ Sneha P. (F)</pre>
               </div>
             `;
           });
-          queueTargets.forEach(el => { el.innerHTML = html; });
+          queueList.innerHTML = html;
         }
       }
 
@@ -4237,281 +4157,84 @@ Sneha P. (F)</pre>
       } catch (e) {}
     }
 
-
-    // =========================================================================
-    // MULTI-CIRCLE & CROSS-USER SHARED CASUAL TOURNAMENTS ENGINE
-    // =========================================================================
-    const SHARED_CIRCLES_STORAGE_KEY = 'racquet_rumble_shared_circles_v2';
-    const ACTIVE_CIRCLE_ID_STORAGE_KEY = 'racquet_rumble_active_circle_id_v2';
-
-    function isUserMatchingPlayer(playerName, user) {
-      if (!user || !playerName) return false;
-      const p = String(playerName).trim().toLowerCase();
-      const uName = String(user.name || '').trim().toLowerCase();
-      const uEmail = String(user.email || '').trim().toLowerCase();
-      const uHandle = uEmail ? uEmail.split('@')[0].toLowerCase() : '';
-
-      if (p === uName) return true;
-      if (p === uEmail) return true;
-      if (uHandle && p === uHandle) return true;
-      if (uName && (uName.startsWith(p + ' ') || p.startsWith(uName + ' '))) return true;
-      return false;
-    }
-
-    function createCasualCircleObj(name, initialPlayers = [], creatorUser = getCasualActiveUser()) {
-      const id = 'circle_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-      const cUser = creatorUser || { id: 'anonymous', name: 'Player', email: '' };
-      
-      const pList = [];
-      if (cUser.name) pList.push(cUser.name);
-      (initialPlayers || []).forEach(p => {
-        const clean = String(p).trim();
-        if (clean && !pList.some(existing => existing.toLowerCase() === clean.toLowerCase())) {
-          pList.push(clean);
-        }
-      });
-
-      return {
-        id,
-        name: String(name || 'Casual Circle').trim(),
-        creatorId: cUser.id || 'anon',
-        creatorEmail: cUser.email || '',
-        creatorName: cUser.name || 'Organizer',
-        createdAt: Date.now(),
-        lastUpdated: Date.now(),
-        players: pList,
-        matches: [],
-        doublesMatches: [],
-        adjudgedWinners: { singles: {}, doubles: {} }
-      };
-    }
-
-    function getUserAccessibleCircles(user = getCasualActiveUser()) {
-      if (!appState.casualCircles || typeof appState.casualCircles !== 'object') {
-        appState.casualCircles = {};
-      }
-      const allCircles = Object.values(appState.casualCircles);
-      if (!user) return { myCircles: [], sharedCircles: [], all: allCircles };
-
-      const myCircles = [];
-      const sharedCircles = [];
-
-      allCircles.forEach(c => {
-        if (!c || typeof c !== 'object') return;
-        const isCreator = (c.creatorId && c.creatorId === user.id) ||
-                          (c.creatorEmail && user.email && c.creatorEmail.toLowerCase() === user.email.toLowerCase());
-        const isMember = Array.isArray(c.players) && c.players.some(p => isUserMatchingPlayer(p, user));
-
-        if (isCreator) {
-          myCircles.push(c);
-        } else if (isMember) {
-          sharedCircles.push(c);
-        }
-      });
-
-      return { myCircles, sharedCircles, all: [...myCircles, ...sharedCircles] };
-    }
-
-    function openCreateCircleModal() {
-      const modal = document.getElementById('modal-create-circle');
-      const nameIn = document.getElementById('new-circle-name-input');
-      const playersIn = document.getElementById('new-circle-players-input');
-      if (nameIn) nameIn.value = '';
-      if (playersIn) playersIn.value = '';
-      if (modal) {
-        modal.classList.remove('hidden');
-        setTimeout(() => { if (nameIn) nameIn.focus(); }, 40);
-      }
-    }
-
-    function closeCreateCircleModal() {
-      const modal = document.getElementById('modal-create-circle');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function handleCreateCircleSubmit(e) {
-      if (e) e.preventDefault();
+    function loadCasualProfileForCurrentUser() {
       const user = getCasualActiveUser();
-      const nameIn = document.getElementById('new-circle-name-input');
-      const playersIn = document.getElementById('new-circle-players-input');
-      const cName = nameIn ? nameIn.value.trim() : '';
-      if (!cName) {
-        showToast('Please enter a circle name', '⚠️');
-        return;
-      }
-
-      const rawPlayers = playersIn ? playersIn.value.split(/[,\n]/).map(p => p.trim()).filter(Boolean) : [];
-      const newCircle = createCasualCircleObj(cName, rawPlayers, user);
-
-      if (!appState.casualCircles) appState.casualCircles = {};
-      appState.casualCircles[newCircle.id] = newCircle;
-      appState.activeCircleId = newCircle.id;
-      appState.casual = newCircle;
-
-      saveCasualProfileForCurrentUser();
-      closeCreateCircleModal();
-      renderCasualAll();
-      showToast(`Created tournament "${newCircle.name}"!`, '🎉');
-    }
-
-    function switchActiveCasualCircle(circleId) {
-      if (!circleId || !appState.casualCircles || !appState.casualCircles[circleId]) return;
-      appState.activeCircleId = circleId;
-      appState.casual = appState.casualCircles[circleId];
-
-      try {
-        const user = getCasualActiveUser();
-        const saveKey = user ? (ACTIVE_CIRCLE_ID_STORAGE_KEY + '_' + user.id) : ACTIVE_CIRCLE_ID_STORAGE_KEY;
-        localStorage.setItem(saveKey, circleId);
-      } catch (e) {}
-
-      renderCasualAll();
-      showToast(`Switched to "${appState.casual.name}"!`, '⚡');
-    }
-
-            function loadCasualProfileForCurrentUser() {
-      const user = getCasualActiveUser();
-      if (!appState.casualCircles || typeof appState.casualCircles !== 'object') {
-        appState.casualCircles = {};
-      }
-
-      // 1. Load all stored shared circles from localStorage
-      try {
-        const rawShared = localStorage.getItem(SHARED_CIRCLES_STORAGE_KEY);
-        if (rawShared) {
-          const parsed = JSON.parse(rawShared);
-          if (parsed && typeof parsed === 'object') {
-            Object.values(parsed).forEach(c => {
-              if (c && c.id) appState.casualCircles[c.id] = c;
-            });
-          }
-        }
-      } catch (e) {}
-
-      // 2. Backward compatibility migration: If user had an older single-profile circle, migrate it into a circle
-      if (user) {
-        const legacyKey = CASUAL_PROFILE_PREFIX + user.id;
-        try {
-          const rawLegacy = localStorage.getItem(legacyKey);
-          if (rawLegacy) {
-            const legacy = JSON.parse(rawLegacy);
-            if (legacy && (Array.isArray(legacy.players) || Array.isArray(legacy.matches))) {
-              const legacyId = 'circle_legacy_' + user.id;
-              if (!appState.casualCircles[legacyId]) {
-                appState.casualCircles[legacyId] = {
-                  id: legacyId,
-                  name: legacy.ownerName ? `${legacy.ownerName}'s Circle` : `${user.name}'s Circle`,
-                  creatorId: user.id,
-                  creatorEmail: user.email,
-                  creatorName: user.name,
-                  createdAt: Date.now(),
-                  lastUpdated: legacy.lastUpdated || Date.now(),
-                  players: Array.isArray(legacy.players) ? legacy.players : [],
-                  matches: Array.isArray(legacy.matches) ? legacy.matches : [],
-                  doublesMatches: Array.isArray(legacy.doublesMatches) ? legacy.doublesMatches : [],
-                  adjudgedWinners: legacy.adjudgedWinners || { singles: {}, doubles: {} }
-                };
-              }
-            }
-          }
-        } catch (e) {}
-      }
-
-      // 3. Determine accessible circles for this user
-      const accessible = getUserAccessibleCircles(user);
-
-      // If user has NO circles yet, auto-create their initial personal circle
-      if (accessible.all.length === 0 && user) {
-        const defaultCircle = createCasualCircleObj(`${user.name}'s Circle`, [], user);
-        appState.casualCircles[defaultCircle.id] = defaultCircle;
-        accessible.myCircles.push(defaultCircle);
-        accessible.all.push(defaultCircle);
-      }
-
-      // 4. Select active circle
-      let savedActiveId = null;
-      try {
-        const saveKey = user ? (ACTIVE_CIRCLE_ID_STORAGE_KEY + '_' + user.id) : ACTIVE_CIRCLE_ID_STORAGE_KEY;
-        savedActiveId = localStorage.getItem(saveKey);
-      } catch (e) {}
-
-      if (savedActiveId && accessible.all.some(c => c.id === savedActiveId)) {
-        appState.activeCircleId = savedActiveId;
-      } else if (accessible.all.length > 0) {
-        appState.activeCircleId = accessible.all[0].id;
-      } else {
-        appState.activeCircleId = null;
-      }
-
-      // 5. Point appState.casual to the active circle
-      if (appState.activeCircleId && appState.casualCircles[appState.activeCircleId]) {
-        appState.casual = appState.casualCircles[appState.activeCircleId];
-      } else {
+      if (!user) {
         appState.casual = {
           players: [],
           matches: [],
           doublesMatches: [],
           adjudgedWinners: { singles: {}, doubles: {} }
         };
+        return;
       }
-    }
-
-        function saveCasualProfileForCurrentUser() {
-      const user = getCasualActiveUser();
-      if (!appState.casualCircles) appState.casualCircles = {};
-      if (appState.activeCircleId && appState.casual) {
-        appState.casual.lastUpdated = Date.now();
-        appState.casualCircles[appState.activeCircleId] = appState.casual;
-      }
-
-      // 1. Save all circles map to localStorage
+      const key = CASUAL_PROFILE_PREFIX + user.id;
       try {
-        localStorage.setItem(SHARED_CIRCLES_STORAGE_KEY, JSON.stringify(appState.casualCircles));
-        if (user && appState.activeCircleId) {
-          localStorage.setItem(ACTIVE_CIRCLE_ID_STORAGE_KEY + '_' + user.id, appState.activeCircleId);
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            appState.casual = {
+              players: Array.isArray(parsed.players) ? parsed.players : Object.values(parsed.players || {}),
+              matches: Array.isArray(parsed.matches) ? parsed.matches : Object.values(parsed.matches || {}),
+              doublesMatches: Array.isArray(parsed.doublesMatches) ? parsed.doublesMatches : Object.values(parsed.doublesMatches || {}),
+              adjudgedWinners: parsed.adjudgedWinners || { singles: {}, doubles: {} }
+            };
+            return;
+          }
         }
       } catch (e) {}
 
-      // 2. Sync active circle and circles index to Firebase Realtime Database
-      if (isCloudConnected && firebaseDb && appState.activeCircleId && appState.casual) {
-        try {
-          const activeCircle = JSON.parse(JSON.stringify(appState.casual));
-          firebaseDb.ref('racquet_rumble_shared_circles/' + appState.activeCircleId).set(activeCircle).catch(() => {});
-        } catch (e) {}
-      }
+      // Start completely from scratch for this user
+      appState.casual = {
+        players: [],
+        matches: [],
+        doublesMatches: [],
+        adjudgedWinners: { singles: {}, doubles: {} }
+      };
     }
 
-        function subscribeCasualUserCloudSync() {
-      if (!isCloudConnected || !firebaseDb) return;
+    function saveCasualProfileForCurrentUser() {
+      const user = getCasualActiveUser();
+      if (!user) return;
+      const key = CASUAL_PROFILE_PREFIX + user.id;
       try {
-        const circlesRef = firebaseDb.ref('racquet_rumble_shared_circles');
-        circlesRef.on('value', (snapshot) => {
+        const cleanCasual = JSON.parse(JSON.stringify({
+          ownerName: user.name,
+          ownerEmail: user.email,
+          players: appState.casual.players || [],
+          matches: appState.casual.matches || [],
+          doublesMatches: appState.casual.doublesMatches || [],
+          adjudgedWinners: appState.casual.adjudgedWinners || { singles: {}, doubles: {} },
+          lastUpdated: Date.now()
+        }));
+        localStorage.setItem(key, JSON.stringify(cleanCasual));
+        if (isCloudConnected && firebaseDb) {
+          firebaseDb.ref('racquet_rumble_casual_users/' + user.id).set(cleanCasual).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    function subscribeCasualUserCloudSync() {
+      const user = getCasualActiveUser();
+      if (!user || !isCloudConnected || !firebaseDb) return;
+      try {
+        const userRef = firebaseDb.ref('racquet_rumble_casual_users/' + user.id);
+        userRef.once('value', (snapshot) => {
           const val = snapshot.val();
           if (val && typeof val === 'object') {
-            let updated = false;
-            Object.values(val).forEach(cloudCircle => {
-              if (cloudCircle && cloudCircle.id) {
-                const local = appState.casualCircles ? appState.casualCircles[cloudCircle.id] : null;
-                if (!local || (cloudCircle.lastUpdated && cloudCircle.lastUpdated > (local.lastUpdated || 0))) {
-                  if (!appState.casualCircles) appState.casualCircles = {};
-                  appState.casualCircles[cloudCircle.id] = cloudCircle;
-                  if (cloudCircle.id === appState.activeCircleId) {
-                    appState.casual = cloudCircle;
-                  }
-                  updated = true;
-                }
-              }
-            });
-
-            if (updated) {
-              try { localStorage.setItem(SHARED_CIRCLES_STORAGE_KEY, JSON.stringify(appState.casualCircles)); } catch (e) {}
-              renderCasualAll();
-            }
+            appState.casual = {
+              players: Array.isArray(val.players) ? val.players : Object.values(val.players || {}),
+              matches: Array.isArray(val.matches) ? val.matches : Object.values(val.matches || {}),
+              doublesMatches: Array.isArray(val.doublesMatches) ? val.doublesMatches : Object.values(val.doublesMatches || {}),
+              adjudgedWinners: val.adjudgedWinners || { singles: {}, doubles: {} }
+            };
+            const key = CASUAL_PROFILE_PREFIX + user.id;
+            try { localStorage.setItem(key, JSON.stringify(appState.casual)); } catch (e) {}
+            renderCasualAll();
           }
         });
-      } catch (e) {
-        console.warn('subscribeCasualUserCloudSync warning:', e);
-      }
+      } catch (e) {}
     }
 
     function escapeHtml(str) {
@@ -6766,39 +6489,7 @@ Sneha P. (F)</pre>
         grid.appendChild(card);
       });
 
-      if (isKnockoutActive()) {
-        renderTVKnockoutTicker();
-      } else {
-        renderTVTickerPills();
-      }
-    }
-
-    function renderTVKnockoutTicker() {
-      const koTickerPills = document.getElementById('tv-knockout-ticker-pills');
-      if (!koTickerPills) return;
-      const ko = appState.knockout || {};
-      const fixtures = Array.isArray(ko.fixtures) ? ko.fixtures : [];
-      const liveFix = fixtures.filter(f => f.status === 'live');
-      const queuedFix = fixtures.filter(f => f.status === 'scheduled' && !f.courtId);
-
-      let html = '';
-      if (liveFix.length > 0) {
-        liveFix.forEach(f => {
-          html += `
-            <div class="bg-[#12221b] border border-emerald-500/40 rounded-xl p-2.5 space-y-1">
-              <div class="flex items-center justify-between text-[10px] text-emerald-400 font-bold">
-                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Court ${f.courtId || 1}</span>
-                <span class="text-amber-300 font-mono">${f.rubbers?.[0]?.scoreA || 0} - ${f.rubbers?.[0]?.scoreB || 0}</span>
-              </div>
-              <div class="text-xs font-bold text-white truncate">${escapeHtml(f.playersA)} vs ${escapeHtml(f.playersB)}</div>
-              <div class="text-[9px] text-[#718b7f]">${f.roundName}</div>
-            </div>
-          `;
-        });
-      } else {
-        html = '<div class="col-span-full text-xs text-[#718b7f] py-2 text-center">No knockout matches currently live on court. Assign matches in the Bracket view.</div>';
-      }
-      koTickerPills.innerHTML = html;
+      renderTVTickerPills();
     }
 
     function renderTVTickerPills() {
@@ -8215,77 +7906,10 @@ Sneha P. (F)</pre>
         if (!needsInitialPlayers) closeBtn.classList.remove('hidden');
         else closeBtn.classList.add('hidden');
       }
-
-      // Render Circle / Tournament Switcher Bar
-      const circleSelect = document.getElementById('casual-circle-select');
-      const roleBadge = document.getElementById('casual-circle-role-badge');
-      const metaLabel = document.getElementById('casual-circle-meta-label');
-      if (circleSelect) {
-        if (!user) {
-          circleSelect.innerHTML = '<option value="">Sign in to view tournaments</option>';
-          if (roleBadge) roleBadge.textContent = '🔒 Sign In';
-          if (metaLabel) metaLabel.textContent = 'Sign in to access shared circles or start your own tournaments.';
-        } else {
-          const { myCircles, sharedCircles, all } = getUserAccessibleCircles(user);
-          circleSelect.innerHTML = '';
-
-          if (all.length === 0) {
-            circleSelect.innerHTML = '<option value="">No Circles Yet</option>';
-            if (roleBadge) roleBadge.textContent = 'No Circle';
-            if (metaLabel) metaLabel.textContent = 'Tap "+ New Circle" to start your first tournament!';
-          } else {
-            if (myCircles.length > 0) {
-              const grp = document.createElement('optgroup');
-              grp.label = '👑 Tournaments You Started';
-              myCircles.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = `${c.name} (${(c.players || []).length} players)`;
-                if (c.id === appState.activeCircleId) opt.selected = true;
-                grp.appendChild(opt);
-              });
-              circleSelect.appendChild(grp);
-            }
-
-            if (sharedCircles.length > 0) {
-              const grp = document.createElement('optgroup');
-              grp.label = "👥 Tournaments You're In (Shared)";
-              sharedCircles.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = `${c.name} (by ${c.creatorName || 'Member'})`;
-                if (c.id === appState.activeCircleId) opt.selected = true;
-                grp.appendChild(opt);
-              });
-              circleSelect.appendChild(grp);
-            }
-
-            const activeCircle = appState.casualCircles ? appState.casualCircles[appState.activeCircleId] : null;
-            if (activeCircle) {
-              const isOwner = (activeCircle.creatorId && activeCircle.creatorId === user.id) ||
-                              (activeCircle.creatorEmail && user.email && activeCircle.creatorEmail.toLowerCase() === user.email.toLowerCase());
-              if (roleBadge) {
-                roleBadge.textContent = isOwner ? '👑 Organizer' : '👥 Participant';
-                roleBadge.className = isOwner
-                  ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-              }
-              if (metaLabel) {
-                const pCount = (activeCircle.players || []).length;
-                if (isOwner) {
-                  metaLabel.innerHTML = `👑 <strong>Started by You</strong> · ${pCount} players · Add friends by name in Friends drawer to automatically share this tournament with them!`;
-                } else {
-                  metaLabel.innerHTML = `👥 <strong>Shared with You</strong> by ${escapeHtml(activeCircle.creatorName || 'Organizer')} (${escapeHtml(activeCircle.creatorEmail || '')}) · You are a player in this circle!`;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      const activeCircleName = (appState.casual && appState.casual.name) ? appState.casual.name : `${user.name}'s Circle`;
       if (setupHeading) {
-        setupHeading.textContent = `Manage Players in "${activeCircleName}"`;
+        setupHeading.textContent = needsInitialPlayers
+          ? `Welcome ${user.name}! Create Your Friends Roster From Scratch`
+          : `Manage ${user.name}'s Friends Roster`;
       }
       if (countLabel) {
         countLabel.textContent = `YOUR FRIENDS ROSTER (${players.length} PLAYER${players.length === 1 ? '' : 'S'})`;
@@ -9320,13 +8944,6 @@ Sneha P. (F)</pre>
     window.selectModeFromPicker = selectModeFromPicker;
     window.saveActiveScreenState = saveActiveScreenState;
     window.restoreActiveScreenState = restoreActiveScreenState;
-    window.createCasualCircleObj = createCasualCircleObj;
-    window.isUserMatchingPlayer = isUserMatchingPlayer;
-    window.getUserAccessibleCircles = getUserAccessibleCircles;
-    window.switchActiveCasualCircle = switchActiveCasualCircle;
-    window.openCreateCircleModal = openCreateCircleModal;
-    window.closeCreateCircleModal = closeCreateCircleModal;
-    window.handleCreateCircleSubmit = handleCreateCircleSubmit;
     window.getPlayerMonthlyWins = getPlayerMonthlyWins;
     window.getPlayerMonthsWonCount = getPlayerMonthsWonCount;
     window.getAdjudgedChampionForPeriod = getAdjudgedChampionForPeriod;
