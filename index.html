@@ -1320,29 +1320,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Circle / Tournament Selector Bar (Supports Multiple Tournaments & Cross-User Sharing) -->
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-[#1a2d22]">
-                            <div class="flex items-center gap-2 flex-1 min-w-0">
-                                <label for="casual-circle-select" class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
-                                    <span>🏸</span>
-                                    <span class="hidden sm:inline">ACTIVE</span>
-                                    <span>CIRCLE:</span>
-                                </label>
-                                <select id="casual-circle-select" onchange="switchActiveCasualCircle(this.value)" class="bg-[#14231b] border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-400 cursor-pointer flex-1 min-w-0 truncate">
-                <!-- Dynamically populated with Tournaments You Started & Tournaments You're In -->
-              </select>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <span id="casual-circle-role-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#14231b] text-emerald-300 border border-[#23382d]">
-                👑 Organizer
-              </span>
-                                <button type="button" onclick="openCreateCircleModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow flex items-center gap-1 transition cursor-pointer">
-                                    <span>➕</span>
-                                    <span>New Circle</span>
-                                </button>
-                            </div>
-                        </div>
-                        <p id="casual-circle-meta-label" class="text-[11px] text-[#8fa39a] italic"></p>
                         <!-- Singles vs Doubles Mode Toggle -->
                         <div class="flex items-center p-1 bg-[#09110d] border border-[#1b2b23] rounded-xl text-xs font-semibold">
                             <button id="casual-mode-btn-singles" onclick="switchCasualGameMode('singles')" class="flex-1 py-1.5 rounded-lg text-center transition-all bg-[#14231b] text-white shadow-sm flex items-center justify-center gap-1.5 border border-[#233c2f]">
@@ -1438,9 +1415,15 @@
                         <div id="casual-leading-card" class="bg-[#241a0e] border border-[#483315] rounded-2xl p-4 shadow-lg relative overflow-hidden">
                             <div class="flex items-center justify-between text-[11px] font-bold tracking-widest uppercase text-[#e5a93c] mb-1">
                                 <span id="casual-leading-badge">LEADING · OCTOBER 2026 (SINGLES)</span>
-                                <button id="btn-casual-adjudge" onclick="handleAdjudgeWinnerClick()" class="text-[10px] bg-[#3a2914] hover:bg-[#4f3719] text-[#fcd34d] px-2.5 py-1 rounded-lg border border-[#6b4c20] transition-colors">
-                👑 Adjudge Winner
-              </button>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="btn-casual-cancel-adjudge" onclick="handleCancelAdjudgeWinnerClick()" class="hidden text-[10px] bg-rose-950/60 hover:bg-rose-900 text-rose-300 px-2.5 py-1 rounded-lg border border-rose-500/40 transition-colors flex items-center gap-1 cursor-pointer" title="Cancel/Revert the crowned champion for this period">
+                                        <span>↩️</span>
+                                        <span>Revert Winner</span>
+                                    </button>
+                                    <button id="btn-casual-adjudge" onclick="handleAdjudgeWinnerClick()" class="text-[10px] bg-[#3a2914] hover:bg-[#4f3719] text-[#fcd34d] px-2.5 py-1 rounded-lg border border-[#6b4c20] transition-colors cursor-pointer">
+                  👑 Adjudge Winner
+                </button>
+                                </div>
                             </div>
                             <h3 id="casual-leading-name" class="text-3xl sm:text-4xl font-bebas text-white">No Players Yet</h3>
                             <p id="casual-leading-stats" class="text-xs font-semibold text-[#e5a93c] mt-0.5">Add friends above & log matches to track standings</p>
@@ -1562,6 +1545,31 @@
                     </section>
                     <!-- View 2.3: Casual Match Logger (OPEN TO ANY LOGGED-IN CASUAL USER) -->
                     <section id="view-casual-log" class="space-y-4 hidden">
+                        <!-- Active Circle & Multi-Circle Manager (Only in Log Matches tab) -->
+                        <div id="casual-circle-manager-card" class="bg-[#101915] border border-[#203428] rounded-2xl p-3.5 space-y-2.5 shadow-lg">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                                <div class="flex items-center gap-2 flex-1 min-w-0">
+                                    <label for="casual-circle-select" class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
+                                        <span>🏸</span>
+                                        <span class="hidden sm:inline">ACTIVE</span>
+                                        <span>CIRCLE:</span>
+                                    </label>
+                                    <select id="casual-circle-select" onchange="switchActiveCasualCircle(this.value)" class="bg-[#14231b] border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-400 cursor-pointer flex-1 min-w-0 truncate">
+                  <!-- Dynamically populated with Tournaments You Started & Tournaments You're In -->
+                </select>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span id="casual-circle-role-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#14231b] text-emerald-300 border border-[#23382d]">
+                  👑 Organizer
+                </span>
+                                    <button type="button" onclick="openCreateCircleModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow flex items-center gap-1 transition cursor-pointer">
+                                        <span>➕</span>
+                                        <span>New Circle</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <p id="casual-circle-meta-label" class="text-[11px] text-[#8fa39a] italic"></p>
+                        </div>
                         <!-- Sign-In Prompt Banner (Only shown if user has not signed in to their personal Casual Circle yet) -->
                         <div id="casual-admin-banner" class="hidden p-3 rounded-2xl bg-[#14221b] border border-[#243c2f] text-xs text-[#8fa39a] flex items-center justify-between">
                             <span class="flex items-center gap-1.5 font-medium">
@@ -3236,7 +3244,7 @@ Sneha P. (F)</pre>
                   , m = document.getElementById("tv-pool-ticker-container")
                   , b = document.getElementById("tv-knockout-ticker-container")
                   , h = document.getElementById("admin-knockout-generator-card")
-                  , f = document.getElementById("admin-teams-grid")?.parentElement;
+                  , g = document.getElementById("admin-teams-grid")?.parentElement;
                 a ? (d && d.classList.add("hidden"),
                 c && c.classList.remove("hidden"),
                 p && p.classList.add("hidden"),
@@ -3244,16 +3252,16 @@ Sneha P. (F)</pre>
                 m && m.classList.add("hidden"),
                 b && b.classList.remove("hidden"),
                 h && h.classList.remove("hidden"),
-                f && !t && f.classList.add("hidden")) : (d && d.classList.remove("hidden"),
+                g && !t && g.classList.add("hidden")) : (d && d.classList.remove("hidden"),
                 c && c.classList.add("hidden"),
                 p && p.classList.remove("hidden"),
                 u && u.classList.add("hidden"),
                 m && m.classList.remove("hidden"),
                 b && b.classList.add("hidden"),
                 h && h.classList.add("hidden"),
-                f && f.classList.remove("hidden"));
-                const g = document.getElementById("btn-cloud-status");
-                g && (t ? g.classList.remove("hidden") : g.classList.add("hidden"));
+                g && g.classList.remove("hidden"));
+                const f = document.getElementById("btn-cloud-status");
+                f && (t ? f.classList.remove("hidden") : f.classList.add("hidden"));
                 const y = document.getElementById("btn-umpire-assign-admin");
                 y && (t ? y.classList.remove("hidden") : y.classList.add("hidden"));
                 const x = document.getElementById("fixtures-admin-toolbar")
@@ -3267,12 +3275,12 @@ Sneha P. (F)</pre>
                   , A = document.getElementById("nav-btn-coach")
                   , I = document.getElementById("nav-btn-standings")
                   , E = document.getElementById("nav-btn-fixtures")
-                  , B = document.getElementById("nav-btn-swot")
-                  , P = document.getElementById("nav-btn-admin");
-                B && B.classList.add("hidden"),
+                  , P = document.getElementById("nav-btn-swot")
+                  , B = document.getElementById("nav-btn-admin");
+                P && P.classList.add("hidden"),
                 I && (I.innerHTML = a ? "<span>⚡</span> <span>Knockout Bracket</span>" : "<span>🏆</span> <span>Pool Standings</span>"),
                 E && (E.innerHTML = a ? "<span>📋</span> <span>Next Fixtures</span>" : '<span>📋</span> <span>Fixtures &amp; Lineups</span> <span id="nav-badge-fixtures-admin" class="hidden text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">Admin</span>'),
-                "tv" !== e || n ? t && !n && [v, w, A, I, E, P].forEach((e => {
+                "tv" !== e || n ? t && !n && [v, w, A, I, E, B].forEach((e => {
                     e && e.classList.remove("hidden")
                 }
                 )) : (v && v.classList.remove("hidden"),
@@ -3280,7 +3288,7 @@ Sneha P. (F)</pre>
                 E && E.classList.remove("hidden"),
                 w && w.classList.add("hidden"),
                 A && A.classList.add("hidden"),
-                P && P.classList.add("hidden"))
+                B && B.classList.add("hidden"))
             }
             function switchTopLevelProfile(e) {
                 "casual" === e ? (appState.topProfile = "casual",
@@ -5125,7 +5133,7 @@ Sneha P. (F)</pre>
                   , m = 0;
                 const b = {}
                   , h = {}
-                  , f = [];
+                  , g = [];
                 c.forEach((e => {
                     p += e.totalWinners,
                     u += e.totalErrors,
@@ -5139,7 +5147,7 @@ Sneha P. (F)</pre>
                     }
                     )),
                     (e.pointLogs || []).forEach((t => {
-                        f.push(Object.assign({
+                        g.push(Object.assign({
                             playerName: e.playerName,
                             teamName: e.teamName
                         }, t))
@@ -5147,8 +5155,8 @@ Sneha P. (F)</pre>
                     ))
                 }
                 ));
-                const g = p + u > 0 ? Math.round(p / (p + u) * 100) + "%" : "—";
-                n.innerHTML = `\n        <div class="bg-[#0b120e] border border-emerald-500/30 rounded-xl p-2.5">\n          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Winners Logged</div>\n          <div class="text-2xl font-bebas text-emerald-400">${p}</div>\n        </div>\n        <div class="bg-[#0b120e] border border-rose-500/30 rounded-xl p-2.5">\n          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Errors Logged</div>\n          <div class="text-2xl font-bebas text-rose-400">${u}</div>\n        </div>\n        <div class="bg-[#0b120e] border border-amber-500/30 rounded-xl p-2.5">\n          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Winner Ratio</div>\n          <div class="text-2xl font-bebas text-amber-300">${g}</div>\n        </div>\n        <div class="bg-[#0b120e] border border-cyan-500/30 rounded-xl p-2.5">\n          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Coach Notes</div>\n          <div class="text-2xl font-bebas text-cyan-300">${m}</div>\n        </div>\n      `;
+                const f = p + u > 0 ? Math.round(p / (p + u) * 100) + "%" : "—";
+                n.innerHTML = `\n        <div class="bg-[#0b120e] border border-emerald-500/30 rounded-xl p-2.5">\n          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Winners Logged</div>\n          <div class="text-2xl font-bebas text-emerald-400">${p}</div>\n        </div>\n        <div class="bg-[#0b120e] border border-rose-500/30 rounded-xl p-2.5">\n          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Errors Logged</div>\n          <div class="text-2xl font-bebas text-rose-400">${u}</div>\n        </div>\n        <div class="bg-[#0b120e] border border-amber-500/30 rounded-xl p-2.5">\n          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Winner Ratio</div>\n          <div class="text-2xl font-bebas text-amber-300">${f}</div>\n        </div>\n        <div class="bg-[#0b120e] border border-cyan-500/30 rounded-xl p-2.5">\n          <div class="text-[10px] font-bold uppercase text-[#8ab09f]">Coach Notes</div>\n          <div class="text-2xl font-bebas text-cyan-300">${m}</div>\n        </div>\n      `;
                 let y = "";
                 Object.entries(b).forEach(( ([e,t]) => {
                     y += `<span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">⚡ ${escapeHtml(e)}: ${t}</span>`
@@ -5159,7 +5167,7 @@ Sneha P. (F)</pre>
                 }
                 )),
                 o.innerHTML = y || '<span class="text-[11px] text-[#718b7f]">No shot winners or errors recorded for this selection yet.</span>',
-                0 === f.length ? r.innerHTML = '<div class="text-xs text-[#718b7f] py-2 text-center">No player-linked point history yet. Tap any completed point (✕) above and choose a shot or note to build player analytics.</div>' : r.innerHTML = f.map((e => `\n          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-2 rounded-xl bg-[#0b120e] border border-[#1d3026] text-xs">\n            <div class="space-y-0.5">\n              <div class="flex items-center gap-1.5 flex-wrap">\n                <span class="font-extrabold text-white">${escapeHtml(e.playerName)}</span>\n                <span class="text-[10px] text-[#8ab09f]">(${escapeHtml(e.teamName)})</span>\n                <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[#14231b] text-emerald-300">${escapeHtml(e.categoryCode)} · Pt #${e.pointNum}</span>\n                ${e.shotType ? `<span class="px-2 py-0.2 rounded text-[10px] font-bold ${"error" === e.category ? "bg-rose-500/20 text-rose-300" : "bg-emerald-500/20 text-emerald-300"}">${"error" === e.category ? "❌ " : "⚡ "}${escapeHtml(e.shotType)}</span>` : ""}\n              </div>\n              ${e.notes ? `<div class="text-[11px] text-[#cde2d8] pl-1">📝 "${escapeHtml(e.notes)}"</div>` : ""}\n            </div>\n            <div class="text-[10px] text-[#718b7f] font-mono shrink-0">${escapeHtml(e.updatedAt || "")}</div>\n          </div>\n        `)).join("")
+                0 === g.length ? r.innerHTML = '<div class="text-xs text-[#718b7f] py-2 text-center">No player-linked point history yet. Tap any completed point (✕) above and choose a shot or note to build player analytics.</div>' : r.innerHTML = g.map((e => `\n          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-2 rounded-xl bg-[#0b120e] border border-[#1d3026] text-xs">\n            <div class="space-y-0.5">\n              <div class="flex items-center gap-1.5 flex-wrap">\n                <span class="font-extrabold text-white">${escapeHtml(e.playerName)}</span>\n                <span class="text-[10px] text-[#8ab09f]">(${escapeHtml(e.teamName)})</span>\n                <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[#14231b] text-emerald-300">${escapeHtml(e.categoryCode)} · Pt #${e.pointNum}</span>\n                ${e.shotType ? `<span class="px-2 py-0.2 rounded text-[10px] font-bold ${"error" === e.category ? "bg-rose-500/20 text-rose-300" : "bg-emerald-500/20 text-emerald-300"}">${"error" === e.category ? "❌ " : "⚡ "}${escapeHtml(e.shotType)}</span>` : ""}\n              </div>\n              ${e.notes ? `<div class="text-[11px] text-[#cde2d8] pl-1">📝 "${escapeHtml(e.notes)}"</div>` : ""}\n            </div>\n            <div class="text-[10px] text-[#718b7f] font-mono shrink-0">${escapeHtml(e.updatedAt || "")}</div>\n          </div>\n        `)).join("")
             }
             function ensureRubberPointDetails(e) {
                 return e ? (e.pointDetails && "object" == typeof e.pointDetails || (e.pointDetails = {
@@ -5356,8 +5364,8 @@ Sneha P. (F)</pre>
                 )).join(""));
                 const b = document.getElementById("coach-match-title")
                   , h = document.getElementById("coach-stage-badge")
-                  , f = document.getElementById("coach-match-mode-badge")
-                  , g = document.getElementById("coach-team-a-name")
+                  , g = document.getElementById("coach-match-mode-badge")
+                  , f = document.getElementById("coach-team-a-name")
                   , y = document.getElementById("coach-team-b-name")
                   , x = document.getElementById("coach-players-a")
                   , S = document.getElementById("coach-players-b")
@@ -5367,8 +5375,8 @@ Sneha P. (F)</pre>
                   , A = document.getElementById("coach-horizontal-graph")
                   , I = document.getElementById("coach-rally-feed-list")
                   , E = document.getElementById("coach-rally-count")
-                  , B = document.getElementById("coach-selected-point-badge")
-                  , P = document.getElementById("coach-selected-shot-Status")
+                  , P = document.getElementById("coach-selected-point-badge")
+                  , B = document.getElementById("coach-selected-shot-Status")
                   , T = document.getElementById("coach-point-note-input");
                 if (!a || !n)
                     return b && (b.textContent = `Court ${appState.selectedCourtId} · No Active Match`),
@@ -5386,10 +5394,10 @@ Sneha P. (F)</pre>
                     b.textContent = `${e} · ${n.categoryName} (${n.categoryCode})`
                 }
                 h && (h.textContent = `${a.stageName} · Series: ${a.teamAScore}-${a.teamBScore}${o ? " · Completed Match Archive" : ""}`),
-                f && (o ? (f.textContent = "🏁 Historic Match (Completed)",
-                f.className = "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40") : (f.textContent = "🟢 Live Umpire Score",
-                f.className = "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30")),
-                g && (g.textContent = n.teamAName),
+                g && (o ? (g.textContent = "🏁 Historic Match (Completed)",
+                g.className = "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40") : (g.textContent = "🟢 Live Umpire Score",
+                g.className = "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30")),
+                f && (f.textContent = n.teamAName),
                 y && (y.textContent = n.teamBName),
                 x && (x.textContent = n.playersA),
                 S && (S.textContent = n.playersB),
@@ -5465,18 +5473,18 @@ Sneha P. (F)</pre>
                     const t = "A" === coachSelectedPoint.team ? n.teamAName : n.teamBName
                       , a = M[coachSelectedPoint.team] && M[coachSelectedPoint.team][coachSelectedPoint.pointNum] || {}
                       , o = coachSelectedPoint.draftShotType || a.shotType || "";
-                    B && (B.textContent = `Editing: ${t} · Point #${coachSelectedPoint.pointNum} (✕)`,
-                    B.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40"),
-                    P && (P.textContent = o ? `Selected: ${o}` : "Tap a shot button below to tag"),
+                    P && (P.textContent = `Editing: ${t} · Point #${coachSelectedPoint.pointNum} (✕)`,
+                    P.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40"),
+                    B && (B.textContent = o ? `Selected: ${o}` : "Tap a shot button below to tag"),
                     T && !e && (T.value = a.notes || ""),
                     document.querySelectorAll(".coach-shot-chip").forEach((e => {
                         e.getAttribute("data-shot") === o ? e.classList.add("ring-2", "ring-amber-400", "bg-amber-500/30", "text-white") : e.classList.remove("ring-2", "ring-amber-400", "bg-amber-500/30", "text-white")
                     }
                     ))
                 } else
-                    B && (B.textContent = "No completed point selected (Wait for Umpire to score or tap ✕)",
-                    B.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-[#16221c] text-[#718b7f] border border-[#23382d]"),
-                    P && (P.textContent = "No point selected"),
+                    P && (P.textContent = "No completed point selected (Wait for Umpire to score or tap ✕)",
+                    P.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-[#16221c] text-[#718b7f] border border-[#23382d]"),
+                    B && (B.textContent = "No point selected"),
                     document.querySelectorAll(".coach-shot-chip").forEach((e => {
                         e.classList.remove("ring-2", "ring-amber-400", "bg-amber-500/30", "text-white")
                     }
@@ -6343,18 +6351,18 @@ Sneha P. (F)</pre>
                   , m = u > 0 ? Math.round(t.totalWinners / u * 100) : null
                   , b = []
                   , h = []
-                  , f = []
-                  , g = [];
+                  , g = []
+                  , f = [];
                 return o ? b.push(`Primary Finishing Weapon: High conversion on ${o} (${r} logged winner${r > 1 ? "s" : ""}${s ? `, complemented by ${s}` : ""}).`) : b.push(`Balanced All-Court Baseline: Steady rally constructor for ${e.teamName} in Pool ${e.pool}.`),
                 e.isCaptain && b.push(`Team Captain & Tactical Anchor: Leads ${e.teamName} lineup strategy and high-pressure rubbers.`),
                 p > 0 ? b.push(`Positive Point Differential (+${p} pts): Outscores opponents ${e.pointsFor}–${e.pointsAgainst} across active rubbers.`) : d.length > 0 && b.push(`Multi-Category Versatility: Deployed across ${d.join(", ")} rubbers${c.length > 0 ? ` (paired with ${c.join(", ")})` : ""}.`),
                 null !== m && m >= 60 && b.push(`High Shot Efficiency (${m}% Winner-to-Error Ratio): Plays aggressive, high-percentage attacking badminton.`),
                 i ? h.push(`Primary Vulnerability — ${i} (${l} logged): Susceptible to ${i.toLowerCase()} when stretched out of position.`) : h.push("Limited Annotated Error Sample: Has not yet been forced into high unforced-error sequences—test backhand rear-court early."),
                 p < 0 ? h.push(`Negative Point Differential (${p} pts): Trails ${e.pointsFor}–${e.pointsAgainst} in cumulative rally points.`) : h.push("Transition Under Pace: Can be pressured when forced to lift from low front-court defensive lunges."),
-                "Smash" === o ? f.push("Deny Rear-Court Jump Smash: Serve low, flat, and wide; avoid high mid-court lifts and force flat drives or tight net exchanges.") : "Drop" === o || "Net" === o ? f.push("Neutralize Front-Court Deception: Hold a slightly higher base position and push deep attacking clears to their backhand corner.") : f.push("Dictate Tempo Early: Attack the body on service return and vary pace between flat drives and steep drops."),
-                "Net Fault" === i ? f.push(`Engage in Tight Net Duels: Force spinning tumbles at the tape to trigger ${i}s.`) : "Unforced Error" === i || "Out / Wide" === i ? f.push(`Extend Rally Length (8+ Shots): Play high-margin placements to the four corners and let ${e.name} over-press near the lines.`) : f.push(`Target Backhand Rear Corner: Pin ${e.name} in the backhand rear quadrant before attacking the open forehand court.`),
-                o && g.push(`Lethal ${o} Punisher: Leaving shuttle short in mid-court invites immediate ${o} point conversion.`),
-                c.length > 0 ? g.push(`Doubles Rotation Chemistry: Strong court coverage alongside ${c.join(" & ")} in ${d.filter((e => e.includes("D"))).join("/")} rubbers.`) : g.push("Singles Stamina & Streak Momentum: Capable of stringing consecutive points on service runs if given rhythm."),
+                "Smash" === o ? g.push("Deny Rear-Court Jump Smash: Serve low, flat, and wide; avoid high mid-court lifts and force flat drives or tight net exchanges.") : "Drop" === o || "Net" === o ? g.push("Neutralize Front-Court Deception: Hold a slightly higher base position and push deep attacking clears to their backhand corner.") : g.push("Dictate Tempo Early: Attack the body on service return and vary pace between flat drives and steep drops."),
+                "Net Fault" === i ? g.push(`Engage in Tight Net Duels: Force spinning tumbles at the tape to trigger ${i}s.`) : "Unforced Error" === i || "Out / Wide" === i ? g.push(`Extend Rally Length (8+ Shots): Play high-margin placements to the four corners and let ${e.name} over-press near the lines.`) : g.push(`Target Backhand Rear Corner: Pin ${e.name} in the backhand rear quadrant before attacking the open forehand court.`),
+                o && f.push(`Lethal ${o} Punisher: Leaving shuttle short in mid-court invites immediate ${o} point conversion.`),
+                c.length > 0 ? f.push(`Doubles Rotation Chemistry: Strong court coverage alongside ${c.join(" & ")} in ${d.filter((e => e.includes("D"))).join("/")} rubbers.`) : f.push("Singles Stamina & Streak Momentum: Capable of stringing consecutive points on service runs if given rhythm."),
                 {
                     player: e,
                     impactRatio: m,
@@ -6365,8 +6373,8 @@ Sneha P. (F)</pre>
                     errorsEntries: n,
                     strengths: b,
                     weaknesses: h,
-                    opportunities: f,
-                    threats: g
+                    opportunities: g,
+                    threats: f
                 }
             }
             function handleSwotSearchInput(e) {
@@ -6431,9 +6439,9 @@ Sneha P. (F)</pre>
                     return;
                 const b = c.player
                   , h = b.analytics
-                  , f = null !== c.impactRatio ? `${c.impactRatio}%` : "—"
-                  , g = c.ptDiff >= 0 ? `+${c.ptDiff}` : `${c.ptDiff}`;
-                p.innerHTML = `\n        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1c2e24] pb-3">\n          <div class="flex items-center gap-3">\n            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-2xl shrink-0">\n              ${b.isCaptain ? "👑" : "🏸"}\n            </div>\n            <div>\n              <div class="flex items-center gap-2 flex-wrap">\n                <h4 class="text-lg sm:text-xl font-extrabold text-white">${escapeHtml(b.name)}</h4>\n                ${b.isCaptain ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">TEAM CAPTAIN</span>' : ""}\n                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${"A" === b.pool ? "bg-emerald-500/20 text-emerald-300" : "bg-cyan-500/20 text-cyan-300"}">POOL ${b.pool}</span>\n              </div>\n              <p class="text-xs text-[#8ab09f] mt-0.5">\n                Team: <strong class="text-white">${escapeHtml(b.teamName)}</strong> · Gender: <strong>${"F" === b.gender ? "Female" : "Male"}</strong> · Categories: <strong class="text-emerald-300">${c.cats.length > 0 ? c.cats.join(", ") : "Squad Member"}</strong>\n              </p>\n            </div>\n          </div>\n          <div class="flex items-center gap-2 self-start sm:self-auto">\n            <span class="px-3 py-1 rounded-xl bg-[#0b120e] border border-[#23382d] text-xs font-semibold text-[#cde2d8]">\n              Pts Scored: <strong class="text-emerald-400 font-mono">${b.pointsFor}</strong> / Conceded: <strong class="text-rose-400 font-mono">${b.pointsAgainst}</strong>\n            </span>\n          </div>\n        </div>\n\n        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">\n          <div class="bg-[#0b120e] border border-[#1f3429] rounded-xl p-2.5 text-center">\n            <div class="text-[10px] font-bold uppercase text-[#718b7f]">Rubbers Active</div>\n            <div class="text-2xl font-bebas text-white">${b.rubbersPlayed}</div>\n          </div>\n          <div class="bg-[#0b120e] border border-emerald-500/30 rounded-xl p-2.5 text-center">\n            <div class="text-[10px] font-bold uppercase text-emerald-400">Shot Winners</div>\n            <div class="text-2xl font-bebas text-emerald-400">${h.totalWinners}</div>\n          </div>\n          <div class="bg-[#0b120e] border border-rose-500/30 rounded-xl p-2.5 text-center">\n            <div class="text-[10px] font-bold uppercase text-rose-400">Errors Logged</div>\n            <div class="text-2xl font-bebas text-rose-400">${h.totalErrors}</div>\n          </div>\n          <div class="bg-[#0b120e] border border-amber-500/30 rounded-xl p-2.5 text-center">\n            <div class="text-[10px] font-bold uppercase text-amber-300">Winner Ratio</div>\n            <div class="text-2xl font-bebas text-amber-300">${f}</div>\n          </div>\n          <div class="bg-[#0b120e] border border-cyan-500/30 rounded-xl p-2.5 text-center col-span-2 sm:col-span-1">\n            <div class="text-[10px] font-bold uppercase text-cyan-300">Point Diff</div>\n            <div class="text-2xl font-bebas ${c.ptDiff >= 0 ? "text-emerald-400" : "text-rose-400"}">${g}</div>\n          </div>\n        </div>\n      `;
+                  , g = null !== c.impactRatio ? `${c.impactRatio}%` : "—"
+                  , f = c.ptDiff >= 0 ? `+${c.ptDiff}` : `${c.ptDiff}`;
+                p.innerHTML = `\n        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1c2e24] pb-3">\n          <div class="flex items-center gap-3">\n            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-2xl shrink-0">\n              ${b.isCaptain ? "👑" : "🏸"}\n            </div>\n            <div>\n              <div class="flex items-center gap-2 flex-wrap">\n                <h4 class="text-lg sm:text-xl font-extrabold text-white">${escapeHtml(b.name)}</h4>\n                ${b.isCaptain ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">TEAM CAPTAIN</span>' : ""}\n                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${"A" === b.pool ? "bg-emerald-500/20 text-emerald-300" : "bg-cyan-500/20 text-cyan-300"}">POOL ${b.pool}</span>\n              </div>\n              <p class="text-xs text-[#8ab09f] mt-0.5">\n                Team: <strong class="text-white">${escapeHtml(b.teamName)}</strong> · Gender: <strong>${"F" === b.gender ? "Female" : "Male"}</strong> · Categories: <strong class="text-emerald-300">${c.cats.length > 0 ? c.cats.join(", ") : "Squad Member"}</strong>\n              </p>\n            </div>\n          </div>\n          <div class="flex items-center gap-2 self-start sm:self-auto">\n            <span class="px-3 py-1 rounded-xl bg-[#0b120e] border border-[#23382d] text-xs font-semibold text-[#cde2d8]">\n              Pts Scored: <strong class="text-emerald-400 font-mono">${b.pointsFor}</strong> / Conceded: <strong class="text-rose-400 font-mono">${b.pointsAgainst}</strong>\n            </span>\n          </div>\n        </div>\n\n        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">\n          <div class="bg-[#0b120e] border border-[#1f3429] rounded-xl p-2.5 text-center">\n            <div class="text-[10px] font-bold uppercase text-[#718b7f]">Rubbers Active</div>\n            <div class="text-2xl font-bebas text-white">${b.rubbersPlayed}</div>\n          </div>\n          <div class="bg-[#0b120e] border border-emerald-500/30 rounded-xl p-2.5 text-center">\n            <div class="text-[10px] font-bold uppercase text-emerald-400">Shot Winners</div>\n            <div class="text-2xl font-bebas text-emerald-400">${h.totalWinners}</div>\n          </div>\n          <div class="bg-[#0b120e] border border-rose-500/30 rounded-xl p-2.5 text-center">\n            <div class="text-[10px] font-bold uppercase text-rose-400">Errors Logged</div>\n            <div class="text-2xl font-bebas text-rose-400">${h.totalErrors}</div>\n          </div>\n          <div class="bg-[#0b120e] border border-amber-500/30 rounded-xl p-2.5 text-center">\n            <div class="text-[10px] font-bold uppercase text-amber-300">Winner Ratio</div>\n            <div class="text-2xl font-bebas text-amber-300">${g}</div>\n          </div>\n          <div class="bg-[#0b120e] border border-cyan-500/30 rounded-xl p-2.5 text-center col-span-2 sm:col-span-1">\n            <div class="text-[10px] font-bold uppercase text-cyan-300">Point Diff</div>\n            <div class="text-2xl font-bebas ${c.ptDiff >= 0 ? "text-emerald-400" : "text-rose-400"}">${f}</div>\n          </div>\n        </div>\n      `;
                 const y = (e, t) => e.map((e => `\n        <li class="flex items-start gap-2 text-xs text-[#d5e6de] leading-relaxed">\n          <span class="${t} font-bold mt-0.5">•</span>\n          <span>${escapeHtml(e)}</span>\n        </li>\n      `)).join("");
                 u.innerHTML = `\n        \x3c!-- Strengths --\x3e\n        <div class="bg-[#101c16] border-2 border-emerald-500/40 rounded-2xl p-4 shadow-lg space-y-2">\n          <div class="flex items-center justify-between border-b border-emerald-500/20 pb-2">\n            <h5 class="text-xs sm:text-sm font-extrabold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">\n              <span>💪</span> STRENGTHS (KEY WEAPONS)\n            </h5>\n            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300">S</span>\n          </div>\n          <ul class="space-y-1.5 pt-1">${y(c.strengths, "text-emerald-400")}</ul>\n        </div>\n\n        \x3c!-- Weaknesses --\x3e\n        <div class="bg-[#1c1215] border-2 border-rose-500/40 rounded-2xl p-4 shadow-lg space-y-2">\n          <div class="flex items-center justify-between border-b border-rose-500/20 pb-2">\n            <h5 class="text-xs sm:text-sm font-extrabold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">\n              <span>⚠️</span> WEAKNESSES (ERROR PATTERNS)\n            </h5>\n            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/15 text-rose-300">W</span>\n          </div>\n          <ul class="space-y-1.5 pt-1">${y(c.weaknesses, "text-rose-400")}</ul>\n        </div>\n\n        \x3c!-- Opportunities --\x3e\n        <div class="bg-[#101a20] border-2 border-cyan-500/40 rounded-2xl p-4 shadow-lg space-y-2">\n          <div class="flex items-center justify-between border-b border-cyan-500/20 pb-2">\n            <h5 class="text-xs sm:text-sm font-extrabold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">\n              <span>🎯</span> OPPORTUNITIES (TACTICAL GAMEPLAN)\n            </h5>\n            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300">O</span>\n          </div>\n          <ul class="space-y-1.5 pt-1">${y(c.opportunities, "text-cyan-400")}</ul>\n        </div>\n\n        \x3c!-- Threats --\x3e\n        <div class="bg-[#1e1910] border-2 border-amber-500/40 rounded-2xl p-4 shadow-lg space-y-2">\n          <div class="flex items-center justify-between border-b border-amber-500/20 pb-2">\n            <h5 class="text-xs sm:text-sm font-extrabold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">\n              <span>🔥</span> THREATS (DANGER ZONES)\n            </h5>\n            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300">T</span>\n          </div>\n          <ul class="space-y-1.5 pt-1">${y(c.threats, "text-amber-400")}</ul>\n        </div>\n      `;
                 const x = c.winnersEntries.length > 0 ? c.winnersEntries.map(( ([e,t]) => `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">⚡ ${escapeHtml(e)}: ${t}</span>`)).join("") : '<span class="text-xs text-[#718b7f]">No winning shots tagged yet for this player.</span>'
@@ -6781,8 +6789,8 @@ Sneha P. (F)</pre>
                         m.innerHTML = '<option value="">Sign in to view tournaments</option>',
                         b && (b.textContent = "🔒 Sign In"),
                         h && (h.textContent = "Sign in to access shared circles or start your own tournaments.");
-                const f = appState.casual && appState.casual.name ? appState.casual.name : `${e.name}'s Circle`;
-                d && (d.textContent = `Manage Players in "${f}"`),
+                const g = appState.casual && appState.casual.name ? appState.casual.name : `${e.name}'s Circle`;
+                d && (d.textContent = `Manage Players in "${g}"`),
                 i && (i.textContent = `YOUR FRIENDS ROSTER (${c.length} PLAYER${1 === c.length ? "" : "S"})`),
                 l && (l.innerHTML = "",
                 0 === c.length ? l.innerHTML = '<div class="text-xs text-[#718b7f] py-1.5">No players added yet. Type your friends names above (e.g. "Alex, Priya, Rohan, Neha") and click "+ Add to My Circle".</div>' : c.forEach((e => {
@@ -6943,13 +6951,16 @@ Sneha P. (F)</pre>
                   , s = getCasualPeriodLabel(appState.casualPeriod)
                   , i = getAdjudgedChampionForPeriod(appState.casualPeriod, appState.casualGameMode)
                   , l = document.getElementById("btn-casual-adjudge");
-                if (r && (r.textContent = `${appState.casualGameMode.toUpperCase()} STANDINGS · ${s.toUpperCase()}`),
+                r && (r.textContent = `${appState.casualGameMode.toUpperCase()} STANDINGS · ${s.toUpperCase()}`),
                 o && (i ? (o.innerHTML = `👑 CHAMPION · ${s.toUpperCase()} (${appState.casualGameMode.toUpperCase()})`,
                 o.className = "text-[11px] font-bold tracking-widest uppercase text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40") : (o.textContent = `LEADING · ${s.toUpperCase()} (${appState.casualGameMode.toUpperCase()})`,
-                o.className = "text-[11px] font-bold tracking-widest uppercase text-[#e5a93c]")),
-                l && (i ? (l.innerHTML = `👑 Crowned: ${escapeHtml(i.player)}`,
+                o.className = "text-[11px] font-bold tracking-widest uppercase text-[#e5a93c]"));
+                const d = document.getElementById("btn-casual-cancel-adjudge");
+                if (l && (i ? (l.innerHTML = `👑 Crowned: ${escapeHtml(i.player)}`,
                 l.title = `Crowned on ${new Date(i.adjudgedAt).toLocaleDateString()}. Tap to re-adjudge champion.`) : (l.innerHTML = "👑 Adjudge Winner",
                 l.title = "Crown monthly champion and save title to player profile")),
+                d && (i ? (d.classList.remove("hidden"),
+                d.title = `Cancel and revert champion title for ${i.player}`) : d.classList.add("hidden")),
                 e.length > 0 && e[0].played > 0) {
                     const t = e[0];
                     a && (a.textContent = t.name),
@@ -6962,19 +6973,16 @@ Sneha P. (F)</pre>
                 0 === e.length ? t.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-xs text-[#718b7f]">Your personal roster is empty. Add your friends above to start tracking standings!</td></tr>' : e.forEach(( (e, a) => {
                     const n = 0 === a && e.played > 0
                       , o = document.createElement("tr");
-                    o.className = n ? "bg-[#251c10] text-[#fcd34d] font-semibold" : "hover:bg-[#15231b] text-[#c4d4cc]";
-                    const r = getPlayerMonthlyWins(e.name)
-                      , s = r.length
-                      , i = s > 0 ? `<span class="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0 inline-flex items-center gap-1" title="Months Won (${s}): ${r.map((e => e.periodLabel)).join(", ")}">👑 ${s} ${1 === s ? "Month" : "Months"} Won</span>` : "";
-                    o.innerHTML = `\n              <td class="py-2.5 px-3 font-bold ${n ? "text-[#e5a93c]" : "text-[#718b7f]"}">#${a + 1}</td>\n              <td class="py-2.5 px-3 font-bold text-white flex items-center flex-wrap gap-1">\n                <span>${escapeHtml(e.name)}</span>\n                ${i}\n              </td>\n              <td class="py-2.5 px-2 text-center">${e.played}</td>\n              <td class="py-2.5 px-2 text-center font-bold text-emerald-400">${e.wins}</td>\n              <td class="py-2.5 px-2 text-center text-[#718b7f]">${e.lost}</td>\n              <td class="py-2.5 px-2 text-center">${e.winPct}%</td>\n              <td class="py-2.5 px-3 text-right font-mono font-bold">${e.ptsWon}</td>\n            `,
+                    o.className = n ? "bg-[#251c10] text-[#fcd34d] font-semibold" : "hover:bg-[#15231b] text-[#c4d4cc]",
+                    o.innerHTML = `\n              <td class="py-2.5 px-3 font-bold ${n ? "text-[#e5a93c]" : "text-[#718b7f]"}">#${a + 1}</td>\n              <td class="py-2.5 px-3 font-bold text-white">\n                ${escapeHtml(e.name)}\n              </td>\n              <td class="py-2.5 px-2 text-center">${e.played}</td>\n              <td class="py-2.5 px-2 text-center font-bold text-emerald-400">${e.wins}</td>\n              <td class="py-2.5 px-2 text-center text-[#718b7f]">${e.lost}</td>\n              <td class="py-2.5 px-2 text-center">${e.winPct}%</td>\n              <td class="py-2.5 px-3 text-right font-mono font-bold">${e.ptsWon}</td>\n            `,
                     t.appendChild(o)
                 }
                 )));
-                const d = document.getElementById("casual-champions-roll-card")
-                  , c = document.getElementById("casual-champions-summary-strip")
-                  , p = document.getElementById("casual-champions-history-list")
-                  , u = document.getElementById("casual-champions-total-badge");
-                if (d && c && p) {
+                const c = document.getElementById("casual-champions-roll-card")
+                  , p = document.getElementById("casual-champions-summary-strip")
+                  , u = document.getElementById("casual-champions-history-list")
+                  , m = document.getElementById("casual-champions-total-badge");
+                if (c && p && u) {
                     const e = appState.casual && appState.casual.adjudgedWinners
                       , t = []
                       , a = {};
@@ -6988,24 +6996,25 @@ Sneha P. (F)</pre>
                         ))
                     }
                     )),
-                    u && (u.textContent = `${t.length} ${1 === t.length ? "Title" : "Titles"} Awarded`),
-                    c.innerHTML = "";
+                    m && (m.textContent = `${t.length} ${1 === t.length ? "Title" : "Titles"} Awarded`),
+                    p.innerHTML = "";
                     const n = Object.keys(a).sort(( (e, t) => a[t] - a[e]));
-                    0 === n.length ? c.innerHTML = '<span class="text-xs text-[#718b7f] italic py-1">No monthly champions crowned yet. Tap "👑 Adjudge Winner" to crown a champion for this month!</span>' : n.forEach((e => {
+                    0 === n.length ? p.innerHTML = '<span class="text-xs text-[#718b7f] italic py-1">No monthly champions crowned yet. Tap "👑 Adjudge Winner" to crown a champion for this month!</span>' : n.forEach((e => {
                         const t = a[e]
-                          , n = getPlayerMonthlyWins(e).map((e => e.periodLabel)).join(", ");
-                        c.innerHTML += `\n              <div class="px-2.5 py-1 rounded-xl bg-[#14231b] border border-amber-500/40 text-xs flex items-center gap-1.5 shadow" title="Months won: ${escapeHtml(n)}">\n                <span class="text-amber-300 font-bold">👑 ${t} ${1 === t ? "Month" : "Months"}:</span>\n                <span class="font-extrabold text-white">${escapeHtml(e)}</span>\n              </div>\n            `
+                          , n = getPlayerMonthlyWins(e).map((e => e.periodLabel)).join(", ")
+                          , o = `<span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">👑 ${t} ${1 === t ? "Month" : "Months"} Won</span>`;
+                        p.innerHTML += `\n              <div class="px-3 py-1.5 rounded-xl bg-[#14231b] border border-amber-500/40 text-xs flex items-center justify-between gap-2 shadow" title="Months won: ${escapeHtml(n)}">\n                <span class="font-bold text-white flex items-center gap-1.5">\n                  <span>🏸</span> <span>${escapeHtml(e)}</span>\n                </span>\n                ${o}\n              </div>\n            `
                     }
                     )),
-                    p.innerHTML = "",
+                    u.innerHTML = "",
                     t.length > 0 && t.sort(( (e, t) => (t.period || "").localeCompare(e.period || ""))).forEach((e => {
-                        p.innerHTML += `\n              <div class="flex items-center justify-between p-2 rounded-xl bg-[#0e1713] border border-[#1d2f25] text-xs">\n                <div class="flex items-center gap-2">\n                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">\n                    ${escapeHtml(e.periodLabel || e.period)} (${(e.mode || "singles").toUpperCase()})\n                  </span>\n                  <span class="font-bold text-white flex items-center gap-1">\n                    <span>👑</span> <span>${escapeHtml(e.player)}</span>\n                  </span>\n                </div>\n                <span class="text-[11px] text-emerald-400 font-mono">\n                  ${e.wins}W - ${e.lost || 0}L (${e.winPct}% Win%)\n                </span>\n              </div>\n            `
+                        u.innerHTML += `\n              <div class="flex items-center justify-between p-2 rounded-xl bg-[#0e1713] border border-[#1d2f25] text-xs">\n                <div class="flex items-center gap-2">\n                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">\n                    ${escapeHtml(e.periodLabel || e.period)} (${(e.mode || "singles").toUpperCase()})\n                  </span>\n                  <span class="font-bold text-white flex items-center gap-1">\n                    <span>👑</span> <span>${escapeHtml(e.player)}</span>\n                  </span>\n                </div>\n                <div class="flex items-center gap-2">\n                  <span class="text-[11px] text-emerald-400 font-mono">\n                    ${e.wins}W - ${e.lost || 0}L (${e.winPct}% Win%)\n                  </span>\n                  <button type="button" onclick="handleCancelSpecificAdjudgedWinner('${escapeHtml(e.mode || "singles")}', '${escapeHtml(e.period)}')" class="text-[10px] bg-rose-950/40 hover:bg-rose-900/80 text-rose-300 px-2 py-0.5 rounded border border-rose-500/30 transition cursor-pointer" title="Revert this crowned champion record">\n                    ↩️ Revert\n                  </button>\n                </div>\n              </div>\n            `
                     }
                     ))
                 }
-                const m = document.getElementById("casual-doubles-pairs-container");
-                if (m && "doubles" === appState.casualGameMode) {
-                    m.innerHTML = "";
+                const b = document.getElementById("casual-doubles-pairs-container");
+                if (b && "doubles" === appState.casualGameMode) {
+                    b.innerHTML = "";
                     const e = appState.casual && Array.isArray(appState.casual.doublesMatches) ? appState.casual.doublesMatches : []
                       , t = "ALL" === appState.casualPeriod ? e : e.filter((e => e.date && e.date.startsWith(appState.casualPeriod)))
                       , a = {};
@@ -7046,8 +7055,8 @@ Sneha P. (F)</pre>
                         return a && n ? t.winPct !== e.winPct ? t.winPct - e.winPct : t.wins !== e.wins ? t.wins - e.wins : (t.pts || 0) !== (e.pts || 0) ? (t.pts || 0) - (e.pts || 0) : (t.played || 0) - (e.played || 0) : a && !n ? -1 : !a && n ? 1 : t.wins !== e.wins ? t.wins - e.wins : (t.pts || 0) !== (e.pts || 0) ? (t.pts || 0) - (e.pts || 0) : t.winPct !== e.winPct ? t.winPct - e.winPct : (t.played || 0) - (e.played || 0)
                     }
                     )),
-                    0 === n.length ? m.innerHTML = '<div class="text-xs text-[#718b7f] py-2 text-center">No doubles matches logged yet.</div>' : n.forEach(( (e, t) => {
-                        m.innerHTML += `\n              <div class="flex items-center justify-between p-2 rounded-xl bg-[#14231b] text-xs">\n                <span class="font-bold text-white">#${t + 1} ${escapeHtml(e.pair)}</span>\n                <span class="text-emerald-400 font-mono font-bold">${e.wins}W - ${e.lost}L (${e.pts} pts)</span>\n              </div>\n            `
+                    0 === n.length ? b.innerHTML = '<div class="text-xs text-[#718b7f] py-2 text-center">No doubles matches logged yet.</div>' : n.forEach(( (e, t) => {
+                        b.innerHTML += `\n              <div class="flex items-center justify-between p-2 rounded-xl bg-[#14231b] text-xs">\n                <span class="font-bold text-white">#${t + 1} ${escapeHtml(e.pair)}</span>\n                <span class="text-emerald-400 font-mono font-bold">${e.wins}W - ${e.lost}L (${e.pts} pts)</span>\n              </div>\n            `
                     }
                     ))
                 }
@@ -7356,6 +7365,23 @@ Sneha P. (F)</pre>
                 renderCasualAll(),
                 showToast("Match deleted", "🗑️")) : showToast("Please sign in to delete matches in your circle", "🔒")
             }
+            function handleCancelSpecificAdjudgedWinner(e, t) {
+                if (isCasualUserLoggedIn())
+                    if (appState.casual && appState.casual.adjudgedWinners && appState.casual.adjudgedWinners[e] && appState.casual.adjudgedWinners[e][t]) {
+                        const a = appState.casual.adjudgedWinners[e][t].player
+                          , n = appState.casual.adjudgedWinners[e][t].periodLabel || t;
+                        delete appState.casual.adjudgedWinners[e][t],
+                        saveCasualProfileForCurrentUser(),
+                        showToast(`↩️ Reverted champion title for ${a} (${n})`, "↩️"),
+                        renderCasualAll()
+                    } else
+                        showToast("No crowned record found to revert", "ℹ️");
+                else
+                    showToast("Please sign in to manage champions in your circle", "🔒")
+            }
+            function handleCancelAdjudgeWinnerClick() {
+                isCasualUserLoggedIn() ? handleCancelSpecificAdjudgedWinner(appState.casualGameMode || "singles", appState.casualPeriod && "ALL" !== appState.casualPeriod ? appState.casualPeriod : getTodayLocalIsoDate().slice(0, 7)) : showToast("Please sign in to manage champions in your circle", "🔒")
+            }
             function handleAdjudgeWinnerClick() {
                 if (!isCasualUserLoggedIn())
                     return void showToast("Please sign in to crown a champion in your circle", "🔒");
@@ -7637,6 +7663,8 @@ Sneha P. (F)</pre>
             window.openCreateCircleModal = openCreateCircleModal,
             window.closeCreateCircleModal = closeCreateCircleModal,
             window.handleCreateCircleSubmit = handleCreateCircleSubmit,
+            window.handleCancelAdjudgeWinnerClick = handleCancelAdjudgeWinnerClick,
+            window.handleCancelSpecificAdjudgedWinner = handleCancelSpecificAdjudgedWinner,
             window.getPlayerMonthlyWins = getPlayerMonthlyWins,
             window.getPlayerMonthsWonCount = getPlayerMonthsWonCount,
             window.getAdjudgedChampionForPeriod = getAdjudgedChampionForPeriod,
